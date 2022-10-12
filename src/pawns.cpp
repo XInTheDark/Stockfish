@@ -33,15 +33,15 @@ namespace {
 
   // Pawn penalties
   constexpr Score Backward      = S( 5, 19);
-  constexpr Score Doubled       = S(10, 50);
+  constexpr Score Doubled       = S(10, 49);
   constexpr Score DoubledEarly  = S(20,  7);
   constexpr Score Isolated      = S( 1, 20);
   constexpr Score WeakLever     = S( 2, 57);
-  constexpr Score WeakUnopposed = S(15, 18)
+  constexpr Score WeakUnopposed = S(15, 18);
 
 
   // Bonus for blocked pawns at 5th or 6th rank
-  constexpr Score BlockedPawn[2] = { S(-20, -8), S(-7, 5) };
+  constexpr Score BlockedPawn[2] = { S(-20, -8), S(-7, 6) };
 
   constexpr Score BlockedStorm[RANK_NB] = {
     S(0, 0), S(0, 0), S(64, 75), S(-3, 14), S(-12, 19), S(-7, 4), S(-10, 5)
