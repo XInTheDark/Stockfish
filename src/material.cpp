@@ -37,11 +37,11 @@ namespace {
 // bishop pair    pawn         knight       bishop       rook           queen
 {S(1419, 1455)                                                                  }, // Bishop pair
 {S( 101,   28), S( 36,  39)                                                     }, // Pawn
-{S(  57,   64), S(250, 187), S(-49, -62)                                        }, // Knight      OUR PIECE 1
+{S(  57,   64), S(250, 187), S(-50, -62)                                        }, // Knight      OUR PIECE 1
 {S(   0,    0), S(120, 140), S( 10,  30), S(  0,   0)                           }, // Bishop
 {S( -63,  -69), S( -5,   3), S(100,  80), S(133, 120), S(-250, -245)            }, // Rook
 {S(-209, -211), S( 37,  14), S(150, 141), S(161, 105), S(-158, -174), S(-9,-30) }  // Queen
-}
+};
 
 
   // One Score parameter for each pair (our piece, their piece)
