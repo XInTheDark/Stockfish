@@ -89,19 +89,21 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   // x moves in y seconds (+ z increment)
   else
   {
-      optScale = std::min((0.01 + ply / 116.4) / mtg,
+      optScale = std::min((0.88 + ply / 116.4) / mtg,
                             0.88 * limits.time[us] / double(timeLeft));
       maxScale = std::min(6.3, 1.5 + 0.11 * mtg);
   }
 
-  // Never use more than 87.5% of the available time for this move (if increment > 0)
   optimumTime = TimePoint(optScale * timeLeft);
   
-  if (limits.inc[us] > 0.0 && limits.time[us] <= 10*60*1000 && (timeLeft / limits.time[us]) > 0.1 && timeLeft > 20*1000) {
-    maximumTime = TimePoint(std::min(0.875 * limits.time[us] - moveOverhead, maxScale * optimumTime));
-  } // scale more for very short matches, provided that enough time is left
+  if (limits.inc[us] >= 100 && limits.time[us] >= 2*60*1000 && (timeLeft / limits.time[us]) > 0.1 && timeLeft > 20*1000) {
+      maximumTime = TimePoint(std::min(0.875 * limits.time[us] - moveOverhead, maxScale * optimumTime));
+      // Never use more than 87.5% of the available time for this move (if sufficient time is left)
+      // scale more for very short matches, provided that enough time is left
+  }
   else {
-    maximumTime = TimePoint(std::min(0.8 * limits.time[us] - moveOverhead, maxScale * optimumTime));
+      maximumTime = TimePoint(std::min(0.75 * limits.time[us] - moveOverhead, maxScale * optimumTime));
+      // use less time if the above conditions are not met (i.e. if short on time)
   }
 
   if (Options["Ponder"])
