@@ -99,11 +99,15 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   if (limits.inc[us] >= 100 && limits.time[us] >= 2*60*1000 && (timeLeft / limits.time[us]) > 0.1 && timeLeft > 20*1000) {
       maximumTime = TimePoint(std::min(0.875 * limits.time[us] - moveOverhead, maxScale * optimumTime));
       // Never use more than 87.5% of the available time for this move (if sufficient time is left)
-      // scale more for very short matches, provided that enough time is left
+      // Scale more for very short matches, provided that enough time is left
   }
   else {
+      if (limits.inc[us] == 0 && timeLeft / limits.time[us] > 0.2 && limits.time[us] >= 3*60*1000 && timeLeft > 60*1000) {
+          // For sudden death, allow a little more time if sufficient time is left
+          maximumTime = TimePoint(std::min(0.825 * limits.time[us] - moveOverhead, maxScale * optimumTime));
+      }
       maximumTime = TimePoint(std::min(0.75 * limits.time[us] - moveOverhead, maxScale * optimumTime));
-      // use less time if the above conditions are not met (i.e. if short on time)
+      // Use very little time if the above conditions are not met (i.e. if short on time)
   }
 
   if (Options["Ponder"])
