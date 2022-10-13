@@ -83,22 +83,23 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
       optScale = std::min(0.01 + std::pow(ply + 3.0, 0.5) * 0.004,
                            0.2 * limits.time[us] / double(timeLeft))
                  * optExtra;
-      maxScale = std::min(7.0, 4.0 + ply / 12.0);
+      maxScale = std::min(7.5, 4.0 + ply / 12.0);
   }
 
   // x moves in y seconds (+ z increment)
   else
   {
-      optScale = std::min((0.88 + ply / 116.4) / mtg,
+      optScale = std::min((0.01 + ply / 116.4) / mtg,
                             0.88 * limits.time[us] / double(timeLeft));
       maxScale = std::min(6.3, 1.5 + 0.11 * mtg);
   }
 
-  // Never use more than 85% of the available time for this move (if increment > 0)
+  // Never use more than 87.5% of the available time for this move (if increment > 0)
   optimumTime = TimePoint(optScale * timeLeft);
-  if (limits.inc[us] > 0.0 && limits.time[us] <= 5*60*1000) {
-    maximumTime = TimePoint(std::min(0.85 * limits.time[us] - moveOverhead, maxScale * optimumTime));
-  }
+  
+  if (limits.inc[us] > 0.0 && limits.time[us] <= 10*60*1000 && (timeLeft / limits.time[us]) > 0.1 && timeLeft > 20*1000) {
+    maximumTime = TimePoint(std::min(0.875 * limits.time[us] - moveOverhead, maxScale * optimumTime));
+  } // scale more for very short matches, provided that enough time is left
   else {
     maximumTime = TimePoint(std::min(0.8 * limits.time[us] - moveOverhead, maxScale * optimumTime));
   }
