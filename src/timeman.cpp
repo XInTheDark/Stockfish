@@ -106,8 +106,9 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
           // For sudden death, allow a little more time if sufficient time is left
           maximumTime = TimePoint(std::min(0.825 * limits.time[us] - moveOverhead, maxScale * optimumTime));
       }
-      maximumTime = TimePoint(std::min(0.75 * limits.time[us] - moveOverhead, maxScale * optimumTime));
+      maximumTime = TimePoint(std::min(0.8 * limits.time[us] - moveOverhead, maxScale * optimumTime));
       // Use very little time if the above conditions are not met (i.e. if short on time)
+      // constant cannot be too small (min. 0.8?)
   }
 
   if (Options["Ponder"])
