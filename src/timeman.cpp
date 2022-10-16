@@ -80,10 +80,10 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   // game time for the current move, so also cap to 20% of available game time.
   if (limits.movestogo == 0)
   {
-      optScale = std::min(0.01 + std::pow(ply + 3.0, 0.5) * 0.004,
+      optScale = std::min(0.01 + std::pow(ply + 3.0, 0.5) * 0.0042,
                            0.2 * limits.time[us] / double(timeLeft))
                  * optExtra;
-      maxScale = std::min(7.5, 4.0 + ply / 12.0);
+      maxScale = std::min(7.0, 4.0 + ply / 12.0);
   }
 
   // x moves in y seconds (+ z increment)
@@ -96,19 +96,14 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
   optimumTime = TimePoint(optScale * timeLeft);
   
-  if (limits.inc[us] >= 100 && limits.time[us] >= 2*60*1000 && (timeLeft / limits.time[us]) > 0.1 && timeLeft > 20*1000) {
-      maximumTime = TimePoint(std::min(0.875 * limits.time[us] - moveOverhead, maxScale * optimumTime));
-      // Never use more than 87.5% of the available time for this move (if sufficient time is left)
-      // Scale more for very short matches, provided that enough time is left
+  if (limits.inc[us] > 0) // if increment exists
+  {
+      // Never use more than 85% of the available time for this move
+      maximumTime = TimePoint(std::min(0.85 * limits.time[us] - moveOverhead, maxScale * optimumTime));
   }
-  else {
-      if (limits.inc[us] == 0 && timeLeft / limits.time[us] > 0.2 && limits.time[us] >= 3*60*1000 && timeLeft > 60*1000) {
-          // For sudden death, allow a little more time if sufficient time is left
-          maximumTime = TimePoint(std::min(0.825 * limits.time[us] - moveOverhead, maxScale * optimumTime));
-      }
+  else // no increment
+  {
       maximumTime = TimePoint(std::min(0.8 * limits.time[us] - moveOverhead, maxScale * optimumTime));
-      // Use very little time if the above conditions are not met (i.e. if short on time)
-      // constant cannot be too small (min. 0.8?)
   }
 
   if (Options["Ponder"])
