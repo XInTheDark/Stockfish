@@ -98,8 +98,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
   if (limits.inc[us] > 0) // if increment exists
   {
-      // Never use more than 85% of the available time for this move
-      maximumTime = TimePoint(std::min(0.85 * limits.time[us] - moveOverhead, maxScale * optimumTime));
+      maximumTime = TimePoint(std::min((0.8 + 0.02 * log10(limits.inc[us])) * limits.time[us] - moveOverhead, maxScale * optimumTime));
   }
   else // no increment
   {
