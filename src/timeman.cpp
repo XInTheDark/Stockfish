@@ -98,9 +98,9 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   optimumTime = TimePoint(optScale * timeLeft);
   maximumTime = TimePoint(std::min(0.8 * limits.time[us] - moveOverhead, maxScale * optimumTime));
 
-  if (timeLeft <= limits.inc[us] || timeLeft <= 2000)
+  if (timeLeft <= limits.inc[us] || timeLeft <= 3000 || timeLeft < limits.time[us] * 0.05)
   {
-      maximumTime = std::min(500 + limits.inc[us], timeLeft / 2);
+      maximumTime = std::min(1500 + limits.inc[us], timeLeft / 2);
   }
 
   if (Options["Ponder"])
