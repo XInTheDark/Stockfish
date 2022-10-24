@@ -100,7 +100,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
   if (timeLeft <= 5000 || timeLeft < 1500 * log10(limits.time[us] + 1) || timeLeft < 1000 * log10(limits.inc[us] + 1))
   {
-      maximumTime = std::min(2000 + 500 * log10(limits.inc[us] + 1), timeLeft * 2 / 3);
+      maximumTime = std::min(2000 + 500 * log10(limits.inc[us] + 1), (double) timeLeft * 2 / 3);
   }
 
   if (Options["Ponder"])
