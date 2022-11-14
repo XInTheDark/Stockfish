@@ -98,7 +98,8 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   optimumTime = TimePoint(optScale * timeLeft);
   maximumTime = TimePoint(std::min(0.8 * limits.time[us] - moveOverhead, maxScale * optimumTime));
 
-  if (timeLeft <= 5000 || timeLeft < 1000 * log10(limits.time[us] + 1) || timeLeft < 1000 * log10(limits.inc[us] + 1))
+  if (timeLeft <= 5000 || timeLeft < 1000 * log10(limits.time[us] + 1)
+  || timeLeft < 1000 * log10(limits.inc[us] + 1))
   {
       maximumTime = (int) std::min(2000.0, double(timeLeft) / 2);
   }
