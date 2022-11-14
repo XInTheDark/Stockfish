@@ -90,7 +90,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   else
   {
       optScale = std::min((0.88 + ply / 116.4) / mtg,
-                            0.88 * limits.time[us] / double(timeLeft));
+                            0.88 * limits.time[us] / timeLeft);
       maxScale = std::min(6.3, 1.5 + 0.11 * mtg);
   }
 
@@ -100,7 +100,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
   if (timeLeft <= 5000 || timeLeft < 1000 * log10(limits.time[us] + 1) || timeLeft < 1000 * log10(limits.inc[us] + 1))
   {
-      maximumTime = std::min(2500, double(timeLeft) * 2 / 3);
+      maximumTime = (int) std::min(2000.0, double(timeLeft) / 2);
   }
 
   if (Options["Ponder"])
