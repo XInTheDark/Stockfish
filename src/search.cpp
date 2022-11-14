@@ -309,7 +309,6 @@ void Thread::search() {
 
   complexityAverage.set(155, 1);
 
-  trend = SCORE_ZERO;
   optimism[us] = optimism[~us] = VALUE_ZERO;
 
   int searchAgainCounter = 0;
@@ -356,11 +355,7 @@ void Thread::search() {
               alpha = std::max(prev - delta,-VALUE_INFINITE);
               beta  = std::min(prev + delta, VALUE_INFINITE);
 
-              // Adjust trend and optimism based on root move's previousScore
-              int tr = 116 * prev / (std::abs(prev) + 89);
-              trend = (us == WHITE ?  make_score(tr, tr / 2)
-                                   : -make_score(tr, tr / 2));
-
+              // Adjust optimism based on root move's previousScore
               int opt = 118 * prev / (std::abs(prev) + 169);
               optimism[ us] = Value(opt);
               optimism[~us] = -optimism[us];
@@ -1177,7 +1172,7 @@ moves_loop: // When in check, search starts here
                          - 4433;
 
           // Decrease/increase reduction for moves with a good/bad history (~30 Elo)
-          r -= ss->statScore / 13628;
+          r -= ss->statScore / (13628 + 4000 * (depth > 7 && depth < 19));
 
           // In general we want to cap the LMR depth search at newDepth, but when
           // reduction is negative, we allow this move a limited search extension
