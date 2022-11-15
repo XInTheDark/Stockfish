@@ -101,8 +101,10 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   // Give more time if lots of time is left
   if (timeLeft > 0.75 * limits.time[us] || (0.75 * timeLeft > maximumTime * 1.2 && 0.75 * timeLeft > optimumTime * 1.35))
   {
-      optimumTime = TimePoint(std::clamp(optimumTime * 1.35, (double) optimumTime, std::max(optimumTime, timeLeft * 0.3)));
-      maximumTime = TimePoint(std::clamp(maximumTime * 1.2, (double) maximumTime, std::max(maximumTime, timeLeft * 0.3)));
+      optimumTime = TimePoint(std::clamp(optimumTime * 1.35, (double) optimumTime,
+                                         std::max((double) optimumTime, timeLeft * 0.3)));
+      maximumTime = TimePoint(std::clamp(maximumTime * 1.2, (double) maximumTime,
+                                         std::max((double) maximumTime, timeLeft * 0.3)));
   }
 
   if (Options["Ponder"])
