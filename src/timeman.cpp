@@ -94,6 +94,8 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
       maxScale = std::min(6.3, 1.5 + 0.11 * mtg);
   }
 
+  optimumTime = TimePoint(optScale * timeLeft);
+
   if (limits.inc[us] > 0) // if increment exists
   {
     maximumTime = TimePoint(std::min(0.85 * limits.time[us] - moveOverhead, maxScale * optimumTime));
