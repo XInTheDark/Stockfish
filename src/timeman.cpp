@@ -101,8 +101,8 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   // Give more time if lots of time is left
   if (timeLeft > maximumTime * 1.5 + limits.time[us] * 0.2)
   {
-      optimumTime *= std::max(1.1, 0.2 + 1.2 * log10(0.2 * mtg));
-      maximumTime *= std::clamp(0.5 + log10(0.2 * mtg), 1.0, 1.3);
+      optimumTime *= std::clamp(0.2 + 1.2 * log10(0.2 * mtg), 1.0, 1.3);
+      maximumTime *= std::clamp(0.5 + log10(0.2 * mtg), 1.0, 1.2);
   }
 
   if (Options["Ponder"])
