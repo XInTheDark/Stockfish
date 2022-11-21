@@ -1094,7 +1094,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   if (complexity && (!useNNUE || useClassical))
       *complexity = abs(v - psq);
 
-  return v;
+  return v * 49 / 50;
 }
 
 /// trace() is like evaluate(), but instead of returning a value, it returns
