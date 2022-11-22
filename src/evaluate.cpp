@@ -714,12 +714,12 @@ namespace {
 
         b = attackedBy[Us][KNIGHT] & attacks_bb<KNIGHT>(s);
 
-        score += KnightOnQueen * popcount(b & safe) * (1 + queenImbalance);
+        score += KnightOnQueen * popcount(b & safe) * (1 + queenImbalance) / 2;
 
         b =  (attackedBy[Us][BISHOP] & attacks_bb<BISHOP>(s, pos.pieces()))
            | (attackedBy[Us][ROOK  ] & attacks_bb<ROOK  >(s, pos.pieces()));
 
-        score += SliderOnQueen * popcount(b & safe & attackedBy2[Us]) * (1 + queenImbalance);
+        score += SliderOnQueen * popcount(b & safe & attackedBy2[Us]) * (1 + queenImbalance) / 2;
     }
 
     if constexpr (T)
