@@ -660,7 +660,7 @@ namespace {
     {
         b = (defended | weak) & (attackedBy[Us][KNIGHT] | attackedBy[Us][BISHOP]);
         while (b)
-            score += ThreatByMinor[type_of(pos.piece_on(pop_lsb(b)))];
+            score += ThreatByMinor[type_of(pos.piece_on(pop_lsb(b)))] / 2;
 
         b = weak & attackedBy[Us][ROOK];
         while (b)
