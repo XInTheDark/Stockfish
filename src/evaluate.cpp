@@ -667,7 +667,7 @@ namespace {
             score += ThreatByRook[type_of(pos.piece_on(pop_lsb(b)))];
 
         if (weak & attackedBy[Us][KING])
-            score += ThreatByKing;
+            score += ThreatByKing / 2;
 
         b =  ~attackedBy[Them][ALL_PIECES]
            | (nonPawnEnemies & attackedBy2[Us]);
