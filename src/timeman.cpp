@@ -75,6 +75,8 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   // Default is 100 and changing this value will probably lose elo.
   timeLeft = slowMover * timeLeft / 100;
 
+  timeLeft = timeLeft > 0.3 * limits.time[us] ? timeLeft : timeLeft * 0.9
+
   // x basetime (+ z increment)
   // If there is a healthy increment, timeLeft can exceed actual available
   // game time for the current move, so also cap to 20% of available game time.
