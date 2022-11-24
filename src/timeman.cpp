@@ -34,6 +34,11 @@ TimeManagement Time; // Our global time management object
 //      1) x basetime (+ z increment)
 //      2) x moves in y seconds (+ z increment)
 
+int log_base = 10, add1 = 90, divisor = 100;
+TUNE(SetRange(2, 50), log_base);
+TUNE(SetRange(10, 150), add1);
+TUNE(SetRange(20, 200), divisor);
+
 void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
   TimePoint moveOverhead    = TimePoint(Options["Move Overhead"]);
@@ -73,7 +78,8 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
   // A user may scale time usage by setting UCI option "Slow Mover"
   // Default is 100 and changing this value will probably lose elo.
-  timeLeft = (int) ( ((90 + log10(limits.time[us])) / 100) * slowMover * timeLeft / 100 );
+  timeLeft = (int) ( ((add1 + log10(limits.time[us]) / log10(log_base)) / divisor)
+          * slowMover * timeLeft / 100 );
 
   // x basetime (+ z increment)
   // If there is a healthy increment, timeLeft can exceed actual available
