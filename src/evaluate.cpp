@@ -1044,6 +1044,12 @@ make_v:
 
 } // namespace Eval
 
+int c1 = 416;
+int c2 = 424;
+int c3 = 1024;
+
+TUNE(SetRange(300, 600), c1, c2);
+TUNE(SetRange(750, 1500), c3);
 
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
@@ -1071,10 +1077,6 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      int c1 = 416, c2 = 424, c3 = 1024;
-      TUNE(SetRange(300, 600), c1, c2);
-      TUNE(SetRange(750, 1500), c3);
-
       nnueComplexity = (  c1 * nnueComplexity
                           + c2 * abs(psq - nnue)
                           + (optimism  > 0 ? int(optimism) * int(psq - nnue) : 0)
