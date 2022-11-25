@@ -510,6 +510,11 @@ void Thread::search() {
                 skill.best ? skill.best : skill.pick_best(multiPV)));
 }
 
+int add = 13628, multiply = 4000, depthMin = 7, depthMax = 19;
+
+TUNE(SetRange(5000, 20000), add);
+TUNE(SetRange(1000, 8000), multiply);
+TUNE(SetRange(1, 30), depthMin, depthMax);
 
 namespace {
 
@@ -1172,7 +1177,7 @@ moves_loop: // When in check, search starts here
                          - 4433;
 
           // Decrease/increase reduction for moves with a good/bad history (~30 Elo)
-          r -= ss->statScore / (13628 + 4000 * (depth > 7 && depth < 19));
+          r -= ss->statScore / (add + multiply * (depth > depthMin && depth < depthMax));
 
           // In general we want to cap the LMR depth search at newDepth, but when
           // reduction is negative, we allow this move a limited search extension
