@@ -73,7 +73,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
   // A user may scale time usage by setting UCI option "Slow Mover"
   // Default is 100 and changing this value will probably lose elo.
-  timeLeft = (int) ( ((90 + log10(limits.time[us])) / 100) * slowMover * timeLeft / 100 );
+  timeLeft = (int) ( ((85 + log10(limits.time[us]) / log10(10.5)) / 100) * slowMover * timeLeft / 100 );
 
   // x basetime (+ z increment)
   // If there is a healthy increment, timeLeft can exceed actual available
