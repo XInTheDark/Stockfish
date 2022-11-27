@@ -1044,6 +1044,11 @@ make_v:
 
 } // namespace Eval
 
+int add1 = 269, div1 = 256, min1 = 754, div2 = 1024;
+TUNE(SetRange(100, 400), add1);
+TUNE(SetRange(128, 512), div1);
+TUNE(SetRange(400, 1200), min1);
+TUNE(SetRange(512, 2048), div2);
 
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
@@ -1080,8 +1085,8 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (269 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 754)) / 1024;
+      optimism = optimism * (add1 + nnueComplexity) / div1;
+      v = (nnue * scale + optimism * (scale - min1)) / div2;
   }
 
   // Damp down the evaluation linearly when shuffling
