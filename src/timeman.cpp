@@ -76,7 +76,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   timeLeft = (int) (
           (90 + log10(limits.time[us] / 1000000.0 + 0.05) / log10(1.5)
           + log10(limits.inc[us] + 0.05)
-          + log10(timeLeft)
+          + log10(timeLeft + 0.05)
           ) / 100 * slowMover * timeLeft / 100
           );
 
