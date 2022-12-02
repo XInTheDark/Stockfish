@@ -75,8 +75,8 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   // Default is 100 and changing this value will probably lose elo.
   timeLeft = (int) (
           (90 + 1.5 * log10(limits.time[us] / 1000000 + 0.05) / log10(2.5)
-              + 0.5 * log10(limits.inc[us] + 0.05)
-              + 0.75 * log10(timeLeft + 0.05) / log10(5.0)
+              + 1.0 * log10(limits.inc[us] + 0.05)
+              + 0.5 * log10(timeLeft + 0.05) / log10(4.5)
               ) / 100 * slowMover * timeLeft / 100
               );
 
