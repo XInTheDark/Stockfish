@@ -1080,8 +1080,8 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (269 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 754)) / 1024;
+      optimism = optimism * (267 + nnueComplexity) / 256;
+      v = (nnue * 1077 + optimism * (scale - 316)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
