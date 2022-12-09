@@ -1060,7 +1060,7 @@ moves_loop: // When in check, search starts here
 
               if (value < singularBeta)
               {
-                  extension = 1;
+                  extension = 1 + depth > 2 && depth < 12;
                   singularQuietLMR = !ttCapture;
 
                   // Avoid search explosion by limiting the number of double extensions
