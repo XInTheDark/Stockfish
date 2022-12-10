@@ -1049,9 +1049,10 @@ moves_loop: // When in check, search starts here
            /* &&  ttValue != VALUE_NONE Already implicit in the next condition */
               &&  abs(ttValue) < VALUE_KNOWN_WIN
               && (tte->bound() & BOUND_LOWER)
-              &&  tte->depth() >= depth - 3)
+              &&  tte->depth() >= depth - 3
+              && depth >= 6)
           {
-              newDepth -= 1;
+              depth -= 5;
 
               Value singularBeta = ttValue - (3 + (ss->ttPv && !PvNode)) * depth;
               Depth singularDepth = (depth - 1) / 2;
@@ -1096,7 +1097,7 @@ moves_loop: // When in check, search starts here
           else if (   givesCheck
                    && depth > 9
                    && abs(ss->staticEval) > 82)
-              extension = 1;
+              extension = -2;
 
           // Quiet ttMove extensions (~0 Elo)
           else if (   PvNode
