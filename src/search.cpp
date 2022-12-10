@@ -981,7 +981,7 @@ moves_loop: // When in check, search starts here
 
       Value delta = beta - alpha;
 
-      depth -= 3;
+      depth = std::clamp(depth - 10, 3, 12);
 
       // Step 14. Pruning at shallow depth (~98 Elo). Depth conditions are important for mate finding.
       if (  !rootNode
