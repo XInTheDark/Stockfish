@@ -995,6 +995,8 @@ moves_loop: // When in check, search starts here
           if (   capture
               || givesCheck)
           {
+              newDepth -= givesCheck;
+
               // Futility pruning for captures (~0 Elo)
               if (   !givesCheck
                   && !PvNode
