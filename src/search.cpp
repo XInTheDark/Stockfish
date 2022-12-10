@@ -981,6 +981,8 @@ moves_loop: // When in check, search starts here
 
       Value delta = beta - alpha;
 
+      depth -= 3;
+
       // Step 14. Pruning at shallow depth (~98 Elo). Depth conditions are important for mate finding.
       if (  !rootNode
           && pos.non_pawn_material(us)
@@ -995,6 +997,7 @@ moves_loop: // When in check, search starts here
           if (   capture
               || givesCheck)
           {
+              depth = std::min(depth, 6);
               // Futility pruning for captures (~0 Elo)
               if (   !givesCheck
                   && !PvNode
@@ -1051,6 +1054,11 @@ moves_loop: // When in check, search starts here
               && (tte->bound() & BOUND_LOWER)
               &&  tte->depth() >= depth - 3)
           {
+              depth -= 2, newDepth -= 1;
+
+              if (capture || givesCheck)
+                  depth = std::clamp(depth - 5, 3, 12);
+
               Value singularBeta = ttValue - (3 + (ss->ttPv && !PvNode)) * depth;
               Depth singularDepth = (depth - 1) / 2;
 
@@ -1068,8 +1076,7 @@ moves_loop: // When in check, search starts here
                       && value < singularBeta - 25
                       && ss->doubleExtensions <= 9)
                   {
-                      extension = 2;
-                      depth += depth < 12;
+                      extension = 2 - depth < 12;
                   }
               }
 
