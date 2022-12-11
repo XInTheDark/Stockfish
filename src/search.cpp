@@ -892,7 +892,7 @@ namespace {
     // Use qsearch if depth is equal or below zero (~4 Elo)
     if (    PvNode
         && !ttMove)
-        depth -= 3;
+        depth -= 2;
 
     if (depth <= 0)
         return qsearch<PV>(pos, ss, alpha, beta);
@@ -900,7 +900,7 @@ namespace {
     if (    cutNode
         &&  depth >= 9
         && !ttMove)
-        depth -= 2;
+        depth -= 1;
 
 moves_loop: // When in check, search starts here
 
@@ -981,7 +981,7 @@ moves_loop: // When in check, search starts here
 
       Value delta = beta - alpha;
 
-      depth -= 3;
+      depth -= 2;
 
       // Step 14. Pruning at shallow depth (~98 Elo). Depth conditions are important for mate finding.
       if (  !rootNode
@@ -997,7 +997,7 @@ moves_loop: // When in check, search starts here
           if (   capture
               || givesCheck)
           {
-              depth = std::min(depth, 6);
+              depth = std::min(depth, 5);
               // Futility pruning for captures (~0 Elo)
               if (   !givesCheck
                   && !PvNode
@@ -1054,7 +1054,7 @@ moves_loop: // When in check, search starts here
               && (tte->bound() & BOUND_LOWER)
               &&  tte->depth() >= depth - 3)
           {
-              depth -= 2, newDepth -= 1;
+              depth -= 2, newDepth -= 2;
 
               if (capture || givesCheck)
                   depth = std::clamp(depth - 5, 3, 12);
@@ -1076,7 +1076,7 @@ moves_loop: // When in check, search starts here
                       && value < singularBeta - 25
                       && ss->doubleExtensions <= 9)
                   {
-                      extension = 2 - depth < 12;
+                      extension = 2;
                   }
               }
 
@@ -1090,7 +1090,7 @@ moves_loop: // When in check, search starts here
 
               // If the eval of ttMove is greater than beta, we reduce it (negative extension)
               else if (ttValue >= beta)
-                  extension = -2;
+                  extension = -1;
 
               // If the eval of ttMove is less than alpha and value, we reduce it (negative extension)
               else if (ttValue <= alpha && ttValue <= value)
