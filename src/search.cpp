@@ -365,6 +365,7 @@ void Thread::search() {
           // high/low, re-search with a bigger window until we don't fail
           // high/low anymore.
           int failedHighCnt = 0;
+          bool updatedAlpha = false;
           while (true)
           {
               // Adjust the effective depth searched, but ensuring at least one effective increment for every
@@ -407,6 +408,12 @@ void Thread::search() {
               }
               else if (bestValue >= beta)
               {
+                  if (!updatedAlpha && failedHighCnt > 4)
+                  {
+                      alpha = (alpha + beta) / 2;
+                      updatedAlpha = true;
+                  }
+
                   beta = std::min(bestValue + delta, VALUE_INFINITE);
                   ++failedHighCnt;
               }
@@ -775,6 +782,17 @@ namespace {
         value = qsearch<NonPV>(pos, ss, alpha - 1, alpha);
         if (value < alpha)
             return value;
+        else if (value > alpha && !ttMove)
+        {
+            posKey = excludedMove == MOVE_NONE ? pos.key() : pos.key() ^ make_key(excludedMove);
+            tte = TT.probe(posKey, ss->ttHit);
+            ttValue = ss->ttHit ? value_from_tt(tte->value(), ss->ply, pos.rule50_count()) : VALUE_NONE;
+            ttMove =  rootNode ? thisThread->rootMoves[thisThread->pvIdx].pv[0]
+            : ss->ttHit    ? tte->move() : MOVE_NONE;
+            ttCapture = ttMove && pos.capture(ttMove);
+            if (!excludedMove)
+            ss->ttPv = PvNode || (ss->ttHit && tte->is_pv());
+        }
     }
 
     // Step 8. Futility pruning: child node (~25 Elo).
@@ -1105,6 +1123,10 @@ moves_loop: // When in check, search starts here
                    && move == ttMove
                    && move == ss->killers[0]
                    && (*contHist[0])[movedPiece][to_sq(move)] >= 5177)
+              extension = 1;
+          else if (   PvNode
+                   && !ttCapture
+                   && capture)
               extension = 1;
       }
 

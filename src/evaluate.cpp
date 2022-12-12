@@ -206,6 +206,8 @@ namespace {
       {}, {}, {805, 1292}, {650, 984}, {1071, 1886}, {730, 1128}
   };
 
+  constexpr int PawnFenceDampen[7] = { 256, 244, 225, 219, 214, 208, 190 };
+
 #define S(mg, eg) make_score(mg, eg)
 
   // MobilityBonus[PieceType-2][attacked] contains bonuses for middle and end game,
@@ -1082,6 +1084,11 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
 
       optimism = optimism * (269 + nnueComplexity) / 256;
       v = (nnue * scale + optimism * (scale - 754)) / 1024;
+
+      Bitboard fence = shift<NORTH>(shift<NORTH_EAST>(pos.pieces(WHITE, PAWN)) & pos.pieces(WHITE, PAWN)) & shift<NORTH_EAST>(pos.pieces(BLACK, PAWN)) & pos.pieces(BLACK, PAWN);
+      fence |= shift<NORTH>(shift<SOUTH_EAST>(pos.pieces(WHITE, PAWN)) & pos.pieces(WHITE, PAWN)) & shift<SOUTH_EAST>(pos.pieces(BLACK, PAWN)) & pos.pieces(BLACK, PAWN);
+      if (fence)
+        v = (v * PawnFenceDampen[popcount(fence) - 1]) / 256;
 
       if ((   more_than_one(pos.pieces( stm, BISHOP) & DarkSquares) || more_than_one(pos.pieces( stm, BISHOP) & ~DarkSquares)
            || more_than_one(pos.pieces(~stm, BISHOP) & DarkSquares) || more_than_one(pos.pieces(~stm, BISHOP) & ~DarkSquares))
