@@ -330,8 +330,8 @@ void Thread::search() {
       size_t pvFirst = 0;
       pvLast = 0;
 
-      if (!Threads.increaseDepth)
-         searchAgainCounter++;
+      if (!Threads.increaseDepth && id() % 2 == 0)
+          searchAgainCounter++;
 
       // MultiPV loop. We perform a full root search for each PV line
       for (pvIdx = 0; pvIdx < multiPV && !Threads.stop; ++pvIdx)
@@ -536,7 +536,7 @@ namespace {
 
     // Dive into quiescence search when the depth reaches zero
     if (depth <= 0)
-        return qsearch<PvNode ? PV : NonPV>(pos, ss, alpha, beta);
+        return qsearch<PvNode ? PV : NonPV>(pos, ss, alpha, beta, depth / 2);
 
     assert(-VALUE_INFINITE <= alpha && alpha < beta && beta <= VALUE_INFINITE);
     assert(PvNode || (alpha == beta - 1));
@@ -855,7 +855,7 @@ namespace {
     {
         assert(probCutBeta < VALUE_INFINITE);
 
-        MovePicker mp(pos, ttMove, probCutBeta - ss->staticEval, &captureHistory);
+        MovePicker mp(pos, ttMove, std::max(VALUE_ZERO, probCutBeta - ss->staticEval), &captureHistory);
 
         while ((move = mp.next_move()) != MOVE_NONE)
             if (move != excludedMove && pos.legal(move))
@@ -898,9 +898,9 @@ namespace {
         return qsearch<PV>(pos, ss, alpha, beta);
 
     if (    cutNode
-        &&  depth >= 9
+        &&  depth >= 7
         && !ttMove)
-        depth -= 2;
+        depth -= 1 + (depth >= 9);
 
 moves_loop: // When in check, search starts here
 
@@ -1088,6 +1088,9 @@ moves_loop: // When in check, search starts here
               // If the eval of ttMove is less than alpha and value, we reduce it (negative extension)
               else if (ttValue <= alpha && ttValue <= value)
                   extension = -1;
+
+              else if (value >= ttValue)
+                  extension = -1;
           }
 
           // Check extensions (~1 Elo)
@@ -1100,6 +1103,7 @@ moves_loop: // When in check, search starts here
           else if (   PvNode
                    && move == ttMove
                    && move == ss->killers[0]
+                   && pos.rule50_count() <= 12
                    && (*contHist[0])[movedPiece][to_sq(move)] >= 5177)
               extension = 1;
       }
@@ -1125,11 +1129,12 @@ moves_loop: // When in check, search starts here
       // We use various heuristics for the sons of a node after the first son has
       // been searched. In general we would like to reduce them, but there are many
       // cases where we extend a son if it has good chances to be "interesting".
-      if (    depth >= 2
-          &&  moveCount > 1 + (PvNode && ss->ply <= 1)
+      if (    depth >= 1 + (PvNode || givesCheck || cutNode)
+          &&  moveCount > 1 + (PvNode && ss->ply <= 1 && !ss->inCheck)
           && (   !ss->ttPv
               || !capture
-              || (cutNode && (ss-1)->moveCount > 1)))
+              || (cutNode && (ss-1)->moveCount > 1)
+              || bestValue >= VALUE_TB_WIN_IN_MAX_PLY))
       {
           Depth r = reduction(improving, depth, moveCount, delta, thisThread->rootDelta);
 
@@ -1145,7 +1150,7 @@ moves_loop: // When in check, search starts here
 
           // Increase reduction for cut nodes (~3 Elo)
           if (cutNode)
-              r += 2;
+              r += 2 - (type_of(move) == PROMOTION)
 
           // Increase reduction if ttMove is a capture (~3 Elo)
           if (ttCapture)
@@ -1156,7 +1161,10 @@ moves_loop: // When in check, search starts here
               r -= 1 + 11 / (3 + depth);
 
           // Decrease reduction if ttMove has been singularly extended (~1 Elo)
-          if (singularQuietLMR)
+          if (singularQuietLMR && !ss->inCheck)
+              r--;
+
+          if (abs(ss->staticEval) < 50 && givesCheck && capture)
               r--;
 
           // Decrease reduction if we move a threatened piece (~1 Elo)
@@ -1166,6 +1174,9 @@ moves_loop: // When in check, search starts here
 
           // Increase reduction if next ply has a lot of fail high
           if ((ss+1)->cutoffCnt > 3)
+              r++;
+
+          if (bestValue >= VALUE_TB_WIN_IN_MAX_PLY)
               r++;
 
           ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
@@ -1180,7 +1191,7 @@ moves_loop: // When in check, search starts here
           // In general we want to cap the LMR depth search at newDepth, but when
           // reduction is negative, we allow this move a limited search extension
           // beyond the first move depth. This may lead to hidden double extensions.
-          Depth d = std::clamp(newDepth - r, 1, newDepth + 1);
+          Depth d = std::clamp(newDepth - r, 1 - (depth == 1), newDepth + 1);
 
           value = -search<NonPV>(pos, ss+1, -(alpha+1), -alpha, d, true);
 
@@ -1192,8 +1203,9 @@ moves_loop: // When in check, search starts here
               const bool doDeeperSearch = value > (alpha + 64 + 11 * (newDepth - d));
               const bool doEvenDeeperSearch = value > alpha + 582;
               const bool doShallowerSearch = value < bestValue + newDepth;
+              const bool doEvenShallowerSearch = value < bestValue + 3;
 
-              newDepth += doDeeperSearch - doShallowerSearch + doEvenDeeperSearch;
+              newDepth += doDeeperSearch - doShallowerSearch + doEvenDeeperSearch - doEvenShallowerSearch;
 
               if (newDepth > d)
                   value = -search<NonPV>(pos, ss+1, -(alpha+1), -alpha, newDepth, !cutNode);
@@ -1298,7 +1310,7 @@ moves_loop: // When in check, search starts here
 
                   // Reduce other moves if we have found at least one score improvement
                   if (   depth > 1
-                      && depth < 6
+                      && depth < 12
                       && beta  <  VALUE_KNOWN_WIN
                       && alpha > -VALUE_KNOWN_WIN)
                       depth -= 1;
@@ -1307,7 +1319,7 @@ moves_loop: // When in check, search starts here
               }
               else
               {
-                  ss->cutoffCnt++;
+                  ss->cutoffCnt += 1 + (priorCapture && !capture && !ttCapture && !givesCheck && (type_of(move) == NORMAL));
                   assert(value >= beta); // Fail high
                   break;
               }
