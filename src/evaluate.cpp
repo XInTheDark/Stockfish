@@ -1082,10 +1082,17 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
 
       optimism = optimism * (278 + nnueComplexity) / 256;
       v = (nnue * scale + optimism * (scale - 755)) / 1024;
+
+      if ((   more_than_one(pos.pieces( stm, BISHOP) & DarkSquares) || more_than_one(pos.pieces( stm, BISHOP) & ~DarkSquares)
+           || more_than_one(pos.pieces(~stm, BISHOP) & DarkSquares) || more_than_one(pos.pieces(~stm, BISHOP) & ~DarkSquares))
+           && pos.count<ALL_PIECES>() == 4)
+           v = Value(0);
   }
 
   // Damp down the evaluation linearly when shuffling
   v = v * (197 - pos.rule50_count()) / 214;
+  // Damp down the evaluation linearly depending on material
+  v = v * (1200 - pos.count<PAWN>() - pos.non_pawn_material() / 230) / 1250;
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
