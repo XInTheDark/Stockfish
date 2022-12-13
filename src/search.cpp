@@ -315,6 +315,8 @@ void Thread::search() {
 
   int searchAgainCounter = 0;
 
+  int stabilityCount = 0;
+
   // Iterative deepening loop until requested to stop or the target depth is reached
   while (   ++rootDepth < MAX_PLY
          && !Threads.stop
@@ -323,6 +325,8 @@ void Thread::search() {
       // Age out PV variability metric
       if (mainThread)
           totBestMoveChanges /= 2;
+
+      rootDepth += (stabilityCount > 4);
 
       // Save the last iteration's scores before first PV line is searched and
       // all the move scores except the (new) PV are set to -VALUE_INFINITE.
@@ -409,6 +413,7 @@ void Thread::search() {
                   alpha = std::max(bestValue - delta, -VALUE_INFINITE);
 
                   failedHighCnt = 0;
+                  stabilityCount = 0;
                   if (mainThread)
                       mainThread->stopOnPonderhit = false;
               }
@@ -422,9 +427,13 @@ void Thread::search() {
 
                   beta = std::min(bestValue + delta, VALUE_INFINITE);
                   ++failedHighCnt;
+                  stabilityCount = 0;
               }
               else
+              {
+                  stabilityCount++;
                   break;
+              }
 
               delta += delta / 4 + 2;
 
@@ -894,8 +903,11 @@ namespace {
 
                 pos.do_move(move, st);
 
+                bool passedQs = false;
+
                 // Perform a preliminary qsearch to verify that the move holds
                 value = -qsearch<NonPV>(pos, ss+1, -probCutBeta, -probCutBeta+1);
+                passedQs = value >= probCutBeta;
 
                 // If the qsearch held, perform the regular search
                 if (value >= probCutBeta)
@@ -907,8 +919,11 @@ namespace {
                 {
                     // Save ProbCut data into transposition table
                     tte->save(posKey, value_to_tt(value, ss->ply), ss->ttPv, BOUND_LOWER, depth - 3, move, ss->staticEval);
+                    captureHistory[pos.moved_piece(move)][to_sq(move)][type_of(pos.piece_on(to_sq(move)))] << stat_bonus(depth - 2);
                     return value;
                 }
+                else if (passedQs)
+                    capturesSearched[captureCount++] = move;
             }
     }
 
@@ -1133,6 +1148,7 @@ moves_loop: // When in check, search starts here
           else if (   PvNode
                    && move == ttMove
                    && move == ss->killers[0]
+                   && pos.rule50_count() <= 13
                    && (*contHist[0])[movedPiece][to_sq(move)] >= 5177)
               extension = 1;
           else if (   PvNode
@@ -1586,8 +1602,10 @@ moves_loop: // When in check, search starts here
           &&  futilityBase > -VALUE_KNOWN_WIN
           &&  type_of(move) != PROMOTION)
       {
-          if (moveCount > 2)
+          if (moveCount > 4)
               continue;
+          else if (moveCount > 2)
+              depth--;
 
           futilityValue = futilityBase + PieceValue[EG][pos.piece_on(to_sq(move))];
 
