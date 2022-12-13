@@ -561,7 +561,7 @@ namespace {
     Move ttMove, move, excludedMove, bestMove;
     Depth extension, newDepth;
     Value bestValue, value, ttValue, eval, maxValue, probCutBeta;
-    bool givesCheck, improving, priorCapture, singularQuietLMR;
+    bool givesCheck, improving, priorCapture, singularQuietLMR, moreReduce;
     bool capture, moveCountPruning, ttCapture;
     Piece movedPiece;
     int moveCount, captureCount, quietCount, improvement, complexity;
@@ -915,6 +915,11 @@ namespace {
         && !ttMove)
         depth -= 3 + ss->ttHit;
 
+    if (    PvNode
+        &&  ss->ply > 2
+        &&  ttMove)
+        depth -= std::clamp((depth - tte->depth()) / 4, 0, 3);
+
     if (depth <= 0)
         return qsearch<PV>(pos, ss, alpha, beta);
 
@@ -1201,6 +1206,12 @@ moves_loop: // When in check, search starts here
               &&  givesCheck)
               r--;
 
+          if (   !capture
+              && (move == (ss+2)->killers[0] || move == (ss+2)->killers[1])
+              &&  move != ss->killers[0]
+              &&  move != ss->killers[1])
+              r--;
+
           ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
                          + (*contHist[0])[movedPiece][to_sq(move)]
                          + (*contHist[1])[movedPiece][to_sq(move)]
@@ -1324,6 +1335,8 @@ moves_loop: // When in check, search starts here
 
       if (value > bestValue)
       {
+          moreReduce = value > bestValue + newDepth;
+
           bestValue = value;
 
           if (value > alpha)
@@ -1351,7 +1364,7 @@ moves_loop: // When in check, search starts here
                   && depth < 6
                   && beta  <  VALUE_KNOWN_WIN
                   && alpha > -VALUE_KNOWN_WIN)
-                  break;
+                  depth -= 1 + (depth > 2 && moreReduce);
 
           }
       }
