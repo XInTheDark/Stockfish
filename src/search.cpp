@@ -1433,9 +1433,7 @@ moves_loop: // When in check, search starts here
         //Assign extra bonus if current node is PvNode or cutNode
         //or fail low was really bad
         bool extraBonus =    PvNode
-                          || cutNode
-                          || ttMove
-                          || bestValue < alpha - 62 * depth;
+                          || cutNode;
 
         update_continuation_histories(ss-1, pos.piece_on(prevSq), prevSq, stat_bonus(depth) * (1 + extraBonus));
     }
