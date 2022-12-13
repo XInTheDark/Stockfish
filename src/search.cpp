@@ -903,6 +903,7 @@ namespace {
         depth -= 2;
 
 moves_loop: // When in check, search starts here
+    newDepth += depth < 12;
 
     // Step 12. A small Probcut idea, when we are in check (~0 Elo)
     probCutBeta = beta + 417;
