@@ -1065,7 +1065,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   else
   {
       int nnueComplexity;
-      int scale = 1064 + 106 * pos.non_pawn_material() / 5120;
+      int scale = 1076 + 96 * pos.non_pawn_material() / 5120;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1073,8 +1073,8 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  416 * nnueComplexity
-                        + 424 * abs(psq - nnue)
+      nnueComplexity = (  412 * nnueComplexity
+                        + 428 * abs(psq - nnue)
                         + (optimism  > 0 ? int(optimism) * int(psq - nnue) : 0)
                         ) / 1024;
 
@@ -1082,8 +1082,8 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (269 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 754)) / 1024;
+      optimism = optimism * (278 + nnueComplexity) / 256;
+      v = (nnue * scale + optimism * (scale - 755)) / 1024;
 
       Bitboard fence = shift<NORTH>(shift<NORTH_EAST>(pos.pieces(WHITE, PAWN)) & pos.pieces(WHITE, PAWN)) & shift<NORTH_EAST>(pos.pieces(BLACK, PAWN)) & pos.pieces(BLACK, PAWN);
       fence |= shift<NORTH>(shift<SOUTH_EAST>(pos.pieces(WHITE, PAWN)) & pos.pieces(WHITE, PAWN)) & shift<SOUTH_EAST>(pos.pieces(BLACK, PAWN)) & pos.pieces(BLACK, PAWN);
@@ -1097,7 +1097,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   }
 
   // Damp down the evaluation linearly when shuffling
-  v = v * (195 - pos.rule50_count()) / 211;
+  v = v * (197 - pos.rule50_count()) / 214;
   // Damp down the evaluation linearly depending on material
   v = v * (1200 - pos.count<PAWN>() - pos.non_pawn_material() / 230) / 1250;
 
