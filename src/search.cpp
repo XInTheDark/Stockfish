@@ -70,7 +70,7 @@ namespace {
   int Reductions[MAX_MOVES]; // [depth or moveNumber]
 
   Depth reduction(bool i, Depth d, int mn, Value delta, Value rootDelta) {
-    int r = Reductions[d] * Reductions[mn];
+    int r = Reductions[d] * Reductions[mn - mn / 10];
     return (r + 1642 - int(delta) * 1024 / int(rootDelta)) / 1024 + (!i && r > 858);
   }
 
@@ -519,6 +519,9 @@ void Thread::search() {
 
       mainThread->iterValue[iterIdx] = bestValue;
       iterIdx = (iterIdx + 1) & 3;
+
+      if (rootDepth < 8)
+          rootDepth++;
   }
 
   if (!mainThread)
@@ -943,9 +946,9 @@ namespace {
         return qsearch<PV>(pos, ss, alpha, beta);
 
     if (    cutNode
-        &&  depth >= 9
+        &&  depth >= 7
         && !ttMove)
-        depth -= 2;
+        depth -= 1 + (depth >= 9);
 
 moves_loop: // When in check, search starts here
 
@@ -1045,6 +1048,7 @@ moves_loop: // When in check, search starts here
                   && !PvNode
                   && lmrDepth < 7
                   && !ss->inCheck
+                  && type_of(pos.piece_on(from_sq(move))) != PAWN
                   && ss->staticEval + 180 + 201 * lmrDepth + PieceValue[EG][pos.piece_on(to_sq(move))]
                    + captureHistory[movedPiece][to_sq(move)][type_of(pos.piece_on(to_sq(move)))] / 6 < alpha)
                   continue;
@@ -1182,7 +1186,8 @@ moves_loop: // When in check, search starts here
           && moveCount > 1 + (PvNode && ss->ply <= 1 && !ss->inCheck)
           && (   !ss->ttPv
               || !capture
-              || (cutNode && (ss-1)->moveCount > 1)))
+              || (cutNode && (ss-1)->moveCount > 1)
+              || bestValue >= VALUE_TB_WIN_IN_MAX_PLY))
       {
           Depth r = reduction(improving, depth, moveCount, delta, thisThread->rootDelta);
 
@@ -1198,7 +1203,7 @@ moves_loop: // When in check, search starts here
 
           // Increase reduction for cut nodes (~3 Elo)
           if (cutNode)
-              r += 2;
+              r += 2 - (depth < 5);
 
           // Increase reduction if ttMove is a capture (~3 Elo)
           if (ttCapture)
@@ -1219,6 +1224,9 @@ moves_loop: // When in check, search starts here
 
           // Increase reduction if next ply has a lot of fail high
           if ((ss+1)->cutoffCnt > 3 && !capture)
+              r++;
+
+          if (bestValue >= VALUE_TB_WIN_IN_MAX_PLY)
               r++;
 
           if (    ss->ply >= 8
