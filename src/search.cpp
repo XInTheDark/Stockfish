@@ -1529,7 +1529,7 @@ moves_loop: // When in check, search starts here
     ttMove = ss->ttHit ? tte->move() : MOVE_NONE;
     pvHit = ss->ttHit && tte->is_pv();
 
-    if (  !PvNode
+    if (  (!PvNode || (tte->depth() > ttDepth && pos.rule50_count() < 90 && ttMove && pos.pseudo_legal(ttMove)))
         && ss->ttHit
         && tte->depth() >= ttDepth
         && ttValue != VALUE_NONE // Only in case of TT access race
@@ -1700,14 +1700,15 @@ moves_loop: // When in check, search starts here
         return mated_in(ss->ply); // Plies to mate from the root
     }
 
+    Value v = bestValue >= beta ? (bestValue + beta)/2 : (bestValue <= alpha ? (bestValue + alpha)/2 : bestValue);
     // Save gathered info in transposition table
-    tte->save(posKey, value_to_tt(bestValue, ss->ply), pvHit,
+    tte->save(posKey, value_to_tt(v, ss->ply), pvHit,
               bestValue >= beta ? BOUND_LOWER : BOUND_UPPER,
               ttDepth, bestMove, ss->staticEval);
 
-    assert(bestValue > -VALUE_INFINITE && bestValue < VALUE_INFINITE);
+    assert(v > -VALUE_INFINITE && v < VALUE_INFINITE);
 
-    return bestValue;
+    return v;
   }
 
 
