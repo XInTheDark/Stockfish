@@ -349,15 +349,19 @@ void Thread::search() {
           // Reset UCI info selDepth for each depth and each PV line
           selDepth = 0;
 
+          Value prev = rootMoves[pvIdx].averageScore;
+
           // Reset aspiration window starting size
           if (rootDepth >= 4)
           {
-              Value prev = rootMoves[pvIdx].averageScore;
               delta = Value(10) + int(prev) * prev / 15620;
               alpha = std::max(prev - delta,-VALUE_INFINITE);
               beta  = std::min(prev + delta, VALUE_INFINITE);
+          }
 
-              // Adjust optimism based on root move's previousScore
+          // Adjust optimism based on root move's previousScore
+          if (rootDepth >= 8)
+          {
               int opt = 118 * prev / (std::abs(prev) + 169);
               optimism[ us] = Value(opt);
               optimism[~us] = -optimism[us];
