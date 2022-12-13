@@ -1287,17 +1287,6 @@ moves_loop: // When in check, search starts here
               }
 
           }
-          else if (d > newDepth && value > alpha)
-           {
-
-              int bonus = stat_bonus(d);
-
-              if (capture)
-              bonus /= 6;
-
-              update_continuation_histories(ss, movedPiece, to_sq(move), bonus);
-
-           }
       }
 
       // Step 18. Full depth search when LMR is skipped
