@@ -509,12 +509,11 @@ void Thread::search() {
               else
                   Threads.stop = true;
           }
-          else if (   Threads.increaseDepth
-                   && !mainThread->ponder
+          else if (   !mainThread->ponder
                    && Time.elapsed() > totalTime * 0.53)
-                   Threads.increaseDepth = false;
+              Threads.increaseDepth = false;
           else
-                   Threads.increaseDepth = true;
+              Threads.increaseDepth = true;
       }
 
       mainThread->iterValue[iterIdx] = bestValue;
@@ -1529,7 +1528,7 @@ moves_loop: // When in check, search starts here
     ttMove = ss->ttHit ? tte->move() : MOVE_NONE;
     pvHit = ss->ttHit && tte->is_pv();
 
-    if (  (!PvNode || (tte->depth() > ttDepth && pos.rule50_count() < 90 && ttMove && pos.pseudo_legal(ttMove)))
+    if (  !PvNode
         && ss->ttHit
         && tte->depth() >= ttDepth
         && ttValue != VALUE_NONE // Only in case of TT access race
