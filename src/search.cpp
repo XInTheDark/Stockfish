@@ -284,6 +284,8 @@ void Thread::search() {
 
   ss->pv = pv;
 
+  captureHistory.reinit();
+
   bestValue = delta = alpha = -VALUE_INFINITE;
   beta = VALUE_INFINITE;
 
@@ -1070,7 +1072,7 @@ moves_loop: // When in check, search starts here
               && (tte->bound() & BOUND_LOWER)
               &&  tte->depth() >= depth - 3)
           {
-              Value singularBeta = ttValue - (3 + (ss->ttPv && !PvNode)) * depth;
+              Value singularBeta = ttValue - (3 + givesCheck + (ss->ttPv && !PvNode)) * depth;
               Depth singularDepth = (depth - 1 + (ss->ttPv && !PvNode)) / 2;
 
               ss->excludedMove = move;
@@ -1163,7 +1165,7 @@ moves_loop: // When in check, search starts here
           // and node is not likely to fail low. (~3 Elo)
           if (   ss->ttPv
               && !likelyFailLow)
-              r -= 2 - (depth - tte->depth() > 3) + cutNode;
+              r -= 1 + 27 / (11 + depth);
 
           // Decrease reduction if opponent's move count is high (~1 Elo)
           if ((ss-1)->moveCount > 7)
@@ -1179,7 +1181,7 @@ moves_loop: // When in check, search starts here
 
           // Decrease reduction for PvNodes based on depth
           if (PvNode)
-              r -= 1 + (depth < thisThread->selDepth / 2) + 11 / (3 + depth);
+              r -= 1 + 11 / (3 + depth) + !ss->ttHit;
 
           // Decrease reduction if ttMove has been singularly extended (~1 Elo)
           if (singularQuietLMR)
@@ -1335,13 +1337,6 @@ moves_loop: // When in check, search starts here
               {
                   alpha = value;
 
-                  // Reduce other moves if we have found at least one score improvement
-                  if (   depth > 1
-                      && depth < 6
-                      && beta  <  VALUE_KNOWN_WIN
-                      && alpha > -VALUE_KNOWN_WIN)
-                      depth -= 1;
-
                   assert(depth > 0);
               }
               else
@@ -1350,6 +1345,14 @@ moves_loop: // When in check, search starts here
                   assert(value >= beta); // Fail high
                   break;
               }
+
+              // Reduce other moves if we have found at least one score improvement
+              if (depth > 1
+                  && depth < 6
+                  && beta  <  VALUE_KNOWN_WIN
+                  && alpha > -VALUE_KNOWN_WIN)
+                  break;
+
           }
       }
 

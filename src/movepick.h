@@ -52,6 +52,11 @@ public:
 
     assert(abs(entry) <= D);
   }
+
+  void reinit() {
+      entry = std::max(entry, T(0));
+  }
+
 };
 
 /// Stats is a generic N-dimensional array used to store various statistics.
@@ -63,6 +68,16 @@ template <typename T, int D, int Size, int... Sizes>
 struct Stats : public std::array<Stats<T, D, Sizes...>, Size>
 {
   typedef Stats<T, D, Size, Sizes...> stats;
+
+  void reinit() {
+
+    // For standard-layout 'this' points to first struct member
+    assert(std::is_standard_layout<stats>::value);
+
+    typedef StatsEntry<T, D> entry;
+    entry* p = reinterpret_cast<entry*>(this);
+    std::for_each(p, p + sizeof(*this) / sizeof(entry), [](entry& e) { e.reinit(); });
+  }
 
   void fill(const T& v) {
 
