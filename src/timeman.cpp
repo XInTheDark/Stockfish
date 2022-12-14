@@ -107,10 +107,12 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
       optimumTime += optimumTime / 4;
 
   // Very little time left
-  if (double(timeLeft) < limits.time[us] / 50 || double(timeLeft) < 10 * 1000) {
+  if (double(timeLeft) < limits.time[us] / 50 - limits.inc[us] || double(timeLeft) < 15 * 1000 - limits.inc[us]) {
       optimumTime = TimePoint(
-              limits.inc[us] * 9 / 10
-              + std::min({(int)optimumTime / 2, (int)double(timeLeft / 5), 750})
+              std::min(optimumTime,
+                       limits.inc[us] * 9 / 10
+                       + std::min({(int)optimumTime / 2, (int)double(timeLeft / 5), 750})
+              )
               );
       maximumTime = TimePoint(maximumTime / 2);
   }
