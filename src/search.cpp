@@ -1699,15 +1699,14 @@ moves_loop: // When in check, search starts here
         return mated_in(ss->ply); // Plies to mate from the root
     }
 
-    Value v = bestValue >= beta ? (bestValue + beta)/2 : (bestValue <= alpha ? (bestValue + alpha)/2 : bestValue);
     // Save gathered info in transposition table
-    tte->save(posKey, value_to_tt(v, ss->ply), pvHit,
+    tte->save(posKey, value_to_tt(bestValue, ss->ply), pvHit,
               bestValue >= beta ? BOUND_LOWER : BOUND_UPPER,
               ttDepth, bestMove, ss->staticEval);
 
-    assert(v > -VALUE_INFINITE && v < VALUE_INFINITE);
+    assert(bestValue > -VALUE_INFINITE && bestValue < VALUE_INFINITE);
 
-    return v;
+    return bestValue;
   }
 
 
