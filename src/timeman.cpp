@@ -105,20 +105,6 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
   if (Options["Ponder"])
       optimumTime += optimumTime / 4;
-
-  // Very little time left
-  if (double(timeLeft) < limits.time[us] / 50 - limits.inc[us] || double(timeLeft) < 15 * 1000 - limits.inc[us]) {
-      optimumTime = TimePoint(
-              std::min(optimumTime,
-                       limits.inc[us] * 9 / 10
-                       + std::min({(int)optimumTime / 2, (int)double(timeLeft / 5), 750})
-              )
-              );
-      maximumTime = TimePoint(std::max(optimumTime, maximumTime / 2));
-      if (limits.inc[us] == 0) {
-          optimumTime = optimumTime * 2 / 3;
-      }
-  }
 }
 
 } // namespace Stockfish
