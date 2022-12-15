@@ -903,6 +903,7 @@ namespace {
         depth -= 2;
 
 moves_loop: // When in check, search starts here
+    newDepth = depth - 2;
 
     // Step 12. A small Probcut idea, when we are in check (~0 Elo)
     probCutBeta = beta + 417;
@@ -977,7 +978,8 @@ moves_loop: // When in check, search starts here
       givesCheck = pos.gives_check(move);
 
       // Calculate new depth for this move
-      newDepth = depth - 1;
+      if (!ss->inCheck)
+          newDepth = depth - 1;
 
       Value delta = beta - alpha;
 
