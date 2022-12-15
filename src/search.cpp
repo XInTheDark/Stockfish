@@ -935,6 +935,8 @@ namespace {
         && ss->ply > 2
         && !ttMove)
         depth -= 3 + ss->ttHit;
+    else if (PvNode && ttMove && eval < ss->staticEval - 50 * depth)
+        depth--;
 
     if (    PvNode
         &&  ss->ply > 2
@@ -1064,7 +1066,7 @@ moves_loop: // When in check, search starts here
 
               // Continuation history based pruning (~2 Elo)
               if (   lmrDepth < 5
-                  && history < -3875 * (depth - 1))
+                  && history < -1600 * depth * (depth - 1))
                   continue;
 
               history += 2 * thisThread->mainHistory[us][from_to(move)];
