@@ -935,8 +935,6 @@ namespace {
         && ss->ply > 2
         && !ttMove)
         depth -= 3 + ss->ttHit;
-    else if (PvNode && ttMove && eval < ss->staticEval - 50 * depth)
-        depth--;
 
     if (    PvNode
         &&  ss->ply > 2
