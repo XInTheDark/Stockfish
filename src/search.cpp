@@ -1222,7 +1222,7 @@ moves_loop: // When in check, search starts here
               r--;
 
           // Increase reduction if next ply has a lot of fail high
-          if ((ss+1)->cutoffCnt > 3 && !capture)
+          if ((ss+1)->cutoffCnt > 3 && (!capture || (capture && PvNode && ss->ttHit)))
               r++;
 
           if (bestValue >= VALUE_TB_WIN_IN_MAX_PLY)
