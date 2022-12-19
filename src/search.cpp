@@ -1182,6 +1182,66 @@ moves_loop: // When in check, search starts here
       // Step 16. Make the move
       pos.do_move(move, st, givesCheck);
 
+      Depth r = reduction(improving, depth, moveCount, delta, thisThread->rootDelta);
+
+      // Decrease reduction if position is or has been on the PV
+      // and node is not likely to fail low. (~3 Elo)
+      if (   ss->ttPv
+          && !likelyFailLow)
+          r -= 1 + 27 / (11 + depth);
+
+      // Decrease reduction if opponent's move count is high (~1 Elo)
+      if ((ss-1)->moveCount > 7)
+          r--;
+
+      // Increase reduction for cut nodes (~3 Elo)
+      if (cutNode)
+          r += 2 - (depth < 5);
+
+      // Increase reduction if ttMove is a capture (~3 Elo)
+      if (ttCapture)
+          r++;
+
+      // Decrease reduction for PvNodes based on depth
+      if (PvNode)
+          r -= 1 + (depth < thisThread->selDepth / 2) + 11 / (3 + depth) + !ss->ttHit;
+
+      // Decrease reduction if ttMove has been singularly extended (~1 Elo)
+      if (singularQuietLMR)
+          r -= 1 + (ss->ttPv && !PvNode);
+
+      // Decrease reduction if we move a threatened piece (~1 Elo)
+      if (   depth > 9
+          && (mp.threatenedPieces & from_sq(move)))
+          r--;
+
+      // Increase reduction if next ply has a lot of fail high
+      if ((ss+1)->cutoffCnt > 3 && (!capture || (capture && PvNode && ss->ttHit)))
+          r++;
+
+      if (bestValue >= VALUE_TB_WIN_IN_MAX_PLY)
+          r++;
+
+      if (    ss->ply >= 8
+          && !(ss-8)->ttPv
+          &&  givesCheck)
+          r--;
+
+      if (   !capture
+          && (move == (ss+2)->killers[0] || move == (ss+2)->killers[1])
+          &&  move != ss->killers[0]
+          &&  move != ss->killers[1])
+          r--;
+
+      ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
+                     + (*contHist[0])[movedPiece][to_sq(move)]
+                     + (*contHist[1])[movedPiece][to_sq(move)]
+                     + (*contHist[3])[movedPiece][to_sq(move)]
+                     - 4433;
+
+      // Decrease/increase reduction for moves with a good/bad history (~30 Elo)
+      r -= ss->statScore / (13000 + 4152 * (depth > 7 && depth < 19));
+
       // Step 17. Late moves reduction / extension (LMR, ~98 Elo)
       // We use various heuristics for the sons of a node after the first son has
       // been searched. In general we would like to reduce them, but there are many
@@ -1193,66 +1253,6 @@ moves_loop: // When in check, search starts here
               || (cutNode && (ss-1)->moveCount > 1)
               || bestValue >= VALUE_TB_WIN_IN_MAX_PLY))
       {
-          Depth r = reduction(improving, depth, moveCount, delta, thisThread->rootDelta);
-
-          // Decrease reduction if position is or has been on the PV
-          // and node is not likely to fail low. (~3 Elo)
-          if (   ss->ttPv
-              && !likelyFailLow)
-              r -= 1 + 27 / (11 + depth);
-
-          // Decrease reduction if opponent's move count is high (~1 Elo)
-          if ((ss-1)->moveCount > 7)
-              r--;
-
-          // Increase reduction for cut nodes (~3 Elo)
-          if (cutNode)
-              r += 2 - (depth < 5);
-
-          // Increase reduction if ttMove is a capture (~3 Elo)
-          if (ttCapture)
-              r++;
-
-          // Decrease reduction for PvNodes based on depth
-          if (PvNode)
-              r -= 1 + (depth < thisThread->selDepth / 2) + 11 / (3 + depth) + !ss->ttHit;
-
-          // Decrease reduction if ttMove has been singularly extended (~1 Elo)
-          if (singularQuietLMR)
-              r -= 1 + (ss->ttPv && !PvNode);
-
-          // Decrease reduction if we move a threatened piece (~1 Elo)
-          if (   depth > 9
-              && (mp.threatenedPieces & from_sq(move)))
-              r--;
-
-          // Increase reduction if next ply has a lot of fail high
-          if ((ss+1)->cutoffCnt > 3 && (!capture || (capture && PvNode && ss->ttHit)))
-              r++;
-
-          if (bestValue >= VALUE_TB_WIN_IN_MAX_PLY)
-              r++;
-
-          if (    ss->ply >= 8
-              && !(ss-8)->ttPv
-              &&  givesCheck)
-              r--;
-
-          if (   !capture
-              && (move == (ss+2)->killers[0] || move == (ss+2)->killers[1])
-              &&  move != ss->killers[0]
-              &&  move != ss->killers[1])
-              r--;
-
-          ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
-                         + (*contHist[0])[movedPiece][to_sq(move)]
-                         + (*contHist[1])[movedPiece][to_sq(move)]
-                         + (*contHist[3])[movedPiece][to_sq(move)]
-                         - 4433;
-
-          // Decrease/increase reduction for moves with a good/bad history (~30 Elo)
-          r -= ss->statScore / (13000 + 4152 * (depth > 7 && depth < 19));
-
           // In general we want to cap the LMR depth search at newDepth, but when
           // reduction is negative, we allow this move a limited search extension
           // beyond the first move depth. This may lead to hidden double extensions.
@@ -1296,7 +1296,7 @@ moves_loop: // When in check, search starts here
       // Step 18. Full depth search when LMR is skipped
       else if (!PvNode || moveCount > 1)
       {
-              value = -search<NonPV>(pos, ss+1, -(alpha+1), -alpha, newDepth, !cutNode);
+              value = -search<NonPV>(pos, ss+1, -(alpha+1), -alpha, newDepth - (r > 4), !cutNode);
       }
 
       if (value > beta)
