@@ -1447,7 +1447,9 @@ moves_loop: // When in check, search starts here
                           || cutNode
                           || givesCheck;
 
-        update_continuation_histories(ss-1, pos.piece_on(prevSq), prevSq, stat_bonus(depth) * (1 + extraBonus));
+        bool doubleExtraBonus = extraBonus && bestValue < alpha - 85 * depth;
+
+        update_continuation_histories(ss-1, pos.piece_on(prevSq), prevSq, stat_bonus(depth) * (1 + extraBonus + doubleExtraBonus));
     }
 
     if (PvNode)
