@@ -1444,8 +1444,7 @@ moves_loop: // When in check, search starts here
         //Assign extra bonus if current node is PvNode or cutNode
         //or fail low was really bad
         bool extraBonus =    PvNode
-                          || cutNode
-                          || givesCheck;
+                          || cutNode;
 
         bool doubleExtraBonus = extraBonus && bestValue < alpha - 85 * depth;
 
