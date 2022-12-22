@@ -1238,7 +1238,7 @@ moves_loop: // When in check, search starts here
       // We use various heuristics for the sons of a node after the first son has
       // been searched. In general we would like to reduce them, but there are many
       // cases where we extend a son if it has good chances to be "interesting".
-      if (    depth >= 1 + (PvNode || givesCheck || cutNode)
+      if (    depth >= 1 + (PvNode || givesCheck || (cutNode && move == ss->killers[0]))
           && moveCount > 1 + (PvNode && ss->ply <= 1 && !ss->inCheck)
           && (   !ss->ttPv
               || !capture
