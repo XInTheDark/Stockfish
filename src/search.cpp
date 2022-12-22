@@ -1194,6 +1194,9 @@ moves_loop: // When in check, search starts here
       if (ttCapture)
           r++;
 
+      else if (ttMove && (mp.threatenedPieces & from_sq(ttMove)))
+          r++;
+
       // Decrease reduction for PvNodes based on depth
       if (PvNode)
           r -= 1 + (depth < thisThread->selDepth / 2) + 11 / (3 + depth) + !ss->ttHit;
