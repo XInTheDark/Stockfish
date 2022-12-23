@@ -1059,7 +1059,7 @@ moves_loop: // When in check, search starts here
 
               if (value < singularBeta)
               {
-                  extension = 1;
+//                  extension = 1;
                   singularQuietLMR = !ttCapture;
 
                   // Avoid search explosion by limiting the number of double extensions
@@ -1067,8 +1067,7 @@ moves_loop: // When in check, search starts here
                       && value < singularBeta - 25
                       && ss->doubleExtensions <= 10)
                   {
-                      extension = 2;
-                      depth += depth < 12;
+                      extension = 1;
                   }
               }
 
@@ -1090,17 +1089,17 @@ moves_loop: // When in check, search starts here
           }
 
           // Check extensions (~1 Elo)
-          else if (   givesCheck
-                   && depth > 9
-                   && abs(ss->staticEval) > 82)
-              extension = 1;
+//          else if (   givesCheck
+//                   && depth > 9
+//                   && abs(ss->staticEval) > 82)
+//              extension = 1;
 
           // Quiet ttMove extensions (~0 Elo)
-          else if (   PvNode
-                   && move == ttMove
-                   && move == ss->killers[0]
-                   && (*contHist[0])[movedPiece][to_sq(move)] >= 5177)
-              extension = 1;
+//          else if (   PvNode
+//                   && move == ttMove
+//                   && move == ss->killers[0]
+//                   && (*contHist[0])[movedPiece][to_sq(move)] >= 5177)
+//              extension = 1;
       }
 
       // Add extension to new depth
@@ -1124,13 +1123,13 @@ moves_loop: // When in check, search starts here
 
       // Decrease reduction if position is or has been on the PV
       // and node is not likely to fail low. (~3 Elo)
-      if (   ss->ttPv
-          && !likelyFailLow)
-          r -= 2;
+//      if (   ss->ttPv
+//          && !likelyFailLow)
+//          r -= 2;
 
       // Decrease reduction if opponent's move count is high (~1 Elo)
-      if ((ss-1)->moveCount > 7)
-          r--;
+//      if ((ss-1)->moveCount > 7)
+//          r--;
 
       // Increase reduction for cut nodes (~3 Elo)
       if (cutNode)
@@ -1142,16 +1141,16 @@ moves_loop: // When in check, search starts here
 
       // Decrease reduction for PvNodes based on depth
       if (PvNode)
-          r -= 1 + 11 / (3 + depth);
+          r -= 1;
 
       // Decrease reduction if ttMove has been singularly extended (~1 Elo)
-      if (singularQuietLMR)
-          r--;
+//      if (singularQuietLMR)
+//          r--;
 
       // Decrease reduction if we move a threatened piece (~1 Elo)
-      if (   depth > 9
-          && (mp.threatenedPieces & from_sq(move)))
-          r--;
+//      if (   depth > 9
+//          && (mp.threatenedPieces & from_sq(move)))
+//          r--;
 
       // Increase reduction if next ply has a lot of fail high
       if ((ss+1)->cutoffCnt > 3)
