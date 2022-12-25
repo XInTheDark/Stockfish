@@ -992,7 +992,8 @@ moves_loop: // When in check, search starts here
           int lmrDepth = std::max(newDepth - reduction(improving, depth, moveCount, delta, thisThread->rootDelta), 0);
 
           if (   capture
-              || givesCheck)
+              || givesCheck
+              || depth > 9)
           {
               // Futility pruning for captures (~2 Elo)
               if (   !givesCheck
