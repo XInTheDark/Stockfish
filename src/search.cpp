@@ -765,7 +765,7 @@ namespace {
                   : (ss-4)->staticEval != VALUE_NONE ? ss->staticEval - (ss-4)->staticEval
                   :                                    168;
     improving = (improvement > 0 || (improvement > -10 && depth < 6))
-            && (depth < 9 || improvement > 10);
+            && (depth < 12 || improvement > 5);
 
     // Step 7. Razoring (~1 Elo).
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
