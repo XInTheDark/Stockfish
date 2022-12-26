@@ -1191,7 +1191,7 @@ moves_loop: // When in check, search starts here
               const bool doDeeperSearch = value > (alpha + 64 + 11 * (newDepth - d));
               const bool doEvenDeeperSearch = value > alpha + 582 && ss->doubleExtensions <= 5;
               const bool doShallowerSearch = value < bestValue + newDepth;
-              const bool doEvenShallowerSearch = value > alpha && value < alpha + 50;
+              const bool doEvenShallowerSearch = value > alpha && value < alpha + 50 && !improving;
 
               ss->doubleExtensions = ss->doubleExtensions + doEvenDeeperSearch;
 
