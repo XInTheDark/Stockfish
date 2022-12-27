@@ -551,7 +551,7 @@ namespace {
     Move ttMove, move, excludedMove, bestMove;
     Depth extension, newDepth;
     Value bestValue, value, ttValue, eval, maxValue, probCutBeta;
-    bool givesCheck, improving, priorCapture, singularQuietLMR;
+    bool givesCheck, improving, more_improving, priorCapture, singularQuietLMR;
     bool capture, moveCountPruning, ttCapture;
     Piece movedPiece;
     int moveCount, captureCount, quietCount, improvement, complexity;
@@ -765,6 +765,7 @@ namespace {
                   : (ss-4)->staticEval != VALUE_NONE ? ss->staticEval - (ss-4)->staticEval
                   :                                    168;
     improving = improvement > 0;
+    more_improving = improvement > std::clamp(depth - 4, -4, 14);
 
     // Step 7. Razoring (~1 Elo).
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
@@ -780,7 +781,7 @@ namespace {
     // The depth condition is important for mate finding.
     if (   !ss->ttPv
         &&  depth < 8
-        &&  eval - futility_margin(depth, improving) - (ss-1)->statScore / 303 >= beta
+        &&  eval - futility_margin(depth, improving + more_improving) - (ss-1)->statScore / 303 >= beta
         &&  eval >= beta
         &&  eval < 28031) // larger than VALUE_KNOWN_WIN, but smaller than TB wins
         return eval;
@@ -835,7 +836,7 @@ namespace {
         }
     }
 
-    probCutBeta = beta + 191 - 54 * improving;
+    probCutBeta = beta + 191 - 54 * improving - 27 * more_improving;
 
     // Step 10. ProbCut (~10 Elo)
     // If we have a good enough capture and a reduced search returns a value
@@ -986,10 +987,10 @@ moves_loop: // When in check, search starts here
           && bestValue > VALUE_TB_LOSS_IN_MAX_PLY)
       {
           // Skip quiet moves if movecount exceeds our FutilityMoveCount threshold (~8 Elo)
-          moveCountPruning = moveCount >= futility_move_count(improving, depth);
+          moveCountPruning = moveCount >= futility_move_count(improving + more_improving, depth);
 
           // Reduced depth of the next LMR search
-          int lmrDepth = std::max(newDepth - reduction(improving, depth, moveCount, delta, thisThread->rootDelta), 0);
+          int lmrDepth = std::max(newDepth - reduction(improving + more_improving, depth, moveCount, delta, thisThread->rootDelta), 0);
 
           if (   capture
               || givesCheck)
