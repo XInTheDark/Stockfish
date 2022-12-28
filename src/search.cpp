@@ -721,6 +721,7 @@ namespace {
         // Skip early pruning when in check
         ss->staticEval = eval = VALUE_NONE;
         improving = false;
+        more_improving = false;
         improvement = 0;
         complexity = 0;
         goto moves_loop;
