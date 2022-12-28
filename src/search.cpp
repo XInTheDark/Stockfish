@@ -398,7 +398,7 @@ void Thread::search() {
               // re-search, otherwise exit the loop.
               if (bestValue <= alpha)
               {
-                  beta = beta > 3 * alpha / 2 ? (alpha + beta) / 2 : alpha;
+                  beta = std::max(alpha * 2, (alpha + beta) / 2);
                   alpha = std::max(bestValue - delta, -VALUE_INFINITE);
 
                   failedHighCnt = 0;
@@ -413,7 +413,7 @@ void Thread::search() {
               else
                   break;
 
-              delta += delta / 4 + 2;
+              delta += 3 * delta / 8 + 2;
 
               assert(alpha >= -VALUE_INFINITE && beta <= VALUE_INFINITE);
           }
