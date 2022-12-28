@@ -976,7 +976,7 @@ moves_loop: // When in check, search starts here
       givesCheck = pos.gives_check(move);
 
       // Calculate new depth for this move
-      newDepth = depth - 1 - (ss->inCheck);
+      newDepth = depth - 1 - (ss->inCheck && (PvNode || cutNode));
 
       Value delta = beta - alpha;
 
