@@ -721,6 +721,7 @@ namespace {
         // Skip early pruning when in check
         ss->staticEval = eval = VALUE_NONE;
         improving = false;
+        more_improving = false;
         improvement = 0;
         complexity = 0;
         goto moves_loop;
@@ -765,7 +766,7 @@ namespace {
                   : (ss-4)->staticEval != VALUE_NONE ? ss->staticEval - (ss-4)->staticEval
                   :                                    168;
     improving = improvement > 0;
-    more_improving = improvement > std::clamp(depth - 4, -4, 14);
+    more_improving = improving && improvement > std::min(depth - 4, 14);
 
     // Step 7. Razoring (~1 Elo).
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
