@@ -767,8 +767,7 @@ namespace {
                   :                                    168;
     improving = improvement > 0;
     more_improving = improving &&
-            (improvement > std::max(2 * (depth - 4), 12)
-            || improvement > ss->staticEval / std::clamp(10 - depth / 5, 5, 10));
+            improvement > ss->staticEval / std::clamp(10 - depth / 5, 5, 10);
 
     // Step 7. Razoring (~1 Elo).
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
@@ -784,7 +783,7 @@ namespace {
     // The depth condition is important for mate finding.
     if (   !ss->ttPv
         &&  depth < 8
-        &&  eval - futility_margin(depth, improving + more_improving) - (ss-1)->statScore / 303 >= beta
+        &&  eval - futility_margin(depth, improving) - (ss-1)->statScore / 303 >= beta
         &&  eval >= beta
         &&  eval < 28031) // larger than VALUE_KNOWN_WIN, but smaller than TB wins
         return eval;
