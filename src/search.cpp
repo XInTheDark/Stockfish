@@ -768,7 +768,7 @@ namespace {
     improving = improvement > 0;
     more_improving = improving &&
             (improvement > std::max(2 * (depth - 4), 12)
-            || improvement > ss->staticEval / 10);
+            || improvement > ss->staticEval / std::clamp(10 - depth / 5, 5, 10));
 
     // Step 7. Razoring (~1 Elo).
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
