@@ -766,7 +766,9 @@ namespace {
                   : (ss-4)->staticEval != VALUE_NONE ? ss->staticEval - (ss-4)->staticEval
                   :                                    168;
     improving = improvement > 0;
-    more_improving = improvement > std::max(2 * (depth - 5), 10);
+    more_improving = improving &&
+            (improvement > std::max(2 * (depth - 4), 12)
+            || improvement > ss->staticEval / 10);
 
     // Step 7. Razoring (~1 Elo).
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
@@ -837,7 +839,7 @@ namespace {
         }
     }
 
-    probCutBeta = beta + 191 - 36 * improving - 18 * more_improving;
+    probCutBeta = beta + 191 - 27 * improving - 27 * more_improving;
 
     // Step 10. ProbCut (~10 Elo)
     // If we have a good enough capture and a reduced search returns a value
