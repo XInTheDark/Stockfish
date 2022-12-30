@@ -1450,7 +1450,7 @@ moves_loop: // When in check, search starts here
         return ttValue;
 
     // Evaluate the position statically
-    if (ss->inCheck && ss->killers[0] != ss->currentMove)
+    if (ss->inCheck && depth > 6)
     {
         ss->staticEval = VALUE_NONE;
         bestValue = futilityBase = -VALUE_INFINITE;
