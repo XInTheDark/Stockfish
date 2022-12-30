@@ -782,7 +782,7 @@ namespace {
     // The depth condition is important for mate finding.
     if (   !ss->ttPv
         &&  depth < 8
-        &&  eval - futility_margin(depth, improving + more_improving) - (ss-1)->statScore / 303 >= beta
+        &&  eval - futility_margin(depth, improving) - (ss-1)->statScore / 303 >= beta
         &&  eval >= beta
         &&  eval < 28031) // larger than VALUE_KNOWN_WIN, but smaller than TB wins
         return eval;
@@ -837,7 +837,7 @@ namespace {
         }
     }
 
-    probCutBeta = beta + 191 - 36 * improving - 18 * more_improving;
+    probCutBeta = beta + 191 - 27 * improving - 27 * more_improving;
 
     // Step 10. ProbCut (~10 Elo)
     // If we have a good enough capture and a reduced search returns a value
@@ -1149,6 +1149,9 @@ moves_loop: // When in check, search starts here
       // Decrease reduction if ttMove has been singularly extended (~1 Elo)
       if (singularQuietLMR)
           r--;
+
+      if (improving && !more_improving)
+          r++;
 
       // Decrease reduction if we move a threatened piece (~1 Elo)
       if (   depth > 9
