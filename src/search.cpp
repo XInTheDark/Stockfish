@@ -1450,7 +1450,7 @@ moves_loop: // When in check, search starts here
         return ttValue;
 
     // Evaluate the position statically
-    if (ss->inCheck && !PvNode)
+    if (ss->inCheck && (!PvNode || (ss-1)->inCheck))
     {
         ss->staticEval = VALUE_NONE;
         bestValue = futilityBase = -VALUE_INFINITE;
