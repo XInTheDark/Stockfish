@@ -1124,6 +1124,9 @@ moves_loop: // When in check, search starts here
 
       // Decrease reduction if position is or has been on the PV
       // and node is not likely to fail low. (~3 Elo)
+      if (!PvNode && !improving)
+          r++;
+
       if (   ss->ttPv
           && !likelyFailLow)
           r -= 2;
