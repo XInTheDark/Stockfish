@@ -765,8 +765,8 @@ namespace {
     improvement =   (ss-2)->staticEval != VALUE_NONE ? ss->staticEval - (ss-2)->staticEval
                   : (ss-4)->staticEval != VALUE_NONE ? ss->staticEval - (ss-4)->staticEval
                   :                                    168;
-    improving = improvement > 0;
-    more_improving = improvement > std::max(2 * (depth - 4), 12);
+    improving = improvement > depth - 4;
+    more_improving = improving && improvement > 2 * (depth - 4);
 
     // Step 7. Razoring (~1 Elo).
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
@@ -1149,9 +1149,6 @@ moves_loop: // When in check, search starts here
       // Decrease reduction if ttMove has been singularly extended (~1 Elo)
       if (singularQuietLMR)
           r--;
-
-      if (improving && !more_improving)
-          r++;
 
       // Decrease reduction if we move a threatened piece (~1 Elo)
       if (   depth > 9
