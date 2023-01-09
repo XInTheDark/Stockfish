@@ -1088,7 +1088,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   v = v * (200 - pos.rule50_count()) / 214;
 
   // Damp down evaluation even more if rule50 count is especially high
-  if (pos.rule50_count() > 80 - 30 * (pos.non_pawn_material() <= 2 * RookValueEg))
+  if (pos.rule50_count() > 80 - 20 * (pos.has_repeated()) - 20 * (pos.non_pawn_material() <= 2 * RookValueEg))
       v = v * (200 - pos.rule50_count()) / 214;
 
   // Guarantee evaluation does not hit the tablebase range
