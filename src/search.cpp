@@ -513,6 +513,17 @@ void Thread::search() {
 }
 
 
+int dds1 = 66, dds2 = 11, deds1 = 582, deds2 = 5;
+int dss1 = 0, dss2 = 1;
+int dess1 = 256, dess2 = 8, dess3 = 64, dess4 = 8, dess5 = 1;
+
+TUNE(dds1, dds2, deds1, dess1, dess2, dess3, dess4);
+
+TUNE(SetRange(0, 10), deds2);
+TUNE(SetRange(-500, 500), dss1);
+TUNE(SetRange(-20, 20), dss2);
+TUNE(SetRange(0, 10), dess5);
+
 namespace {
 
   // search<>() is the main search function for both PV and non-PV nodes
@@ -1191,13 +1202,16 @@ moves_loop: // When in check, search starts here
           {
               // Adjust full depth search based on LMR results - if result
               // was good enough search deeper, if it was bad enough search shallower
-              const bool doDeeperSearch = value > (alpha + 66 + 11 * (newDepth - d));
-              const bool doEvenDeeperSearch = value > alpha + 582 && ss->doubleExtensions <= 5;
-              const bool doShallowerSearch = value < bestValue + newDepth;
+              const bool doDeeperSearch = value > (alpha + dds1 + dds2 * (newDepth - d));
+              const bool doEvenDeeperSearch = value > alpha + deds1 && ss->doubleExtensions <= deds2;
+              const bool doShallowerSearch = value < bestValue + dss1 + dss2 * newDepth;
+              const bool doEvenShallowerSearch = doShallowerSearch && cutNode
+                      && (value < beta - dess1 - dess2 * newDepth || value < alpha + dess3 + dess4 * newDepth)
+                      && (ss-1)->cutoffCnt > dess5;
 
               ss->doubleExtensions = ss->doubleExtensions + doEvenDeeperSearch;
 
-              newDepth += doDeeperSearch - doShallowerSearch + doEvenDeeperSearch;
+              newDepth += doDeeperSearch - doShallowerSearch + doEvenDeeperSearch - doEvenShallowerSearch;
 
               if (newDepth > d)
                   value = -search<NonPV>(pos, ss+1, -(alpha+1), -alpha, newDepth, !cutNode);
