@@ -1081,7 +1081,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
 
           // If the evaluations differ by a lot, we scale down classicalWeight
           // depending on the difference.
-          classicalWeight = std::clamp(classicalWeight - (abs(nnue - v) - 150) / 5, 0, classicalWeight);
+          classicalWeight = std::clamp(classicalWeight - (abs(nnue - v) - 100) / 10, 0, classicalWeight);
 
           // Blend the two evaluations
           v = (v * classicalWeight + nnue * (100 - classicalWeight)) / 100;
