@@ -1062,8 +1062,8 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   {
       v = Evaluation<NO_TRACE>(pos).value();
 
-      int classicalWeight = std::min(100, pos.count<ALL_PIECES>() * 10 / 3 + abs(psq) / 150);
-      if (useNNUE && classicalWeight < 80)
+      int classicalWeight = std::min(100, pos.count<ALL_PIECES>() * 3 + pos.non_pawn_material() / 3000 + abs(psq) / 300 + abs(v) / 100);
+      if (useNNUE && classicalWeight < 80 && v != VALUE_DRAW && v != VALUE_MATE)
       {
           // NNUE eval
           int nnueComplexity;
