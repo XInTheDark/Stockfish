@@ -1062,7 +1062,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   {
       v = Evaluation<NO_TRACE>(pos).value();
 
-      if (useNNUE)
+      if (useNNUE && pos.count<ALL_PIECES>() < 25)
       {
           // NNUE eval
           int nnueComplexity;
