@@ -1074,7 +1074,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       v = nnue = (nnue * scale + optimism * (scale - 748)) / 1024;
 
       int classicalWeight = std::min(100, pos.count<ALL_PIECES>() + pos.non_pawn_material() / 3000 + abs(psq) / 200);
-      if (classicalWeight >= 20 && abs(nnue) > 100 && abs(nnue) < VALUE_MATE)
+      if (classicalWeight >= 20 && abs(nnue) > 200 && abs(nnue) < VALUE_MATE && optimism < 0)
       {
           // We blend classical eval with NNUE eval
           Value classical = Evaluation<NO_TRACE>(pos).value();
