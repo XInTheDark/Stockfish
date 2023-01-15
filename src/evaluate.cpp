@@ -1061,31 +1061,6 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   if (useClassical)
   {
       v = Evaluation<NO_TRACE>(pos).value();
-
-      int classicalWeight = std::min(100, pos.count<ALL_PIECES>() * 3 + pos.non_pawn_material() / 3000 + abs(psq) / 300 + abs(v) / 100);
-      if (useNNUE && classicalWeight < 80 && v != VALUE_DRAW && v != VALUE_MATE)
-      {
-          // NNUE eval
-          int nnueComplexity;
-          int scale = 1076 + 96 * pos.non_pawn_material() / 5120;
-          Color stm = pos.side_to_move();
-          Value optimism = pos.this_thread()->optimism[stm];
-
-          Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
-          nnueComplexity = (406 * nnueComplexity
-                            + 424 * abs(psq - nnue)
-                            + (optimism > 0 ? int(optimism) * int(psq - nnue) : 0)
-                           ) / 1024;
-          optimism = optimism * (272 + nnueComplexity) / 256;
-          nnue = (nnue * scale + optimism * (scale - 748)) / 1024;
-
-          // If the evaluations differ by a lot, we scale down classicalWeight
-          // depending on the difference.
-          classicalWeight = std::clamp(classicalWeight - (abs(nnue - v) - 100) / 10, 0, classicalWeight);
-
-          // Blend the two evaluations
-          v = (v * classicalWeight + nnue * (100 - classicalWeight)) / 100;
-      }
   }
   else
   {
@@ -1096,6 +1071,18 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       Value optimism = pos.this_thread()->optimism[stm];
 
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
+      v = nnue = (nnue * scale + optimism * (scale - 748)) / 1024;
+
+      int classicalWeight = std::min(100, pos.count<ALL_PIECES>() + pos.non_pawn_material() / 5000 + abs(psq) / 200);
+      if (classicalWeight >= 15 && nnue != VALUE_DRAW && nnue < VALUE_MATE)
+      {
+          // We blend classical eval with NNUE eval
+          Value classical = Evaluation<NO_TRACE>(pos).value();
+          classicalWeight = std::clamp(classicalWeight - (abs(nnue - classical) - 100) / 10, 0, classicalWeight + 10);
+
+          // Blend the two evaluations
+          v = (classical * classicalWeight + nnue * (100 - classicalWeight)) / 100;
+      }
 
       // Blend nnue complexity with (semi)classical complexity
       nnueComplexity = (  406 * nnueComplexity
@@ -1108,7 +1095,6 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
           *complexity = nnueComplexity;
 
       optimism = optimism * (272 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 748)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
