@@ -1079,12 +1079,12 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
           optimism = optimism * (272 + nnueComplexity) / 256;
           nnue = (nnue * scale + optimism * (scale - 748)) / 1024;
 
-          // if the NNUE and classical evaluations differ by a lot, we use the classical eval
-          if (abs(nnue - v) < 250)
-              // Blend the two evaluations
-              v = (v * classicalWeight + nnue * (100 - classicalWeight)) / 100;
-          else
-              v = nnue;
+          // If the evaluations differ by a lot, we scale down classicalWeight
+          // depending on the difference.
+          classicalWeight = std::clamp(classicalWeight - (abs(nnue - v) - 150) / 5, 0, classicalWeight);
+
+          // Blend the two evaluations
+          v = (v * classicalWeight + nnue * (100 - classicalWeight)) / 100;
       }
   }
   else
