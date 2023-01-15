@@ -1079,7 +1079,8 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
           nnue = (nnue * scale + optimism * (scale - 748)) / 1024;
 
           // Blend the two evaluations
-          int classicalWeight = std::min(100, pos.count<ALL_PIECES>() * 7);
+          // when there are 15 pieces, it should be 50% classical, 50% NNUE
+          int classicalWeight = std::min(100, pos.count<ALL_PIECES>() * 10 / 3);
           v = (v * classicalWeight + nnue * (100 - classicalWeight)) / 100;
       }
   }
