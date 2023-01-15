@@ -1083,6 +1083,8 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
           if (abs(nnue - v) < 250)
               // Blend the two evaluations
               v = (v * classicalWeight + nnue * (100 - classicalWeight)) / 100;
+          else
+              v = nnue;
       }
   }
   else
