@@ -1059,7 +1059,30 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > 1781);
 
   if (useClassical)
+  {
       v = Evaluation<NO_TRACE>(pos).value();
+
+      int classicalWeight = std::min(100, pos.count<ALL_PIECES>() * 10 / 3 + abs(psq) / 150);
+      if (useNNUE && classicalWeight < 80)
+      {
+          // NNUE eval
+          int nnueComplexity;
+          int scale = 1076 + 96 * pos.non_pawn_material() / 5120;
+          Color stm = pos.side_to_move();
+          Value optimism = pos.this_thread()->optimism[stm];
+
+          Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
+          nnueComplexity = (406 * nnueComplexity
+                            + 424 * abs(psq - nnue)
+                            + (optimism > 0 ? int(optimism) * int(psq - nnue) : 0)
+                           ) / 1024;
+          optimism = optimism * (272 + nnueComplexity) / 256;
+          nnue = (nnue * scale + optimism * (scale - 748)) / 1024;
+
+          // Blend the two evaluations
+          v = (v * classicalWeight + nnue * (100 - classicalWeight)) / 100;
+      }
+  }
   else
   {
       int nnueComplexity;
