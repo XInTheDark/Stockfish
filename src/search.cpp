@@ -1036,7 +1036,7 @@ moves_loop: // When in check, search starts here
           }
       }
 
-      playStrongMove = move == ttMove || move == ss->killers[0] || move == ss->killers[1];
+      playStrongMove = move == ttMove || move == ss->killers[0] || move == ss->killers[1] || ((capture || givesCheck) && abs(ss->staticEval) < 500);
 
       // Step 15. Extensions (~100 Elo)
       // We take care to not overdo to avoid search getting stuck.
@@ -1149,7 +1149,7 @@ moves_loop: // When in check, search starts here
       if (ttCapture)
           r++;
 
-      if (moveCount > 2 && !playStrongMove && PvNode)
+      if (moveCount > 2 && !playStrongMove && PvNode && depth > 9)
           r--;
 
       // Decrease reduction for PvNodes based on depth
