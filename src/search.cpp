@@ -1108,7 +1108,7 @@ moves_loop: // When in check, search starts here
                    && (*contHist[0])[movedPiece][to_sq(move)] >= 5600)
               extension = 1;
 
-          if (!cutNode && depth > 9 && playStrongMove && !capture && !givesCheck && abs(ss->staticEval) < 500)
+          if (!cutNode && depth > 9 && playStrongMove && abs(ss->staticEval) < 500)
               extension--;
       }
 
