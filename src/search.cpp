@@ -1107,9 +1107,6 @@ moves_loop: // When in check, search starts here
                    && move == ss->killers[0]
                    && (*contHist[0])[movedPiece][to_sq(move)] >= 5600)
               extension = 1;
-
-          if (!PvNode && depth > 9 && playStrongMove && !capture && !givesCheck && abs(ss->staticEval) < 500)
-              extension--;
       }
 
       // Add extension to new depth
@@ -1150,7 +1147,7 @@ moves_loop: // When in check, search starts here
           r++;
 
       if (moveCount > 2 && !playStrongMove && PvNode && depth > 9)
-          r--;
+          r -= 1 + (improvement > 200 + 3 * depth);
 
       // Decrease reduction for PvNodes based on depth
       if (PvNode)
