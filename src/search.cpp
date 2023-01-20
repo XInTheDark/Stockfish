@@ -1215,11 +1215,23 @@ moves_loop: // When in check, search starts here
       // Step 18. Full depth search when LMR is skipped. If expected reduction is high, reduce its depth by 1.
       else if (!PvNode || moveCount > 1)
       {
-               // Increase reduction for cut nodes and not ttMove (~1 Elo)
-               if (!ttMove && cutNode)
-                         r += 2;
+          // Increase reduction for cut nodes and not ttMove (~1 Elo)
+          if (!ttMove && cutNode)
+              r += 2;
 
-               value = -search<NonPV>(pos, ss+1, -(alpha+1), -alpha, newDepth - (r > 4), !cutNode);
+          if (   !PvNode
+              && !cutNode
+              && ss->ttPv
+//              && !improving
+              && type_of(pos.captured_piece()) == PAWN
+              && (ss-1)->currentMove != MOVE_NULL
+              && ttMove
+              && eval <= alpha
+              && type_of(movedPiece) != PAWN
+              && type_of(movedPiece) != QUEEN)
+              r += 1 + !improving;
+
+          value = -search<NonPV>(pos, ss+1, -(alpha+1), -alpha, newDepth - (r > 4), !cutNode);
       }
 
       // For PV nodes only, do a full PV search on the first move or after a fail
