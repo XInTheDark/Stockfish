@@ -1146,9 +1146,6 @@ moves_loop: // When in check, search starts here
       if (ttCapture)
           r++;
 
-      if (moveCount > 2 && !playStrongMove && PvNode && depth > 9)
-          r -= 1 + (improvement > 200 + 3 * depth);
-
       // Decrease reduction for PvNodes based on depth
       if (PvNode)
           r -= 1 + 11 / (3 + depth);
@@ -1161,6 +1158,11 @@ moves_loop: // When in check, search starts here
       if (   depth > 9
           && (mp.threatenedPieces & from_sq(move)))
           r--;
+
+      if (moveCount > 2 && !playStrongMove && !cutNode && depth > 9)
+          r -= 1 + (PvNode && improving && depth > 12) - (r < 0);
+      else if (playStrongMove)
+          r += 1 + (r < 1) + !improving - PvNode;
 
       // Increase reduction if next ply has a lot of fail high
       if ((ss+1)->cutoffCnt > 3)
