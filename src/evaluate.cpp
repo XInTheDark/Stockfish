@@ -1081,6 +1081,9 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
           *complexity = nnueComplexity;
 
       optimism = optimism * (272 + nnueComplexity) / 256;
+      if (optimism < 0)
+          optimism /= 3;
+
       v = (nnue * scale + optimism * (scale - 748)) / 1024;
   }
 
