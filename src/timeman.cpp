@@ -71,9 +71,17 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   // Use extra time with larger increments
   double optExtra = std::clamp(1.0 + 12.0 * limits.inc[us] / limits.time[us], 1.0, 1.12);
 
+  double timeBonus = 1.0
+          + 0.025 * log10((double) limits.time[us] / 1000 + 0.000001) / 2 // Time bonus (log100) (-~0.075 for 0 time)
+          + 0.025 * Options["UCI_Chess960"] // Chess960 bonus
+          + 0.2 * log10((double) timeLeft / limits.time[us] + 0.000001) // Time loss penalty
+          + 0.01 * log10((double) limits.inc[us] + 0.000001) / log10(50); // increment bonus (-~0.035 for 0 inc)
+
+  timeBonus = std::clamp(timeBonus, 0.75, 1.15);
+
   // A user may scale time usage by setting UCI option "Slow Mover"
   // Default is 100 and changing this value will probably lose elo.
-  timeLeft = slowMover * timeLeft / 100;
+  timeLeft = slowMover * timeLeft * timeBonus / 100;
 
   // x basetime (+ z increment)
   // If there is a healthy increment, timeLeft can exceed actual available
