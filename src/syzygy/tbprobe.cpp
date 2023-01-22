@@ -1,6 +1,6 @@
 /*
   Stockfish, a UCI chess playing engine derived from Glaurung 2.1
-  Copyright (C) 2004-2022 The Stockfish developers (see AUTHORS file)
+  Copyright (C) 2004-2023 The Stockfish developers (see AUTHORS file)
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -24,9 +24,10 @@
 #include <fstream>
 #include <iostream>
 #include <list>
-#include <sstream>
-#include <type_traits>
 #include <mutex>
+#include <sstream>
+#include <string_view>
+#include <type_traits>
 
 #include "../bitboard.h"
 #include "../movegen.h"
@@ -70,7 +71,7 @@ enum TBFlag { STM = 1, Mapped = 2, WinPlies = 4, LossPlies = 8, Wide = 16, Singl
 inline WDLScore operator-(WDLScore d) { return WDLScore(-int(d)); }
 inline Square operator^(Square s, int i) { return Square(int(s) ^ i); }
 
-const std::string PieceToChar = " PNBRQK  pnbrqk";
+constexpr std::string_view PieceToChar = " PNBRQK  pnbrqk";
 
 int MapPawns[SQUARE_NB];
 int MapB1H1H7[SQUARE_NB];
@@ -199,13 +200,10 @@ public:
         }
     }
 
-    // Memory map the file and check it. File should be already open and will be
-    // closed after mapping.
+    // Memory map the file and check it.
     uint8_t* map(void** baseAddress, uint64_t* mapping, TBType type) {
-
-        assert(is_open());
-
-        close(); // Need to re-open to get native file descriptor
+        if (is_open())
+            close(); // Need to re-open to get native file descriptor
 
 #ifndef _WIN32
         struct stat statbuf;
