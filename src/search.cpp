@@ -1143,6 +1143,9 @@ moves_loop: // When in check, search starts here
       if (ttCapture)
           r++;
 
+      if (!cutNode && depth < 12 && thisThread->bestMoveChanges > (2 + improving))
+          r--;
+
       // Decrease reduction for PvNodes based on depth
       if (PvNode)
           r -= 1 + 11 / (3 + depth);
