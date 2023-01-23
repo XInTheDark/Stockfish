@@ -101,7 +101,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
   if (timeLeft < 15 * 1000)
   {
-      optScale = std::min(optScale, (150 + limits.inc[us]) / timeLeft);
+      optScale = std::min(optScale, (150 + double(limits.inc[us])) / timeLeft);
   }
 
   // Never use more than 80% of the available time for this move
