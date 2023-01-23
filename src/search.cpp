@@ -1146,7 +1146,7 @@ moves_loop: // When in check, search starts here
       if (ttCapture)
           r++;
 
-      if (move == ss->killers[0])
+      if (move == ttMove || move == ss->killers[0])
           r -= 1 + (PvNode && improving);
 
       // Decrease reduction for PvNodes based on depth
