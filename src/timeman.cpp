@@ -80,6 +80,9 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
               ) / 100 * slowMover * timeLeft / 100
               );
 
+  if (timeLeft < 15 * 1000)
+      timeLeft = std::min(timeLeft, 150 + limits.inc[us]);
+
   // x basetime (+ z increment)
   // If there is a healthy increment, timeLeft can exceed actual available
   // game time for the current move, so also cap to 20% of available game time.
