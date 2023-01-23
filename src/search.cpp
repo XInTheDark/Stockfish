@@ -555,7 +555,7 @@ namespace {
     Depth extension, newDepth;
     Value bestValue, value, ttValue, eval, maxValue, probCutBeta;
     bool givesCheck, improving, priorCapture, singularQuietLMR;
-    bool capture, moveCountPruning, ttCapture;
+    bool capture, moveCountPruning, ttCapture, playStrongMove;
     Piece movedPiece;
     int moveCount, captureCount, quietCount, improvement, complexity;
 
@@ -934,7 +934,7 @@ moves_loop: // When in check, search starts here
                                       ss->killers);
 
     value = bestValue;
-    moveCountPruning = singularQuietLMR = false;
+    moveCountPruning = singularQuietLMR = playStrongMove = false;
 
     // Indicate PvNodes that will probably fail low if the node was searched
     // at a depth equal or greater than the current depth, and the result of this search was a fail low.
@@ -1037,22 +1037,20 @@ moves_loop: // When in check, search starts here
 
       // Step 15. Extensions (~100 Elo)
       // We take care to not overdo to avoid search getting stuck.
-      if (ss->ply < thisThread->rootDepth * 2)
-      {
+      if (ss->ply < thisThread->rootDepth * 2) {
           // Singular extension search (~94 Elo). If all moves but one fail low on a
           // search of (alpha-s, beta-s), and just one fails high on (alpha, beta),
           // then that move is singular and should be extended. To verify this we do
           // a reduced search on all the other moves but the ttMove and if the
           // result is lower than ttValue minus a margin, then we will extend the ttMove.
-          if (   !rootNode
-              &&  depth >= 4 - (thisThread->previousDepth > 24) + 2 * (PvNode && tte->is_pv())
-              &&  move == ttMove
+          if (!rootNode
+              && depth >= 4 - (thisThread->previousDepth > 24) + 2 * (PvNode && tte->is_pv())
+              && move == ttMove
               && !excludedMove // Avoid recursive singular search
-           /* &&  ttValue != VALUE_NONE Already implicit in the next condition */
-              &&  abs(ttValue) < VALUE_KNOWN_WIN
+              /* &&  ttValue != VALUE_NONE Already implicit in the next condition */
+              && abs(ttValue) < VALUE_KNOWN_WIN
               && (tte->bound() & BOUND_LOWER)
-              &&  tte->depth() >= depth - 3)
-          {
+              && tte->depth() >= depth - 3) {
               Value singularBeta = ttValue - (3 + (ss->ttPv && !PvNode)) * depth;
               Depth singularDepth = (depth - 1) / 2;
 
@@ -1060,51 +1058,51 @@ moves_loop: // When in check, search starts here
               value = search<NonPV>(pos, ss, singularBeta - 1, singularBeta, singularDepth, cutNode);
               ss->excludedMove = MOVE_NONE;
 
-              if (value < singularBeta)
-              {
+              if (value < singularBeta) {
                   extension = 1;
                   singularQuietLMR = !ttCapture;
 
                   // Avoid search explosion by limiting the number of double extensions
-                  if (  !PvNode
+                  if (!PvNode
                       && value < singularBeta - 25
-                      && ss->doubleExtensions <= 10)
-                  {
+                      && ss->doubleExtensions <= 10) {
                       extension = 2;
                       depth += depth < 12;
                   }
               }
 
-              // Multi-cut pruning
-              // Our ttMove is assumed to fail high, and now we failed high also on a reduced
-              // search without the ttMove. So we assume this expected Cut-node is not singular,
-              // that multiple moves fail high, and we can prune the whole subtree by returning
-              // a soft bound.
+                  // Multi-cut pruning
+                  // Our ttMove is assumed to fail high, and now we failed high also on a reduced
+                  // search without the ttMove. So we assume this expected Cut-node is not singular,
+                  // that multiple moves fail high, and we can prune the whole subtree by returning
+                  // a soft bound.
               else if (singularBeta >= beta)
                   return singularBeta;
 
-              // If the eval of ttMove is greater than beta, we reduce it (negative extension)
+                  // If the eval of ttMove is greater than beta, we reduce it (negative extension)
               else if (ttValue >= beta)
                   extension = -2;
 
-              // If the eval of ttMove is less than alpha and value, we reduce it (negative extension)
+                  // If the eval of ttMove is less than alpha and value, we reduce it (negative extension)
               else if (ttValue <= alpha && ttValue <= value)
                   extension = -1;
           }
 
-          // Check extensions (~1 Elo)
-          else if (   givesCheck
+              // Check extensions (~1 Elo)
+          else if (givesCheck
                    && depth > 9
                    && abs(ss->staticEval) > 78)
               extension = 1;
 
-          // Quiet ttMove extensions (~1 Elo)
-          else if (   PvNode
+              // Quiet ttMove extensions (~1 Elo)
+          else if (PvNode
                    && move == ttMove
                    && move == ss->killers[0]
                    && (*contHist[0])[movedPiece][to_sq(move)] >= 5600)
               extension = 1;
       }
+
+      playStrongMove = move == ss->killers[0] || move == ss->killers[1];
 
       // Add extension to new depth
       newDepth += extension;
@@ -1142,6 +1140,9 @@ moves_loop: // When in check, search starts here
       // Increase reduction if ttMove is a capture (~3 Elo)
       if (ttCapture)
           r++;
+
+      if (!playStrongMove && PvNode)
+          r--;
 
       // Decrease reduction for PvNodes based on depth
       if (PvNode)
