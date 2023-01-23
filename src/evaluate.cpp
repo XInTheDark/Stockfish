@@ -1050,8 +1050,8 @@ make_v:
 
 int scale1 = 1076, scale2 = 96, scale3 = 0;
 int nnueC1 = 406, nnueC2 = 424, nnueC3 = 0;
-int opt1 = 272, opt2 = 256;
-int v1 = 748, v2 = 1024;
+int opt1 = 272;
+int v1 = 748;
 
 TUNE(scale1, scale2);
 TUNE(SetRange(-1024, 1024), scale3);
@@ -1059,9 +1059,9 @@ TUNE(SetRange(-1024, 1024), scale3);
 TUNE(nnueC1, nnueC2);
 TUNE(SetRange(-100, 100), nnueC3);
 
-TUNE(opt1, opt2);
+TUNE(opt1);
 
-TUNE(v1, v2);
+TUNE(v1);
 
 
 Value Eval::evaluate(const Position& pos, int* complexity) {
@@ -1096,8 +1096,8 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (opt1 + nnueComplexity) / opt2;
-      v = (nnue * scale + optimism * (scale - v1)) / v2;
+      optimism = optimism * (opt1 + nnueComplexity) / 256;
+      v = (nnue * scale + optimism * (scale - v1)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
