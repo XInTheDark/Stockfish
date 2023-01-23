@@ -1147,9 +1147,7 @@ moves_loop: // When in check, search starts here
           r++;
 
       if (move == ss->killers[0])
-          r -= 1 + improving;
-      else if (move == ss->killers[1])
-          r--;
+          r -= 1 + (PvNode && improving);
 
       // Decrease reduction for PvNodes based on depth
       if (PvNode)
