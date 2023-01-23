@@ -73,7 +73,12 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
   // A user may scale time usage by setting UCI option "Slow Mover"
   // Default is 100 and changing this value will probably lose elo.
-  timeLeft = slowMover * timeLeft / 100;
+  timeLeft = (int) (
+          (90 + 1.5 * log10(limits.time[us] / 1000000 + 0.05) / log10(2.5)
+              + 0.5 * log10(limits.inc[us] + 0.05)
+              + 0.75 * log10(timeLeft + 0.05) / log10(5.0)
+              ) / 100 * slowMover * timeLeft / 100
+              );
 
   // x basetime (+ z increment)
   // If there is a healthy increment, timeLeft can exceed actual available
@@ -92,6 +97,11 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
       optScale = std::min((0.88 + ply / 116.4) / mtg,
                             0.88 * limits.time[us] / double(timeLeft));
       maxScale = std::min(6.3, 1.5 + 0.11 * mtg);
+  }
+
+  if (timeLeft < 15 * 1000)
+  {
+      optScale = std::min(optScale, (150 + double(limits.inc[us])) / timeLeft);
   }
 
   // Never use more than 80% of the available time for this move
