@@ -1197,11 +1197,9 @@ moves_loop: // When in check, search starts here
               const bool doDeeperSearch = value > (alpha + 63 + 11 * (newDepth - d));
               const bool doEvenDeeperSearch = value > alpha + 584 && ss->doubleExtensions <= 5;
               const bool doShallowerSearch = value < bestValue + 19;
-              const bool doEvenShallowerSearch = (cutNode && (ss-1)->cutoffCnt > 1 && depth > 9)
-                      || (    PvNode
-                              && (value > beta - 128 - 8 * newDepth || value < alpha + 128 + 8 * newDepth)
-                              && thisThread->bestMoveChanges < 3
-                      );
+              const bool doEvenShallowerSearch = !doEvenDeeperSearch && PvNode
+                              && (value > beta - 64 - 8 * newDepth || value < alpha + 64 + 8 * newDepth)
+                              && thisThread->bestMoveChanges < 3;
 
               ss->doubleExtensions = ss->doubleExtensions + doEvenDeeperSearch;
 
