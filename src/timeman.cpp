@@ -71,17 +71,14 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   // Use extra time with larger increments
   double optExtra = std::clamp(1.0 + 12.0 * limits.inc[us] / limits.time[us], 1.0, 1.12);
 
-  double timeBonus = 1.0
-          + 0.025 * log10((double) limits.time[us] / 1000 + 0.000001) / 2 // Time bonus (log100) (-~0.075 for 0 time)
-          + 0.025 * Options["UCI_Chess960"] // Chess960 bonus
-          + 0.2 * log10((double) timeLeft / limits.time[us] + 0.000001) // Time loss penalty
-          + 0.01 * log10((double) limits.inc[us] + 0.000001) / log10(50); // increment bonus (-~0.035 for 0 inc)
-
-  timeBonus = std::clamp(timeBonus, 0.75, 1.15);
-
   // A user may scale time usage by setting UCI option "Slow Mover"
   // Default is 100 and changing this value will probably lose elo.
-  timeLeft = slowMover * timeLeft * timeBonus / 100;
+  timeLeft = (int) (
+          (90 + 1.5 * log10(limits.time[us] / 1000000 + 0.05) / log10(2.5)
+              + 0.5 * log10(limits.inc[us] + 0.05)
+              + 0.75 * log10(timeLeft + 0.05) / log10(5.0)
+              ) / 100 * slowMover * timeLeft / 100
+              );
 
   // x basetime (+ z increment)
   // If there is a healthy increment, timeLeft can exceed actual available
@@ -100,6 +97,11 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
       optScale = std::min((0.88 + ply / 116.4) / mtg,
                             0.88 * limits.time[us] / double(timeLeft));
       maxScale = std::min(6.3, 1.5 + 0.11 * mtg);
+  }
+
+  if (timeLeft < 15 * 1000)
+  {
+      optScale = std::min(optScale, (150 + double(limits.inc[us])) / timeLeft);
   }
 
   // Never use more than 80% of the available time for this move
