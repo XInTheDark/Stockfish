@@ -262,9 +262,6 @@ void MainThread::search() {
 /// repeatedly with increasing depth until the allocated thinking time has been
 /// consumed, the user stops the search, or the maximum search depth is reached.
 
-int opt3 = 116, opt4 = 170;
-TUNE(opt3, opt4);
-
 void Thread::search() {
 
   // To allow access to (ss-7) up to (ss+2), the stack must be oversized.
@@ -365,7 +362,7 @@ void Thread::search() {
               beta  = std::min(prev + delta, VALUE_INFINITE);
 
               // Adjust optimism based on root move's previousScore
-              int opt = opt3 * prev / (std::abs(prev) + opt4);
+              int opt = 110 * prev / (std::abs(prev) + 165);
               optimism[ us] = Value(opt);
               optimism[~us] = -optimism[us];
           }
