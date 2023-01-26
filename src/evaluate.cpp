@@ -1087,6 +1087,11 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   // Damp down the evaluation linearly when shuffling
   v = v * (200 - pos.rule50_count()) / 214;
 
+  // If best move changes many times and there is no decisive advantage,
+  // damp down the evaluation
+  if (abs(to_cp(v)) < 100)
+      v = v * (100 - (int) pos.this_thread()->bestMoveChanges * 10) / 100;
+
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
 
