@@ -1081,6 +1081,10 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
           *complexity = nnueComplexity;
 
       optimism = optimism * (272 + nnueComplexity) / 256;
+
+      // If best move changes many times, reduce optimism
+      optimism = optimism * (256 - (int) pos.this_thread()->bestMoveChanges * 16) / 256;
+
       v = (nnue * scale + optimism * (scale - 748)) / 1024;
   }
 
