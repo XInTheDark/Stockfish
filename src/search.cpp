@@ -1159,6 +1159,11 @@ moves_loop: // When in check, search starts here
       if (singularQuietLMR)
           r--;
 
+      // Decrease reduction if ttMove is a killer and we have a good history
+      if ((ttMove == ss->killers[0] || ttMove == ss->killers[1])
+          && (*contHist[0])[movedPiece][to_sq(move)] >= 5600)
+          r--;
+
       // Decrease reduction if we move a threatened piece (~1 Elo)
       if (   depth > 9
           && (mp.threatenedPieces & from_sq(move)))
