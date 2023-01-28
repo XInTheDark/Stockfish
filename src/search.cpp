@@ -1169,7 +1169,7 @@ moves_loop: // When in check, search starts here
           r++;
 
       if (PvNode && thisThread->complexityAverage.value() < 200)
-          r += thisThread->complexityAverage.value() / 64;
+          r += 4 - thisThread->complexityAverage.value() / 64;
 
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
                      + (*contHist[0])[movedPiece][to_sq(move)]
