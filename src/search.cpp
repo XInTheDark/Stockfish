@@ -1100,6 +1100,12 @@ moves_loop: // When in check, search starts here
                   extension = -1;
           }
 
+          // Extend if best move changes a lot
+          else if (   thisThread->bestMoveChanges > 1
+                   && depth > 9
+                   && abs(ss->staticEval) > 78)
+              extension = 1;
+
           // Check extensions (~1 Elo)
           else if (   givesCheck
                    && depth > 9
