@@ -1056,7 +1056,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive and several pieces remain. (~3 Elo)
-  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > 1781);
+  bool useClassical = !useNNUE;
 
   if (useClassical)
   {
@@ -1071,18 +1071,6 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       Value optimism = pos.this_thread()->optimism[stm];
 
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
-      v = nnue = (nnue * scale + optimism * (scale - 748)) / 1024;
-
-      int classicalWeight = std::min(100, pos.count<ALL_PIECES>() + pos.non_pawn_material() / 3000 + abs(psq) / 200);
-      if (classicalWeight >= 25 && pos.count<ALL_PIECES>() <= 16 && abs(to_cp(nnue)) > 75 - 25 * Options["UCI_Chess960"] && abs(nnue) < VALUE_MATE)
-      {
-          // We blend classical eval with NNUE eval
-          Value classical = Evaluation<NO_TRACE>(pos).value();
-          classicalWeight = std::clamp(classicalWeight + (abs(classical) - abs(nnue)) / 10, classicalWeight / 2, classicalWeight + 10);
-
-          // Blend the two evaluations
-          v = (classical * classicalWeight + nnue * (100 - classicalWeight)) / 100;
-      }
 
       // Blend nnue complexity with (semi)classical complexity
       nnueComplexity = (  406 * nnueComplexity
@@ -1095,6 +1083,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
           *complexity = nnueComplexity;
 
       optimism = optimism * (272 + nnueComplexity) / 256;
+      v = (nnue * scale + optimism * (scale - 748)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
