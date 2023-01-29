@@ -1,17 +1,14 @@
 /*
   Stockfish, a UCI chess playing engine derived from Glaurung 2.1
   Copyright (C) 2004-2023 The Stockfish developers (see AUTHORS file)
-
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-
   Stockfish is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -73,12 +70,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
   // A user may scale time usage by setting UCI option "Slow Mover"
   // Default is 100 and changing this value will probably lose elo.
-  timeLeft = (int) (
-          (90 + 1.5 * log10(limits.time[us] / 1000000 + 0.05) / log10(2.5)
-              + 0.5 * log10(limits.inc[us] + 0.05)
-              + 0.75 * log10(timeLeft + 0.05) / log10(5.0)
-              ) / 100 * slowMover * timeLeft / 100
-              );
+  timeLeft = slowMover * timeLeft / 100;
 
   // x basetime (+ z increment)
   // If there is a healthy increment, timeLeft can exceed actual available
@@ -97,11 +89,6 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
       optScale = std::min((0.88 + ply / 116.4) / mtg,
                             0.88 * limits.time[us] / double(timeLeft));
       maxScale = std::min(6.3, 1.5 + 0.11 * mtg);
-  }
-
-  if (timeLeft < 15 * 1000)
-  {
-      optScale = std::min(optScale, (150 + double(limits.inc[us])) / timeLeft);
   }
 
   // Never use more than 80% of the available time for this move
