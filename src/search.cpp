@@ -1164,6 +1164,11 @@ moves_loop: // When in check, search starts here
       if ((ss+1)->cutoffCnt > 3)
           r++;
 
+      // Decrease reduction if move is a killer and we have a good history
+      if (move == ss->killers[0]
+          && (*contHist[0])[movedPiece][to_sq(move)] >= 3600)
+          r--;
+
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
                      + (*contHist[0])[movedPiece][to_sq(move)]
                      + (*contHist[1])[movedPiece][to_sq(move)]
@@ -1195,17 +1200,13 @@ moves_loop: // When in check, search starts here
           {
               // Adjust full depth search based on LMR results - if result
               // was good enough search deeper, if it was bad enough search shallower
-              const bool doDeeperSearch = value > (alpha + 63 + 11 * (newDepth - d));
-              const bool doEvenDeeperSearch = value > alpha + 584 && ss->doubleExtensions <= 5;
-              const bool doShallowerSearch = value < bestValue + 19;
-              const bool doEvenShallowerSearch = doShallowerSearch && cutNode
-                      && (value < beta - 249 - 8 * newDepth || value < alpha + 64 + 8 * newDepth)
-                      && (ss-1)->cutoffCnt > 0
-                      && thisThread->bestMoveChanges < 3;
+              const bool doDeeperSearch = value > (alpha + 66 + 11 * (newDepth - d));
+              const bool doEvenDeeperSearch = value > alpha + 582 && ss->doubleExtensions <= 5;
+              const bool doShallowerSearch = value < bestValue + newDepth;
 
               ss->doubleExtensions = ss->doubleExtensions + doEvenDeeperSearch;
 
-              newDepth += doDeeperSearch - doShallowerSearch + doEvenDeeperSearch - doEvenShallowerSearch;
+              newDepth += doDeeperSearch - doShallowerSearch + doEvenDeeperSearch;
 
               if (newDepth > d)
                   value = -search<NonPV>(pos, ss+1, -(alpha+1), -alpha, newDepth, !cutNode);
