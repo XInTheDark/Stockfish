@@ -191,7 +191,7 @@ void MainThread::search() {
   }
 
   Color us = rootPos.side_to_move();
-  Time.init(Limits, us, rootPos.game_ply());
+  Time.init(Limits, us, rootPos.game_ply(), (int) this->bestMoveChanges);
   TT.new_search();
 
   Eval::NNUE::verify();
