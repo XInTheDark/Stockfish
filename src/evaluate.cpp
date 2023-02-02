@@ -1082,10 +1082,6 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
 
       optimism = optimism * (272 + nnueComplexity) / 256;
       v = (nnue * scale + optimism * (scale - 748)) / 1024;
-
-      // If we are optimistic and v is close to a draw, then round to a draw
-      if (optimism > 64 && to_cp(v) < 0 && to_cp(v) > -25)
-        v = VALUE_DRAW;
   }
 
   // Damp down the evaluation linearly when shuffling
