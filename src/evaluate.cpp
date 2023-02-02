@@ -1087,6 +1087,10 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   // Damp down the evaluation linearly when shuffling
   v = v * (200 - pos.rule50_count()) / 214;
 
+  // If we are optimistic and v is close to a draw, then round to a draw
+  if (pos.this_thread()->optimism[pos.side_to_move()] > 64 && to_cp(v) < 0 && to_cp(v) > -25)
+      v = VALUE_DRAW;
+
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
 
