@@ -773,10 +773,7 @@ namespace {
     improvement =   (ss-2)->staticEval != VALUE_NONE ? ss->staticEval - (ss-2)->staticEval
                   : (ss-4)->staticEval != VALUE_NONE ? ss->staticEval - (ss-4)->staticEval
                   :                                    172;
-    if ((ss-2)->improving)
-        improvement += 50;
-
-    improving = improvement > 0;
+    improving = improvement > 0 || ( improvement > -64 && (ss-2)->improving && (ss-4)->improving );
     ss->improving = improving;
 
     // Step 7. Razoring (~1 Elo).
@@ -848,7 +845,7 @@ namespace {
         }
     }
 
-    probCutBeta = beta + 180 - 36 * improving - 18 * (ss-2)->improving;
+    probCutBeta = beta + 180 - 54 * improving;
 
     // Step 10. ProbCut (~10 Elo)
     // If we have a good enough capture and a reduced search returns a value
