@@ -1177,6 +1177,10 @@ moves_loop: // When in check, search starts here
           && (*contHist[0])[movedPiece][to_sq(move)] >= 3600)
           r--;
 
+      // Decrease reduction if rule50 counter is high
+      if (depth > 9 && improvement < 50)
+          r -= pos.rule50_count() / 20;
+
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
                      + (*contHist[0])[movedPiece][to_sq(move)]
                      + (*contHist[1])[movedPiece][to_sq(move)]
