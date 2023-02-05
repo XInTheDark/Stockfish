@@ -1179,6 +1179,7 @@ moves_loop: // When in check, search starts here
 
       // Decrease reduction if eval is high and we have a good history
       if (ss->staticEval > 300
+          && improvement > -30
           && (*contHist[0])[movedPiece][to_sq(move)] >= 3600)
           r--;
 
