@@ -1563,7 +1563,7 @@ moves_loop: // When in check, search starts here
 
       // Do not search moves with bad enough SEE values (~5 Elo)
       if (    bestValue > VALUE_TB_LOSS_IN_MAX_PLY
-          && !pos.see_ge(move, Value(std::max(-250 - depth * 15, -700)))
+          && !pos.see_ge(move, Value(std::max(-300 + depth * 100, -700)))
           )
           continue;
 
