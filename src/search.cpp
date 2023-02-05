@@ -457,6 +457,8 @@ void Thread::search() {
           th->bestMoveChanges = 0;
       }
 
+      ss->bestMoveChanges = totBestMoveChanges;
+
       // Do we have time for the next iteration? Can we stop searching now?
       if (    Limits.use_time_management()
           && !Threads.stop
@@ -1157,7 +1159,7 @@ moves_loop: // When in check, search starts here
 
       // Decrease reduction for PvNodes based on depth
       if (PvNode)
-          r -= 1 + 11 / (3 + depth);
+          r -= 1 + 11 / (3 + depth) + ss->bestMoveChanges / 3;
 
       // Decrease reduction if ttMove has been singularly extended (~1 Elo)
       if (singularQuietLMR)
