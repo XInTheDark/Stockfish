@@ -1563,7 +1563,7 @@ moves_loop: // When in check, search starts here
 
       // Do not search moves with bad enough SEE values (~5 Elo)
       if (    bestValue > VALUE_TB_LOSS_IN_MAX_PLY
-          && !pos.see_ge(move, Value(-250 - pos.non_pawn_material() / 32))
+          && !pos.see_ge(move, Value(-1024 + pos.non_pawn_material() / 32))
           )
           continue;
 
