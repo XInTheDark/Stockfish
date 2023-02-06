@@ -457,7 +457,7 @@ void Thread::search() {
           th->bestMoveChanges = 0;
       }
 
-      ss->bestMoveChanges = totBestMoveChanges;
+      ss->bestMoveChanges = (ss-2)->bestMoveChanges + totBestMoveChanges;
 
       // Do we have time for the next iteration? Can we stop searching now?
       if (    Limits.use_time_management()
