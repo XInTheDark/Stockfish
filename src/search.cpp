@@ -1169,7 +1169,7 @@ moves_loop: // When in check, search starts here
           r--;
 
       // Decrease reduction if move is a capture and we have a good history
-      if (capture && (*contHist[0])[movedPiece][to_sq(move)] > 3000)
+      if ((capture || givesCheck) && (*contHist[0])[movedPiece][to_sq(move)] > 3600)
           r--;
 
       // Increase reduction if next ply has a lot of fail high
