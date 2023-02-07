@@ -1168,6 +1168,10 @@ moves_loop: // When in check, search starts here
           && (mp.threatenedPieces & from_sq(move)))
           r--;
 
+      // Decrease reduction if move is a capture and we have a good history
+      if (capture && (*contHist[0])[movedPiece][to_sq(move)] > 3000)
+          r--;
+
       // Increase reduction if next ply has a lot of fail high
       if ((ss+1)->cutoffCnt > 3)
           r++;
