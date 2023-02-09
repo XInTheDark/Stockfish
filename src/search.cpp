@@ -1082,6 +1082,13 @@ moves_loop: // When in check, search starts here
                   {
                       extension = 2;
                       depth += depth < 12;
+                      // In special cases where we have an extremely good history,
+                      // and the complexity of the position is high,
+                      // we extend even more.
+                      if (depth > 9
+                          && (*contHist[0])[movedPiece][to_sq(move)] > 8000
+                          && thisThread->complexityAverage.value() > 128)
+                          extension = 3;
                   }
               }
 
@@ -1118,7 +1125,7 @@ moves_loop: // When in check, search starts here
 
       // Add extension to new depth
       newDepth += extension;
-      ss->doubleExtensions = (ss-1)->doubleExtensions + (extension == 2);
+      ss->doubleExtensions = (ss-1)->doubleExtensions + (extension >= 2) + (extension == 3);
 
       // Speculative prefetch as early as possible
       prefetch(TT.first_entry(pos.key_after(move)));
