@@ -1170,10 +1170,18 @@ moves_loop: // When in check, search starts here
       if ((ss+1)->cutoffCnt > 3)
           r++;
 
-      // Decrease reduction if move is a killer and we have a good history
-      if (move == ss->killers[0]
-          && (*contHist[0])[movedPiece][to_sq(move)] >= 3600)
-          r--;
+      // If we have a good history:
+      if ((*contHist[0])[movedPiece][to_sq(move)] >= 3600)
+      {
+          // Decrease reduction if move is a killer
+          if (move == ss->killers[0])
+              r--;
+
+          // Decrease reduction if complexity and optimism are high
+          if (thisThread->complexityAverage.value() > 200
+              && thisThread->optimism[us] > 64)
+              r--;
+      }
 
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
                      + (*contHist[0])[movedPiece][to_sq(move)]
