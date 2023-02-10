@@ -1175,6 +1175,10 @@ moves_loop: // When in check, search starts here
           && (*contHist[0])[movedPiece][to_sq(move)] >= 3600)
           r--;
 
+      // Decrease reduction if optimism is negative and complexity is low
+      if (thisThread->optimism[us] < 0 && complexity < 150)
+          r--;
+
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
                      + (*contHist[0])[movedPiece][to_sq(move)]
                      + (*contHist[1])[movedPiece][to_sq(move)]
