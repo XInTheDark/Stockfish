@@ -254,6 +254,9 @@ void MainThread::search() {
   std::cout << sync_endl;
 }
 
+int search_opt = 0, qsearch_opt = 0;
+
+TUNE(SetRange(0, 128), search_opt, qsearch_opt);
 
 /// Thread::search() is the main iterative deepening loop. It calls search()
 /// repeatedly with increasing depth until the allocated thinking time has been
@@ -741,7 +744,7 @@ namespace {
         ss->staticEval = eval = tte->eval();
 
         // Recalculate TT eval if it was calculated with a different optimism
-        if (eval == VALUE_NONE || abs(tte->optimism() - thisThread->optimism[us]) > 10)
+        if (eval == VALUE_NONE || abs(tte->optimism() - thisThread->optimism[us]) > search_opt)
             ss->staticEval = eval = evaluate(pos, &complexity);
         else // Fall back to (semi)classical complexity for TT hits, the NNUE complexity is lost
             complexity = abs(ss->staticEval - pos.psq_eg_stm());
@@ -1479,7 +1482,8 @@ moves_loop: // When in check, search starts here
         if (ss->ttHit)
         {
             // Never assume anything about values stored in TT
-            if ((ss->staticEval = bestValue = tte->eval()) == VALUE_NONE)
+            if ((ss->staticEval = bestValue = tte->eval()) == VALUE_NONE
+                || abs(tte->optimism() - thisThread->optimism[pos.side_to_move()]) > qsearch_opt)
                 ss->staticEval = bestValue = evaluate(pos);
 
             // ttValue can be used as a better position evaluation (~13 Elo)
