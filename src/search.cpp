@@ -741,6 +741,8 @@ namespace {
         ss->staticEval = eval = tte->eval();
         if (eval == VALUE_NONE)
             ss->staticEval = eval = evaluate(pos, &complexity);
+        else if (tte->depth() < depth - 7)
+            ss->staticEval = eval = evaluate(pos, &complexity, false);
         else // Fall back to (semi)classical complexity for TT hits, the NNUE complexity is lost
             complexity = abs(ss->staticEval - pos.psq_eg_stm());
 

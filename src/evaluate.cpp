@@ -1048,7 +1048,7 @@ make_v:
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
 
-Value Eval::evaluate(const Position& pos, int* complexity) {
+Value Eval::evaluate(const Position& pos, int* complexity, bool nnue) {
 
   Value v;
   Value psq = pos.psq_eg_stm();
@@ -1056,7 +1056,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive and several pieces remain. (~3 Elo)
-  bool useClassical = !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > 1781);
+  bool useClassical = !nnue || !useNNUE || (pos.count<ALL_PIECES>() > 7 && abs(psq) > 1781);
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
@@ -1095,6 +1095,10 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
       *complexity = abs(v - psq);
 
   return v;
+}
+
+Value Eval::evaluate(const Position& pos, int* complexity) {
+  return evaluate(pos, complexity, true);
 }
 
 /// trace() is like evaluate(), but instead of returning a value, it returns
