@@ -739,7 +739,8 @@ namespace {
     {
         // Never assume anything about values stored in TT
         ss->staticEval = eval = tte->eval();
-        if (eval == VALUE_NONE)
+        // Recalculate TT eval if rule50 counter is high
+        if (eval == VALUE_NONE || pos.rule50_count() > 2 * tte->depth())
             ss->staticEval = eval = evaluate(pos, &complexity);
         else // Fall back to (semi)classical complexity for TT hits, the NNUE complexity is lost
             complexity = abs(ss->staticEval - pos.psq_eg_stm());
