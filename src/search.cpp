@@ -512,6 +512,8 @@ void Thread::search() {
                 skill.best ? skill.best : skill.pick_best(multiPV)));
 }
 
+int ttd = 0;
+TUNE(SetRange(-25, 25), ttd);
 
 namespace {
 
@@ -739,7 +741,7 @@ namespace {
     {
         // Never assume anything about values stored in TT
         ss->staticEval = eval = tte->eval();
-        if (eval == VALUE_NONE)
+        if (eval == VALUE_NONE || tte->depth() < depth - ttd)
             ss->staticEval = eval = evaluate(pos, &complexity);
         else // Fall back to (semi)classical complexity for TT hits, the NNUE complexity is lost
             complexity = abs(ss->staticEval - pos.psq_eg_stm());
