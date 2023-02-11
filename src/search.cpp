@@ -1075,6 +1075,15 @@ moves_loop: // When in check, search starts here
                   extension = 1;
                   singularQuietLMR = !ttCapture;
 
+                  if (PvNode && depth > 10) {
+                      pos.do_move(move, st, givesCheck);
+                      Value newEval = evaluate(pos);
+                      if (abs(ss->staticEval - newEval) > PawnValueEg) {
+                          extension = 2;
+                      }
+                      pos.undo_move(move);
+                  }
+
                   // Avoid search explosion by limiting the number of double extensions
                   if (  !PvNode
                       && value < singularBeta - 25
