@@ -739,7 +739,7 @@ namespace {
     {
         // Never assume anything about values stored in TT
         ss->staticEval = eval = tte->eval();
-        if (eval == VALUE_NONE)
+        if (eval == VALUE_NONE || ss->improving)
             ss->staticEval = eval = evaluate(pos, &complexity);
         else // Fall back to (semi)classical complexity for TT hits, the NNUE complexity is lost
             complexity = abs(ss->staticEval - pos.psq_eg_stm());
@@ -772,6 +772,7 @@ namespace {
                   : (ss-4)->staticEval != VALUE_NONE ? ss->staticEval - (ss-4)->staticEval
                   :                                    172;
     improving = improvement > 0;
+    ss->improving = improving;
 
     // Step 7. Razoring (~1 Elo).
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
@@ -1475,7 +1476,7 @@ moves_loop: // When in check, search starts here
         if (ss->ttHit)
         {
             // Never assume anything about values stored in TT
-            if ((ss->staticEval = bestValue = tte->eval()) == VALUE_NONE)
+            if ((ss->staticEval = bestValue = tte->eval()) == VALUE_NONE || ss->improving)
                 ss->staticEval = bestValue = evaluate(pos);
 
             // ttValue can be used as a better position evaluation (~13 Elo)
