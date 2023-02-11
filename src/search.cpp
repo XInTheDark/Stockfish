@@ -741,7 +741,7 @@ namespace {
         ss->staticEval = eval = tte->eval();
 
         // Recalculate TT eval if it was calculated with a different optimism
-        if (eval == VALUE_NONE || abs(tte->optimism() - thisThread->optimism[us]) > 10)
+        if (eval == VALUE_NONE || abs(tte->optimism() - thisThread->optimism[us]) > 25)
             ss->staticEval = eval = evaluate(pos, &complexity);
         else // Fall back to (semi)classical complexity for TT hits, the NNUE complexity is lost
             complexity = abs(ss->staticEval - pos.psq_eg_stm());
