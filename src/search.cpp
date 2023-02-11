@@ -89,6 +89,11 @@ namespace {
     return VALUE_DRAW - 1 + Value(thisThread->nodes & 0x2);
   }
 
+  // Determine whether a position uses classical evaluation
+  bool use_classical_eval(const Position& pos) {
+      return !Options["Use NNUE"] || (pos.count<ALL_PIECES>() > 7 && abs(pos.psq_eg_stm()) > 1781);
+  }
+
   // Skill structure is used to implement strength limit. If we have an uci_elo then
   // we convert it to a suitable fractional skill level using anchoring to CCRL Elo
   // (goldfish 1.13 = 2000) and a fit through Ordo derived Elo for match (TC 60+0.6)
@@ -739,7 +744,7 @@ namespace {
     {
         // Never assume anything about values stored in TT
         ss->staticEval = eval = tte->eval();
-        if (eval == VALUE_NONE)
+        if (eval == VALUE_NONE || (tte->depth() < depth - 4 && use_classical_eval(pos)))
             ss->staticEval = eval = evaluate(pos, &complexity);
         else // Fall back to (semi)classical complexity for TT hits, the NNUE complexity is lost
             complexity = abs(ss->staticEval - pos.psq_eg_stm());
