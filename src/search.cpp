@@ -261,11 +261,12 @@ void MainThread::search() {
 
 int deltaV1 = 10, deltaV2 = 15400,
     opt1 = 116, opt2 = 170,
-    betaV = 512,
+    t = 512,
     deltaV3 = 256, deltaV4 = 2;
 
 TUNE(SetRange(-50, 50), deltaV1);
-TUNE(deltaV2, opt1, opt2, betaV, deltaV3);
+TUNE(SetRange(1, 1023), t);
+TUNE(deltaV2, opt1, opt2, deltaV3);
 TUNE(SetRange(-50, 50), deltaV4);
 
 void Thread::search() {
@@ -410,7 +411,7 @@ void Thread::search() {
               // re-search, otherwise exit the loop.
               if (bestValue <= alpha)
               {
-                  beta = (alpha + beta) * betaV / 1024;
+                  beta = (alpha * t + beta * (1024 - t)) / 1024;
                   alpha = std::max(bestValue - delta, -VALUE_INFINITE);
 
                   failedHighCnt = 0;
