@@ -741,7 +741,7 @@ namespace {
         ss->staticEval = eval = tte->eval();
 
         // Recalculate the static eval if the eval differs a lot from (ss-1)->staticEval
-        if (eval == VALUE_NONE || abs(abs(eval) - abs((ss-1)->staticEval)) > PawnValueEg)
+        if (eval == VALUE_NONE || pos.rule50_count() > 90 - tte->depth() || abs(abs(eval) - abs((ss-1)->staticEval)) > PawnValueEg)
             ss->staticEval = eval = evaluate(pos, &complexity);
         else // Fall back to (semi)classical complexity for TT hits, the NNUE complexity is lost
             complexity = abs(ss->staticEval - pos.psq_eg_stm());
