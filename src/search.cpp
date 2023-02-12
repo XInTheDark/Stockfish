@@ -421,6 +421,8 @@ void Thread::search() {
               assert(alpha >= -VALUE_INFINITE && beta <= VALUE_INFINITE);
           }
 
+          this->failedHighCnt = failedHighCnt;
+
           // Sort the PV lines searched so far and update the GUI
           std::stable_sort(rootMoves.begin() + pvFirst, rootMoves.begin() + pvIdx + 1);
 
@@ -1168,6 +1170,9 @@ moves_loop: // When in check, search starts here
 
       // Increase reduction if next ply has a lot of fail high
       if ((ss+1)->cutoffCnt > 3)
+          r++;
+
+      if (thisThread->failedHighCnt > 1)
           r++;
 
       // Decrease reduction if move is a killer and we have a good history
