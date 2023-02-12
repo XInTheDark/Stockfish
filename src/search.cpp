@@ -517,6 +517,27 @@ namespace {
 
   // search<>() is the main search function for both PV and non-PV nodes
 
+int e1 = 4, e2 = 22, e3 = 2, e4 = 3, e5 = 3, e6 = 1,
+    x1 = 25, x2 = 10, x3 = 12, x4 = 9, x5 = 78, x6 = 5600,
+
+    r1 = 2, r2 = 1, r3 = 2, r4 = 1,
+    r5 = 1, r6 = 11, r7 = 3,
+    r8 = 1, r9 = 9, r10 = 1,
+    r11 = 3, r12 = 1,
+    r13 = 3600, r14 = 1,
+
+    s1 = 1024, s2 = 4467,
+    s3 = 12800, s4 = 4410, s5 = 7, s6 = 19,
+
+    l1 = 66, l2 = 11,
+    l3 = 582, l4 = 5;
+
+TUNE(e1, e2, e3, e4, e5, e6);
+TUNE(x1, x2, x3, x4, x5, x6);
+TUNE(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14);
+TUNE(s1, s2, s3, s4, s5, s6);
+TUNE(l1, l2, l3, l4);
+
   template <NodeType nodeType>
   Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, bool cutNode) {
 
@@ -1054,16 +1075,16 @@ moves_loop: // When in check, search starts here
           // a reduced search on all the other moves but the ttMove and if the
           // result is lower than ttValue minus a margin, then we will extend the ttMove.
           if (   !rootNode
-              &&  depth >= 4 - (thisThread->completedDepth > 22) + 2 * (PvNode && tte->is_pv())
+              &&  depth >= e1 - (thisThread->completedDepth > e2) + e3 * (PvNode && tte->is_pv())
               &&  move == ttMove
               && !excludedMove // Avoid recursive singular search
            /* &&  ttValue != VALUE_NONE Already implicit in the next condition */
               &&  abs(ttValue) < VALUE_KNOWN_WIN
               && (tte->bound() & BOUND_LOWER)
-              &&  tte->depth() >= depth - 3)
+              &&  tte->depth() >= depth - e4)
           {
-              Value singularBeta = ttValue - (3 + (ss->ttPv && !PvNode)) * depth;
-              Depth singularDepth = (depth - 1) / 2;
+              Value singularBeta = ttValue - (e5 + (ss->ttPv && !PvNode)) * depth;
+              Depth singularDepth = (depth - e6) / 2;
 
               ss->excludedMove = move;
               // the search with excludedMove will update ss->staticEval
@@ -1077,11 +1098,11 @@ moves_loop: // When in check, search starts here
 
                   // Avoid search explosion by limiting the number of double extensions
                   if (  !PvNode
-                      && value < singularBeta - 25
-                      && ss->doubleExtensions <= 10)
+                      && value < singularBeta - x1
+                      && ss->doubleExtensions <= x2)
                   {
                       extension = 2;
-                      depth += depth < 12;
+                      depth += depth < x3;
                   }
               }
 
@@ -1104,15 +1125,15 @@ moves_loop: // When in check, search starts here
 
           // Check extensions (~1 Elo)
           else if (   givesCheck
-                   && depth > 9
-                   && abs(ss->staticEval) > 78)
+                   && depth > x4
+                   && abs(ss->staticEval) > x5)
               extension = 1;
 
           // Quiet ttMove extensions (~1 Elo)
           else if (   PvNode
                    && move == ttMove
                    && move == ss->killers[0]
-                   && (*contHist[0])[movedPiece][to_sq(move)] >= 5600)
+                   && (*contHist[0])[movedPiece][to_sq(move)] >= x6)
               extension = 1;
       }
 
@@ -1139,50 +1160,50 @@ moves_loop: // When in check, search starts here
       // and node is not likely to fail low. (~3 Elo)
       if (   ss->ttPv
           && !likelyFailLow)
-          r -= 2;
+          r -= r1;
 
       // Decrease reduction if opponent's move count is high (~1 Elo)
       if ((ss-1)->moveCount > 7)
-          r--;
+          r -= r2;
 
       // Increase reduction for cut nodes (~3 Elo)
       if (cutNode)
-          r += 2;
+          r += r3;
 
       // Increase reduction if ttMove is a capture (~3 Elo)
       if (ttCapture)
-          r++;
+          r += r4;
 
       // Decrease reduction for PvNodes based on depth
       if (PvNode)
-          r -= 1 + 11 / (3 + depth);
+          r -= r5 + r6 / (r7 + depth);
 
       // Decrease reduction if ttMove has been singularly extended (~1 Elo)
       if (singularQuietLMR)
-          r--;
+          r -= r8;
 
       // Decrease reduction if we move a threatened piece (~1 Elo)
-      if (   depth > 9
+      if (   depth > r9
           && (mp.threatenedPieces & from_sq(move)))
-          r--;
+          r -= r10;
 
       // Increase reduction if next ply has a lot of fail high
-      if ((ss+1)->cutoffCnt > 3)
-          r++;
+      if ((ss+1)->cutoffCnt > r11)
+          r += r12;
 
       // Decrease reduction if move is a killer and we have a good history
       if (move == ss->killers[0]
-          && (*contHist[0])[movedPiece][to_sq(move)] >= 3600)
-          r--;
+          && (*contHist[0])[movedPiece][to_sq(move)] >= r13)
+          r -= r14;
 
-      ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
+      ss->statScore =  s1 * thisThread->mainHistory[us][from_to(move)] / 512
                      + (*contHist[0])[movedPiece][to_sq(move)]
                      + (*contHist[1])[movedPiece][to_sq(move)]
                      + (*contHist[3])[movedPiece][to_sq(move)]
-                     - 4467;
+                     - s2;
 
       // Decrease/increase reduction for moves with a good/bad history (~30 Elo)
-      r -= ss->statScore / (12800 + 4410 * (depth > 7 && depth < 19));
+      r -= ss->statScore / (s3 + s4 * (depth > s5 && depth < s6));
 
       // Step 17. Late moves reduction / extension (LMR, ~117 Elo)
       // We use various heuristics for the sons of a node after the first son has
@@ -1206,8 +1227,8 @@ moves_loop: // When in check, search starts here
           {
               // Adjust full depth search based on LMR results - if result
               // was good enough search deeper, if it was bad enough search shallower
-              const bool doDeeperSearch = value > (alpha + 66 + 11 * (newDepth - d));
-              const bool doEvenDeeperSearch = value > alpha + 582 && ss->doubleExtensions <= 5;
+              const bool doDeeperSearch = value > (alpha + l1 + l2 * (newDepth - d));
+              const bool doEvenDeeperSearch = value > alpha + l3 && ss->doubleExtensions <= l4;
               const bool doShallowerSearch = value < bestValue + newDepth;
 
               ss->doubleExtensions = ss->doubleExtensions + doEvenDeeperSearch;
