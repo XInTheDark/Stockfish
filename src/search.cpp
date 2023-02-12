@@ -259,6 +259,15 @@ void MainThread::search() {
 /// repeatedly with increasing depth until the allocated thinking time has been
 /// consumed, the user stops the search, or the maximum search depth is reached.
 
+int t1_1 = 71, t1_2 = 12, t1_3 = 6, t1_4 = 657,
+    t2_1 = 9, t2_2 = 137, t2_3 = 65,
+    t3_1 = 140, t3_2 = 215,
+    t4_1 = 100, t4_2 = 170,
+    t5_1 = 100, t5_2 = 261, t5_3 = 1739, t5_4 = 150,
+    t6_1 = 53;
+
+TUNE(t1_1, t1_2, t1_3, t1_4, t2_1, t2_2, t2_3, t3_1, t3_2, t4_1, t4_2, t5_1, t5_2, t5_3, t5_4, t6_1);
+
 void Thread::search() {
 
   // To allow access to (ss-7) up to (ss+2), the stack must be oversized.
@@ -462,16 +471,16 @@ void Thread::search() {
           && !Threads.stop
           && !mainThread->stopOnPonderhit)
       {
-          double fallingEval = (71 + 12 * (mainThread->bestPreviousAverageScore - bestValue)
-                                    +  6 * (mainThread->iterValue[iterIdx] - bestValue)) / 656.7;
+          double fallingEval = (t1_1 + t1_2 * (mainThread->bestPreviousAverageScore - bestValue)
+                                    +  t1_3 * (mainThread->iterValue[iterIdx] - bestValue)) / t1_4;
           fallingEval = std::clamp(fallingEval, 0.5, 1.5);
 
           // If the bestMove is stable over several iterations, reduce time accordingly
-          timeReduction = lastBestMoveDepth + 9 < completedDepth ? 1.37 : 0.65;
-          double reduction = (1.4 + mainThread->previousTimeReduction) / (2.15 * timeReduction);
-          double bestMoveInstability = 1 + 1.7 * totBestMoveChanges / Threads.size();
+          timeReduction = lastBestMoveDepth + t2_1 < completedDepth ? t2_2 / 100.0 : t2_3 / 100.0;
+          double reduction = (t3_1 / 100.0 + mainThread->previousTimeReduction) / (t3_2 / 100.0 * timeReduction);
+          double bestMoveInstability = t4_1 / 100.0 + t4_2 / 100.0 * totBestMoveChanges / Threads.size();
           int complexity = mainThread->complexityAverage.value();
-          double complexPosition = std::min(1.0 + (complexity - 261) / 1738.7, 1.5);
+          double complexPosition = std::min(t5_1 / 100.0 + (complexity - t5_2) / t5_3, t5_4 / 100.0);
 
           double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability * complexPosition;
 
@@ -491,7 +500,7 @@ void Thread::search() {
                   Threads.stop = true;
           }
           else if (   !mainThread->ponder
-                   && Time.elapsed() > totalTime * 0.53)
+                   && Time.elapsed() > totalTime * t6_1 / 100.0)
               Threads.increaseDepth = false;
           else
               Threads.increaseDepth = true;
