@@ -266,7 +266,8 @@ int deltaV1 = 10, deltaV2 = 15400,
 
 TUNE(SetRange(1, 50), deltaV1, deltaV4);
 TUNE(SetRange(1, 1023), t);
-TUNE(deltaV2, opt1, opt2);
+TUNE(SetRange(1, 30800), deltaV2);
+TUNE(opt1, opt2);
 TUNE(deltaV3);
 
 void Thread::search() {
