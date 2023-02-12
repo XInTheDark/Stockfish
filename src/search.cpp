@@ -261,11 +261,13 @@ void MainThread::search() {
 
 int deltaV1 = 10, deltaV2 = 15400,
     opt1 = 116, opt2 = 170,
-    t = 512;
+    t = 512,
+    deltaV3 = 256, deltaV4 = 2;
 
-TUNE(SetRange(-50, 50), deltaV1);
+TUNE(SetRange(1, 50), deltaV1, deltaV4);
 TUNE(SetRange(1, 1023), t);
 TUNE(deltaV2, opt1, opt2);
+TUNE(deltaV3);
 
 void Thread::search() {
 
@@ -424,7 +426,7 @@ void Thread::search() {
               else
                   break;
 
-              delta += delta / 4 + 2;
+              delta += delta * deltaV3 / 1024 + deltaV4;
 
               assert(alpha >= -VALUE_INFINITE && beta <= VALUE_INFINITE);
           }
