@@ -259,6 +259,15 @@ void MainThread::search() {
 /// repeatedly with increasing depth until the allocated thinking time has been
 /// consumed, the user stops the search, or the maximum search depth is reached.
 
+int deltaV1 = 10, deltaV2 = 15400,
+    opt1 = 116, opt2 = 170,
+    betaV = 512,
+    deltaV3 = 256, deltaV4 = 2;
+
+TUNE(SetRange(-50, 50), deltaV1);
+TUNE(deltaV2, opt1, opt2, betaV, deltaV3);
+TUNE(SetRange(-50, 50), deltaV4);
+
 void Thread::search() {
 
   // To allow access to (ss-7) up to (ss+2), the stack must be oversized.
@@ -354,12 +363,12 @@ void Thread::search() {
           if (rootDepth >= 4)
           {
               Value prev = rootMoves[pvIdx].averageScore;
-              delta = Value(10) + int(prev) * prev / 15400;
+              delta = Value(deltaV1) + int(prev) * prev / deltaV2;
               alpha = std::max(prev - delta,-VALUE_INFINITE);
               beta  = std::min(prev + delta, VALUE_INFINITE);
 
               // Adjust optimism based on root move's previousScore
-              int opt = 116 * prev / (std::abs(prev) + 170);
+              int opt = opt1 * prev / (std::abs(prev) + opt2);
               optimism[ us] = Value(opt);
               optimism[~us] = -optimism[us];
           }
@@ -401,7 +410,7 @@ void Thread::search() {
               // re-search, otherwise exit the loop.
               if (bestValue <= alpha)
               {
-                  beta = (alpha + beta) / 2;
+                  beta = (alpha + beta) * betaV / 1024;
                   alpha = std::max(bestValue - delta, -VALUE_INFINITE);
 
                   failedHighCnt = 0;
@@ -416,7 +425,7 @@ void Thread::search() {
               else
                   break;
 
-              delta += delta / 4 + 2;
+              delta += delta * deltaV3 / 1024 + deltaV4;
 
               assert(alpha >= -VALUE_INFINITE && beta <= VALUE_INFINITE);
           }
