@@ -401,8 +401,8 @@ void Thread::search() {
               // re-search, otherwise exit the loop.
               if (bestValue <= alpha)
               {
-                  // We increase aspiration window by 1% for each increase in depth
-                  double alphaPercentage = std::min(0.5 + 0.01 * (completedDepth - 1), 0.99);
+                  // We decrease aspiration window by 0.5% for each increase in depth
+                  double alphaPercentage = std::min(0.5 - 0.005 * (completedDepth - 1), 0.05);
                   beta = Value( (double) alpha * alphaPercentage + (double) beta * (1 - alphaPercentage) );
                   alpha = std::max(bestValue - delta, -VALUE_INFINITE);
 
