@@ -354,12 +354,12 @@ void Thread::search() {
           if (rootDepth >= 4)
           {
               Value prev = rootMoves[pvIdx].averageScore;
-              delta = Value(11) + int(prev) * prev / 16177;
+              delta = Value(10) + int(prev) * prev / 16029;
               alpha = std::max(prev - delta,-VALUE_INFINITE);
               beta  = std::min(prev + delta, VALUE_INFINITE);
 
               // Adjust optimism based on root move's previousScore
-              int opt = 112 * prev / (std::abs(prev) + 175);
+              int opt = 111 * prev / (std::abs(prev) + 184);
               optimism[ us] = Value(opt);
               optimism[~us] = -optimism[us];
           }
@@ -401,7 +401,7 @@ void Thread::search() {
               // re-search, otherwise exit the loop.
               if (bestValue <= alpha)
               {
-                  beta = (alpha * 496 + beta * 528) / 1024;
+                  beta = (alpha * 504 + beta * 520) / 1024;
                   alpha = std::max(bestValue - delta, -VALUE_INFINITE);
 
                   failedHighCnt = 0;
@@ -416,7 +416,7 @@ void Thread::search() {
               else
                   break;
 
-              delta += delta * 259 / 1024 + 3;
+              delta += delta * 260 / 1024 + 3;
 
               assert(alpha >= -VALUE_INFINITE && beta <= VALUE_INFINITE);
           }
