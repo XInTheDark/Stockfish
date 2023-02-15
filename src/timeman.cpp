@@ -29,41 +29,6 @@ namespace Stockfish {
 TimeManagement Time; // Our global time management object
 
 
-int a1 = 50,
-
-    b1 = 100, b2 = 12, b3 = 100, b4 = 112,
-
-    c1 = 120, c2 = 300, c3 = 45, c4 = 39, c5 = 20,
-
-    d1 = 700, d2 = 400, d3 = 1200,
-
-    e1 = 88, e2 = 11640, e3 = 88,
-
-    f1 = 630, f2 = 150, f3 = 11,
-
-    g1 = 80;
-
-TUNE(SetRange(1, 100), a1);
-TUNE(SetRange(1, 200), b1);
-TUNE(SetRange(1, 24), b2);
-TUNE(SetRange(1, 200), b3);
-TUNE(SetRange(1, 224), b4);
-TUNE(SetRange(1, 240), c1);
-TUNE(SetRange(1, 600), c2);
-TUNE(SetRange(1, 90), c3);
-TUNE(SetRange(1, 78), c4);
-TUNE(SetRange(1, 40), c5);
-TUNE(SetRange(1, 1400), d1);
-TUNE(SetRange(1, 800), d2);
-TUNE(SetRange(1, 2400), d3);
-TUNE(SetRange(1, 176), e1);
-TUNE(SetRange(1, 23280), e2);
-TUNE(SetRange(1, 176), e3);
-TUNE(SetRange(1, 1260), f1);
-TUNE(SetRange(1, 300), f2);
-TUNE(SetRange(1, 22), f3);
-TUNE(SetRange(1, 160), g1);
-
 /// TimeManagement::init() is called at the beginning of the search and calculates
 /// the bounds of time allowed for the current game ply. We currently support:
 //      1) x basetime (+ z increment)
@@ -97,14 +62,14 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   startTime = limits.startTime;
 
   // Maximum move horizon of 50 moves
-  int mtg = limits.movestogo ? std::min(limits.movestogo, a1) : a1;
+  int mtg = limits.movestogo ? std::min(limits.movestogo, 50) : 50;
 
   // Make sure timeLeft is > 0 since we may use it as a divisor
   TimePoint timeLeft =  std::max(TimePoint(1),
       limits.time[us] + limits.inc[us] * (mtg - 1) - moveOverhead * (2 + mtg));
 
   // Use extra time with larger increments
-  double optExtra = std::clamp(b1 / 100.0 + b2 / 100.0 * limits.inc[us] / limits.time[us], b3 / 100.0, b4 / 100.0);
+  double optExtra = std::clamp(1.075 + 0.126 * limits.inc[us] / limits.time[us], 0.98, 1.09);
 
   // A user may scale time usage by setting UCI option "Slow Mover"
   // Default is 100 and changing this value will probably lose elo.
@@ -115,23 +80,23 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   // game time for the current move, so also cap to 20% of available game time.
   if (limits.movestogo == 0)
   {
-      optScale = std::min(c1 / 10000.0 + std::pow(ply + c2 / 100.0, c3 / 100.0) * c4 / 10000.0,
-                           c5 / 100.0 * limits.time[us] / double(timeLeft))
+      optScale = std::min(0.0118 + std::pow(ply + 3.02, 0.444) * 0.00386,
+                           0.193 * limits.time[us] / double(timeLeft))
                  * optExtra;
-      maxScale = std::min(d1 / 100.0, d2 / 100.0 + ply / (d3 / 100.0));
+      maxScale = std::min(7.2106, 4.434 + ply / 11.22);
   }
 
   // x moves in y seconds (+ z increment)
   else
   {
-      optScale = std::min((e1 / 100.0 + ply / (e2 / 100.0)) / mtg,
-                            e3 / 100.0 * limits.time[us] / double(timeLeft));
-      maxScale = std::min(f1 / 100.0, f2 / 100.0 + f3 / 100.0 * mtg);
+      optScale = std::min((0.85 + ply / 118.0) / mtg,
+                            0.83 * limits.time[us] / double(timeLeft));
+      maxScale = std::min(5.906, 1.451 + 0.1074 * mtg);
   }
 
   // Never use more than 80% of the available time for this move
   optimumTime = TimePoint(optScale * timeLeft);
-  maximumTime = TimePoint(std::min(g1 / 100.0 * limits.time[us] - moveOverhead, maxScale * optimumTime));
+  maximumTime = TimePoint(std::min(0.85 * limits.time[us] - moveOverhead, maxScale * optimumTime));
 
   if (Options["Ponder"])
       optimumTime += optimumTime / 4;
