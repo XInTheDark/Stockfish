@@ -1175,6 +1175,11 @@ moves_loop: // When in check, search starts here
           && (*contHist[0])[movedPiece][to_sq(move)] >= 3600)
           r--;
 
+      if (extension == 2 && r <= -2) {
+          r -= 2;
+          newDepth++;
+      }
+
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
                      + (*contHist[0])[movedPiece][to_sq(move)]
                      + (*contHist[1])[movedPiece][to_sq(move)]
