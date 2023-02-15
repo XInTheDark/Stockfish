@@ -1176,7 +1176,7 @@ moves_loop: // When in check, search starts here
           r--;
 
       // Decrease reduction if tte->depth() is small
-      if (ss->ttHit && tte->depth() < depth / 2)
+      if (ss->ttHit && tte->depth() < depth - 5)
           r--;
 
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
