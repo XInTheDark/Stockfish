@@ -31,7 +31,7 @@ TimeManagement Time; // Our global time management object
 
 int a1 = 50,
 
-    b1 = 100, b2 = 12, b3 = 100, b4 = 112,
+    b1 = 100, b2 = 1200, b3 = 100, b4 = 112,
 
     c1 = 120, c2 = 300, c3 = 45, c4 = 39, c5 = 20,
 
@@ -45,7 +45,7 @@ int a1 = 50,
 
 TUNE(SetRange(1, 100), a1);
 TUNE(SetRange(1, 200), b1);
-TUNE(SetRange(1, 24), b2);
+TUNE(SetRange(1, 2400), b2);
 TUNE(SetRange(1, 200), b3);
 TUNE(SetRange(1, 224), b4);
 TUNE(SetRange(1, 240), c1);
