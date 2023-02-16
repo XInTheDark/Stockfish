@@ -37,10 +37,6 @@ int a1 = 50,
 
     d1 = 700, d2 = 400, d3 = 1200,
 
-    e1 = 88, e2 = 11640, e3 = 88,
-
-    f1 = 630, f2 = 150, f3 = 11,
-
     g1 = 80;
 
 TUNE(SetRange(1, 100), a1);
@@ -56,12 +52,6 @@ TUNE(SetRange(1, 40), c5);
 TUNE(SetRange(1, 1400), d1);
 TUNE(SetRange(1, 800), d2);
 TUNE(SetRange(1, 2400), d3);
-TUNE(SetRange(1, 176), e1);
-TUNE(SetRange(1, 23280), e2);
-TUNE(SetRange(1, 176), e3);
-TUNE(SetRange(1, 1260), f1);
-TUNE(SetRange(1, 300), f2);
-TUNE(SetRange(1, 22), f3);
 TUNE(SetRange(1, 160), g1);
 
 /// TimeManagement::init() is called at the beginning of the search and calculates
@@ -124,9 +114,9 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   // x moves in y seconds (+ z increment)
   else
   {
-      optScale = std::min((e1 / 100.0 + ply / (e2 / 100.0)) / mtg,
-                            e3 / 100.0 * limits.time[us] / double(timeLeft));
-      maxScale = std::min(f1 / 100.0, f2 / 100.0 + f3 / 100.0 * mtg);
+      optScale = std::min((0.88 + ply / 116.4) / mtg,
+                            0.88 * limits.time[us] / double(timeLeft));
+      maxScale = std::min(6.3, 1.5 + 0.11 * mtg);
   }
 
   // Never use more than 80% of the available time for this move
