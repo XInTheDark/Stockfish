@@ -62,14 +62,14 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   startTime = limits.startTime;
 
   // Maximum move horizon of 50 moves
-  int mtg = limits.movestogo ? std::min(limits.movestogo, 48) : 48;
+  int mtg = limits.movestogo ? std::min(limits.movestogo, 47) : 47;
 
   // Make sure timeLeft is > 0 since we may use it as a divisor
   TimePoint timeLeft =  std::max(TimePoint(1),
       limits.time[us] + limits.inc[us] * (mtg - 1) - moveOverhead * (2 + mtg));
 
   // Use extra time with larger increments
-  double optExtra = std::clamp(0.94 + 11.3 * limits.inc[us] / limits.time[us], 1.02, 1.04);
+  double optExtra = std::clamp(0.9447 + 11.143 * limits.inc[us] / limits.time[us], 1.01, 1.055);
 
   // A user may scale time usage by setting UCI option "Slow Mover"
   // Default is 100 and changing this value will probably lose elo.
@@ -80,10 +80,10 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   // game time for the current move, so also cap to 20% of available game time.
   if (limits.movestogo == 0)
   {
-      optScale = std::min(0.0121 + std::pow(ply + 3.066, 0.4554) * 0.00381,
-                           0.192 * limits.time[us] / double(timeLeft))
+      optScale = std::min(0.0117 + std::pow(ply + 3.075, 0.4542) * 0.00383,
+                           0.20 * limits.time[us] / double(timeLeft))
                  * optExtra;
-      maxScale = std::min(6.83, 4.032 + ply / 11.80);
+      maxScale = std::min(7.112, 3.988 + ply / 11.148);
   }
 
   // x moves in y seconds (+ z increment)
@@ -96,7 +96,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
   // Never use more than 80% of the available time for this move
   optimumTime = TimePoint(optScale * timeLeft);
-  maximumTime = TimePoint(std::min(0.8175 * limits.time[us] - moveOverhead, maxScale * optimumTime));
+  maximumTime = TimePoint(std::min(0.875 * limits.time[us] - moveOverhead, maxScale * optimumTime));
 
   if (Options["Ponder"])
       optimumTime += optimumTime / 4;
