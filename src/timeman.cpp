@@ -69,7 +69,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
       limits.time[us] + limits.inc[us] * (mtg - 1) - moveOverhead * (2 + mtg));
 
   // Use extra time with larger increments
-  double optExtra = std::clamp(1.075 + 12.0 * limits.inc[us] / limits.time[us], 0.98, 1.09);
+  double optExtra = std::clamp(1.043 + 12.0 * limits.inc[us] / limits.time[us], 1.01, 1.05);
 
   // A user may scale time usage by setting UCI option "Slow Mover"
   // Default is 100 and changing this value will probably lose elo.
@@ -80,10 +80,10 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   // game time for the current move, so also cap to 20% of available game time.
   if (limits.movestogo == 0)
   {
-      optScale = std::min(0.0118 + std::pow(ply + 3.02, 0.444) * 0.00386,
-                           0.193 * limits.time[us] / double(timeLeft))
+      optScale = std::min(0.0117 + std::pow(ply + 3.07, 0.4365) * 0.00375,
+                           0.201 * limits.time[us] / double(timeLeft))
                  * optExtra;
-      maxScale = std::min(7.2106, 4.434 + ply / 11.22);
+      maxScale = std::min(6.9843, 4.252 + ply / 11.34);
   }
 
   // x moves in y seconds (+ z increment)
@@ -96,7 +96,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
   // Never use more than 80% of the available time for this move
   optimumTime = TimePoint(optScale * timeLeft);
-  maximumTime = TimePoint(std::min(0.85 * limits.time[us] - moveOverhead, maxScale * optimumTime));
+  maximumTime = TimePoint(std::min(0.855 * limits.time[us] - moveOverhead, maxScale * optimumTime));
 
   if (Options["Ponder"])
       optimumTime += optimumTime / 4;
