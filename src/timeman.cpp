@@ -69,7 +69,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
       limits.time[us] + limits.inc[us] * (mtg - 1) - moveOverhead * (2 + mtg));
 
   // Use extra time with larger increments
-  double optExtra = std::clamp(1.075 + 0.126 * limits.inc[us] / limits.time[us], 0.98, 1.09);
+  double optExtra = std::clamp(1.075 + 12.0 * limits.inc[us] / limits.time[us], 0.98, 1.09);
 
   // A user may scale time usage by setting UCI option "Slow Mover"
   // Default is 100 and changing this value will probably lose elo.
