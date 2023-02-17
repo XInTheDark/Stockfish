@@ -1209,7 +1209,7 @@ moves_loop: // When in check, search starts here
               const bool doDeeperSearch = value > (alpha + 66 + 11 * (newDepth - d));
               const bool doEvenDeeperSearch = value > alpha + 582 && ss->doubleExtensions <= 5;
               const bool doShallowerSearch = value < bestValue + newDepth;
-              const bool doShallowerSearch2 = cutNode && value < (bestValue + 2 * newDepth) / 3
+              const bool doShallowerSearch2 = cutNode && (value > beta + 64 + 8 * newDepth || value < alpha - 64 - 8 * newDepth)
                       && !(capture || ss->inCheck || ttMove);
 
               ss->doubleExtensions = ss->doubleExtensions + doEvenDeeperSearch;
