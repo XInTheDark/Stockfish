@@ -70,7 +70,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, const Position& 
   // Make sure timeLeft is > 0 since we may use it as a divisor
   TimePoint timeLeft =  std::max(TimePoint(1),
       limits.time[us] + increment * (mtg - 1) - moveOverhead * (2 + mtg));
-  double percentageLeft = timeLeft * 100 / limits.time[us];
+  double percentageLeft = limits.time[us] ? timeLeft * 100 / limits.time[us] : 50;
 
   // Use extra time with larger increments
   double optExtra = std::clamp(1.0 + 12.0 * increment / limits.time[us], 1.0, 1.12);
