@@ -100,7 +100,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, const Position& 
 
   // Scale max time based on increment, game ply and time left
   double maxTime = 0.75 + (increment ? log10(increment) / 50 : -0.05) + (ply - 50) / 1000.0 + (percentageLeft - 50) / 1000.0;
-  std::clamp(maxTime, 0.70, 0.95);
+  std::clamp(maxTime, 0.70, 0.875);
 
   optimumTime = TimePoint(optScale * timeLeft);
   maximumTime = TimePoint(std::min(maxTime * limits.time[us] - moveOverhead, maxScale * optimumTime));
