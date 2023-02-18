@@ -401,7 +401,8 @@ void Thread::search() {
               // re-search, otherwise exit the loop.
               if (bestValue <= alpha)
               {
-                  beta = (alpha + beta) / 2;
+                  int alphaPercentage = std::clamp(100 * (alpha - bestValue) / (alpha - beta), 0, 100);
+                  beta = (alpha * alphaPercentage + beta * (100 - alphaPercentage)) / 100;
                   alpha = std::max(bestValue - delta, -VALUE_INFINITE);
 
                   failedHighCnt = 0;
