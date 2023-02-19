@@ -34,7 +34,8 @@ TimeManagement Time; // Our global time management object
 //      1) x basetime (+ z increment)
 //      2) x moves in y seconds (+ z increment)
 
-void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
+void TimeManagement::init(Search::LimitsType& limits, Color us, const Position& pos) {
+  int ply = pos.game_ply();
 
   TimePoint moveOverhead    = TimePoint(Options["Move Overhead"]);
   TimePoint slowMover       = TimePoint(Options["Slow Mover"]);
@@ -93,6 +94,11 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
                             0.88 * limits.time[us] / double(timeLeft));
       maxScale = std::min(6.3, 1.5 + 0.11 * mtg);
   }
+
+  // Adjust optimum time based on optimism
+  Thread* thread = pos.this_thread();
+  int optimism = thread->optimism[us];
+  optScale = optScale * std::clamp(1.0 + (optimism - 150) / 1000.0, 0.85, 1.15);
 
   // Never use more than 80% of the available time for this move
   optimumTime = TimePoint(optScale * timeLeft);
