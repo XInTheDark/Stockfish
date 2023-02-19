@@ -1135,7 +1135,11 @@ moves_loop: // When in check, search starts here
       // Step 16. Make the move
       pos.do_move(move, st, givesCheck);
 
-      r += (ss-1)->r / 3;
+      // Decrease reduction if previous reduction was negative
+      if (!cutNode && (ss-1)->r < -3)
+          r -= PvNode + (depth < 12);
+      else if ((ss-1)->r > 3)
+          r++;
 
       // Decrease reduction if position is or has been on the PV
       // and node is not likely to fail low. (~3 Elo)
