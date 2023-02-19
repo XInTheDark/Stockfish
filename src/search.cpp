@@ -401,7 +401,9 @@ void Thread::search() {
               // re-search, otherwise exit the loop.
               if (bestValue <= alpha)
               {
-                  beta = (alpha + beta) / 2;
+                  // Scale aspiration window size based on depth (lower depth = smaller window)
+                  int betaPercentage = 50 + (rootDepth - 20) * 0.5;
+                  beta = (alpha * (100 - betaPercentage) + beta * betaPercentage) / 100;
                   alpha = std::max(bestValue - delta, -VALUE_INFINITE);
 
                   failedHighCnt = 0;
