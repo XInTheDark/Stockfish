@@ -1178,7 +1178,7 @@ moves_loop: // When in check, search starts here
       // Decrease reduction if there is an upcoming move that draws by repetition
       if (pos.has_game_cycle(ss->ply)
           && pos.rule50_count() >= 3)
-          r -= 2;
+          r -= 1 + !PvNode;
 
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
                      + (*contHist[0])[movedPiece][to_sq(move)]
