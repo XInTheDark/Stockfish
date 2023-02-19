@@ -37,7 +37,6 @@ TimeManagement Time; // Our global time management object
 void TimeManagement::init(Search::LimitsType& limits, Color us, const Position& pos) {
 
   int ply = pos.game_ply();
-  int increment = limits.inc[us];
 
   TimePoint moveOverhead    = TimePoint(Options["Move Overhead"]);
   TimePoint slowMover       = TimePoint(Options["Slow Mover"]);
@@ -58,7 +57,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, const Position& 
 
       // Convert from milliseconds to nodes
       limits.time[us] = TimePoint(availableNodes);
-      increment *= npmsec;
+      limits.inc[us] *= npmsec;
       limits.npmsec = npmsec;
   }
 
@@ -69,11 +68,17 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, const Position& 
 
   // Make sure timeLeft is > 0 since we may use it as a divisor
   TimePoint timeLeft =  std::max(TimePoint(1),
-      limits.time[us] + increment * (mtg - 1) - moveOverhead * (2 + mtg));
-  double percentageLeft = limits.time[us] ? timeLeft * 100 / limits.time[us] : 50;
+      limits.time[us] + limits.inc[us] * (mtg - 1) - moveOverhead * (2 + mtg));
 
   // Use extra time with larger increments
-  double optExtra = std::clamp(1.0 + 12.0 * increment / limits.time[us], 1.0, 1.12);
+  double optExtra = 1.0 + 12.0 * limits.inc[us] / limits.time[us];
+
+  // Use extra time if opponent has less time than us
+  TimePoint opponentTime = limits.time[~us] + limits.inc[~us] * (mtg - 1);
+  if (opponentTime && opponentTime < limits.time[us])
+      optExtra += 0.2 * (1.0 - double(opponentTime) / limits.time[us]);
+
+  optExtra = std::clamp(optExtra, 1.0, 1.2);
 
   // A user may scale time usage by setting UCI option "Slow Mover"
   // Default is 100 and changing this value will probably lose elo.
@@ -98,12 +103,8 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, const Position& 
       maxScale = std::min(6.3, 1.5 + 0.11 * mtg);
   }
 
-  // Scale max time based on increment, game ply and time left
-  double maxTime = 0.75 + (increment ? log10(increment) / 50 : -0.05) + (ply - 50) / 1000.0 + (percentageLeft - 50) / 1000.0;
-  std::clamp(maxTime, 0.70, 0.875);
-
   optimumTime = TimePoint(optScale * timeLeft);
-  maximumTime = TimePoint(std::min(maxTime * limits.time[us] - moveOverhead, maxScale * optimumTime));
+  maximumTime = TimePoint(std::min(0.8 * limits.time[us] - moveOverhead, maxScale * optimumTime));
 
   if (Options["Ponder"])
       optimumTime += optimumTime / 4;
