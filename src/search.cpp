@@ -742,7 +742,11 @@ namespace {
         if (eval == VALUE_NONE)
             ss->staticEval = eval = evaluate(pos, &complexity);
         else // Fall back to (semi)classical complexity for TT hits, the NNUE complexity is lost
+        {
             complexity = abs(ss->staticEval - pos.psq_eg_stm());
+            if (PvNode)
+                Eval::NNUE::hint_common_parent_position(pos);
+        }
 
         // ttValue can be used as a better position evaluation (~7 Elo)
         if (    ttValue != VALUE_NONE
@@ -1476,6 +1480,9 @@ moves_loop: // When in check, search starts here
             // Never assume anything about values stored in TT
             if ((ss->staticEval = bestValue = tte->eval()) == VALUE_NONE)
                 ss->staticEval = bestValue = evaluate(pos);
+
+            if (PvNode)
+                Eval::NNUE::hint_common_parent_position(pos);
 
             // ttValue can be used as a better position evaluation (~13 Elo)
             if (    ttValue != VALUE_NONE
