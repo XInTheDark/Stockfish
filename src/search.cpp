@@ -737,6 +737,8 @@ namespace {
     }
     else if (ss->ttHit)
     {
+        Eval::NNUE::hint_common_parent_position(pos);
+
         // Never assume anything about values stored in TT
         ss->staticEval = eval = tte->eval();
         if (eval == VALUE_NONE)
@@ -1473,6 +1475,8 @@ moves_loop: // When in check, search starts here
     {
         if (ss->ttHit)
         {
+            Eval::NNUE::hint_common_parent_position(pos);
+
             // Never assume anything about values stored in TT
             if ((ss->staticEval = bestValue = tte->eval()) == VALUE_NONE)
                 ss->staticEval = bestValue = evaluate(pos);
