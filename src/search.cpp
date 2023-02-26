@@ -629,6 +629,9 @@ namespace {
     if (!excludedMove)
         ss->ttPv = PvNode || (ss->ttHit && tte->is_pv());
 
+    if (ss->ttPv)
+        Eval::NNUE::hint_common_parent_position(pos);
+
     // At non-PV nodes we check for an early TT cutoff
     if (  !PvNode
         && ss->ttHit
