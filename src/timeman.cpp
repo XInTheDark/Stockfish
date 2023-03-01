@@ -94,7 +94,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
       maxScale = std::min(6.3, 1.5 + 0.11 * mtg);
   }
 
-  double maxTimeScale = std::clamp(0.85 - 0.5 * limits.inc[us] / limits.time[us], 0.75, 0.85);
+  double maxTimeScale = limits.inc[us] ? std::clamp(0.85 - 0.5 * limits.inc[us] / limits.time[us], 0.75, 0.85) : 0.75;
 
   // Never use more than 80% of the available time for this move
   optimumTime = TimePoint(optScale * timeLeft);
