@@ -34,7 +34,10 @@ TimeManagement Time; // Our global time management object
 //      1) x basetime (+ z increment)
 //      2) x moves in y seconds (+ z increment)
 
-void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
+void TimeManagement::init(Search::LimitsType& limits, Color us, Position& pos) {
+
+  int ply = pos.game_ply();
+  Thread* thisThread = pos.this_thread();
 
   TimePoint moveOverhead    = TimePoint(Options["Move Overhead"]);
   TimePoint slowMover       = TimePoint(Options["Slow Mover"]);
@@ -71,6 +74,10 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   // Use extra time with larger increments
   double optExtra = std::clamp(1.0 + 12.0 * limits.inc[us] / limits.time[us], 1.0, 1.12);
 
+  // Scale time on completedDepth (more at low depths)
+  int completedDepth = thisThread->completedDepth;
+  double depthExtra = std::clamp(1.0 + (25.0 - completedDepth) / 100.0, 1.0, 1.20);
+
   // A user may scale time usage by setting UCI option "Slow Mover"
   // Default is 100 and changing this value will probably lose elo.
   timeLeft = slowMover * timeLeft / 100;
@@ -82,7 +89,8 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   {
       optScale = std::min(0.0120 + std::pow(ply + 3.0, 0.45) * 0.0039,
                            0.2 * limits.time[us] / double(timeLeft))
-                 * optExtra;
+                 * optExtra
+                 * depthExtra;
       maxScale = std::min(7.0, 4.0 + ply / 12.0);
   }
 
@@ -90,7 +98,8 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   else
   {
       optScale = std::min((0.88 + ply / 116.4) / mtg,
-                            0.88 * limits.time[us] / double(timeLeft));
+                            0.88 * limits.time[us] / double(timeLeft))
+                * depthExtra;
       maxScale = std::min(6.3, 1.5 + 0.11 * mtg);
   }
 
