@@ -70,6 +70,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
   // Use extra time with larger increments
   double optExtra = std::clamp(1.0 + 12.0 * limits.inc[us] / limits.time[us], 1.0, 1.12);
+  double maxExtra = std::clamp(1.0 + 12.0 * limits.inc[us] / limits.time[us], 1.0, 1.2);
 
   // A user may scale time usage by setting UCI option "Slow Mover"
   // Default is 100 and changing this value will probably lose elo.
@@ -83,7 +84,8 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
       optScale = std::min(0.0120 + std::pow(ply + 3.0, 0.45) * 0.0039,
                            0.2 * limits.time[us] / double(timeLeft))
                  * optExtra;
-      maxScale = std::min(7.0, 4.0 + ply / 12.0);
+      maxScale = std::min(7.0, 4.0 + ply / 12.0)
+                 * maxExtra;
   }
 
   // x moves in y seconds (+ z increment)
