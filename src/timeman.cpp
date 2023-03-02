@@ -81,7 +81,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
   if (limits.movestogo == 0)
   {
       optScale = std::min(0.0120 + 0.0039 *
-                               (ply < 80 ? 0.059 * ply + 2.58 : 0.0302 * ply + 4.89),
+                               (ply < 100 ? 0.054 * ply + 2.63 : 0.027 * ply + 5.38),
                            0.2 * limits.time[us] / double(timeLeft))
                  * optExtra;
       maxScale = std::min(7.0, 4.0 + ply / 12.0);
