@@ -360,6 +360,8 @@ void Thread::search() {
 
               // Adjust optimism based on root move's previousScore
               int opt = 120 * prev / (std::abs(prev) + 161);
+              // Adjust optimism based on complexity
+              opt *= (272 + complexityAverage.value()) / 256;
               optimism[ us] = Value(opt);
               optimism[~us] = -optimism[us];
           }
