@@ -1149,41 +1149,41 @@ moves_loop: // When in check, search starts here
       // and node is not likely to fail low. (~3 Elo)
       if (   ss->ttPv
           && !likelyFailLow)
-          R -= 2057.71 / 1000.0;
+          R -= 2055.33 / 1000.0;
 
       // Decrease reduction if opponent's move count is high (~1 Elo)
       if ((ss-1)->moveCount > 7)
-          R -= 1008.45 / 1000.0;
+          R -= 1008.06 / 1000.0;
 
       // Increase reduction for cut nodes (~3 Elo)
       if (cutNode)
-          R += 2058.69 / 1000.0;
+          R += 2059.49 / 1000.0;
 
       // Increase reduction if ttMove is a capture (~3 Elo)
       if (ttCapture)
-          R += 1016.66 / 1000.0;
+          R += 1013.09 / 1000.0;
 
       // Decrease reduction for PvNodes based on depth
       if (PvNode)
-          R -= 1024.36 * (1 + 12 / (3 + depth)) / 1000.0;
+          R -= 1027.94 * (1 + 12 / (3 + depth)) / 1000.0;
 
       // Decrease reduction if ttMove has been singularly extended (~1 Elo)
       if (singularQuietLMR)
-          R -= 1038.45 / 1000.0;
+          R -= 1039.64 / 1000.0;
 
       // Decrease reduction if we move a threatened piece (~1 Elo)
       if (   depth > 9
           && (mp.threatenedPieces & from_sq(move)))
-          R -= 931.33 / 1000.0;
+          R -= 934.90 / 1000.0;
 
       // Increase reduction if next ply has a lot of fail high
       if ((ss+1)->cutoffCnt > 3)
-          R += 1048.98 / 1000.0;
+          R += 1044.61 / 1000.0;
 
       // Decrease reduction if move is a killer and we have a good history
       if (move == ss->killers[0]
           && (*contHist[0])[movedPiece][to_sq(move)] >= 3722)
-          R -= 1018.19 / 1000.0;
+          R -= 1013.83 / 1000.0;
 
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
                      + (*contHist[0])[movedPiece][to_sq(move)]
@@ -1192,7 +1192,7 @@ moves_loop: // When in check, search starts here
                      - 4182;
 
       // Decrease/increase reduction for moves with a good/bad history (~30 Elo)
-      R -= 1040.64 * (ss->statScore / (11791 + 3992 * (depth > 6 && depth < 19))) / 1000.0;
+      R -= 1044.21 * (ss->statScore / (11791 + 3992 * (depth > 6 && depth < 19))) / 1000.0;
 
       Depth r = std::round(R);
 
