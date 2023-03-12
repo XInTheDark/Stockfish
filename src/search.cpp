@@ -1133,6 +1133,10 @@ moves_loop: // When in check, search starts here
       newDepth += extension;
       ss->doubleExtensions = (ss-1)->doubleExtensions + (extension == 2);
 
+      // Increase reduction for negative extensions with bad history
+      if (extension < 0 && (*contHist[0])[movedPiece][to_sq(move)] < 1500)
+          r -= 2 * extension;
+
       // Speculative prefetch as early as possible
       prefetch(TT.first_entry(pos.key_after(move)));
 
