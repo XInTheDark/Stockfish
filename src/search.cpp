@@ -1164,6 +1164,10 @@ moves_loop: // When in check, search starts here
       if (ttCapture)
           r++;
 
+      // Decrease reduction if TT depth is low
+      if (ss->ttPv && tte->depth() < depth - 3)
+          r--;
+
       // Decrease reduction for PvNodes based on depth
       if (PvNode)
           r -= 1 + 12 / (3 + depth);
