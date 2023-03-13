@@ -1008,10 +1008,11 @@ moves_loop: // When in check, search starts here
           int lmrDepth = std::max(newDepth - r, 0);
 
           if (   capture
-              || givesCheck)
+              || givesCheck
+              || move == countermove)
           {
               // Futility pruning for captures (~2 Elo)
-              if (   !givesCheck
+              if (   capture
                   && !PvNode
                   && lmrDepth < 6
                   && !ss->inCheck
