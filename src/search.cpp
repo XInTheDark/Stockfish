@@ -513,6 +513,13 @@ void Thread::search() {
                 skill.best ? skill.best : skill.pick_best(multiPV)));
 }
 
+int a1 = -19, a2 = -1920, a3 = 1920,
+    b1 = 156,
+    i1 = 2, i2 = 0,
+    c1 = 426, c2 = 252;
+
+TUNE(a1, a2, a3, b1, c1, c2);
+TUNE(SetRange(-50, 50), i1, i2);
 
 namespace {
 
@@ -766,7 +773,7 @@ namespace {
     // Use static evaluation difference to improve quiet move ordering (~4 Elo)
     if (is_ok((ss-1)->currentMove) && !(ss-1)->inCheck && !priorCapture)
     {
-        int bonus = std::clamp(-19 * int((ss-1)->staticEval + ss->staticEval), -1920, 1920);
+        int bonus = std::clamp(a1 * int((ss-1)->staticEval + ss->staticEval), a2, a3);
         thisThread->mainHistory[~us][from_to((ss-1)->currentMove)] << bonus;
     }
 
@@ -776,13 +783,13 @@ namespace {
     // margin and the improving flag are used in various pruning heuristics.
     improvement =   (ss-2)->staticEval != VALUE_NONE ? ss->staticEval - (ss-2)->staticEval
                   : (ss-4)->staticEval != VALUE_NONE ? ss->staticEval - (ss-4)->staticEval
-                  :                                    156;
-    improving = improvement > 0;
+                  :                                    b1;
+    improving = improvement > i1 * depth + i2;
 
     // Step 7. Razoring (~1 Elo).
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
     // return a fail low.
-    if (eval < alpha - 426 - 252 * depth * depth)
+    if (eval < alpha - c1 - c2 * depth * depth)
     {
         value = qsearch<NonPV>(pos, ss, alpha - 1, alpha);
         if (value < alpha)
