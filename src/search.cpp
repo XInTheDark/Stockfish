@@ -1102,7 +1102,7 @@ moves_loop: // When in check, search starts here
 
               // If the eval of ttMove is greater than beta, we reduce it (negative extension)
               else if (ttValue >= beta)
-                  extension = -2 - !PvNode;
+                  extension = -2;
 
               // If the eval of ttMove is less than value, we reduce it (negative extension)
               else if (ttValue <= value)
@@ -1112,7 +1112,9 @@ moves_loop: // When in check, search starts here
               else if (ttValue <= alpha)
                   extension = -1;
 
-              if (PvNode && extension < 0)
+              if (!PvNode && extension < 0)
+                  extension--;
+              else if (PvNode && extension < 0)
                   extension++;
           }
 
