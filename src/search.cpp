@@ -1131,6 +1131,8 @@ moves_loop: // When in check, search starts here
       newDepth += extension;
       ss->doubleExtensions = (ss-1)->doubleExtensions + (extension == 2);
 
+      r -= PvNode ? 2 * extension : extension;
+
       // Speculative prefetch as early as possible
       prefetch(TT.first_entry(pos.key_after(move)));
 
