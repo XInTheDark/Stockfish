@@ -1106,7 +1106,10 @@ moves_loop: // When in check, search starts here
 
               // Negative extension for cutNodes
               else if (cutNode)
-                  extension = -2 - !PvNode;
+              {
+                  extension = -2;
+                  depth -= depth < 13;
+              }
 
               // If the eval of ttMove is less than value, we reduce it (negative extension)
               else if (ttValue <= value)
