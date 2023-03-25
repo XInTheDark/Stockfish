@@ -1060,7 +1060,7 @@ moves_loop: // When in check, search starts here
 
               Bitboard occupied;
               // Prune moves with negative SEE (~4 Elo)
-              if (!pos.see_ge(move, occupied, Value(-24 * lmrDepth * lmrDepth - 15 * lmrDepth)))
+              if (!pos.see_ge(move, occupied, Value(-290 - depth)))
                   continue;
           }
       }
