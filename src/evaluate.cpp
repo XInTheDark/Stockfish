@@ -1044,7 +1044,7 @@ make_v:
 
 } // namespace Eval
 
-int a1 = 12, a2 = 7, a3 = 1781,
+int a0 = 6, a1 = 15, a2 = 7, a3 = 1781,
     b1 = 1001, b2 = 5120, b3 = 61, b4 = 0,
     c1 = 406, c2 = 424,
     d1 = 272, d2 = 748,
@@ -1063,7 +1063,7 @@ Value Eval::evaluate(const Position& pos, int* complexity, int depth) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive and several pieces remain. (~3 Elo)
-  bool useClassical = !useNNUE || (depth > a1 && (pos.count<ALL_PIECES>() > a2 && abs(psq) > a3));
+  bool useClassical = !useNNUE || (depth > a0 && a1 > depth && (pos.count<ALL_PIECES>() > a2 && abs(psq) > a3));
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
