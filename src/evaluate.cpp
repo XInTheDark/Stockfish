@@ -1053,14 +1053,14 @@ Value Eval::evaluate(const Position& pos, int* complexity, int depth) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive and several pieces remain. (~3 Elo)
-      bool useClassical = !useNNUE || (depth < 17 && (pos.count<ALL_PIECES>() > 7 && abs(psq) > 1810));
+      bool useClassical = !useNNUE || (depth < 17 && (pos.count<ALL_PIECES>() > 7 && abs(psq) > 1808));
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
   else
   {
       int nnueComplexity;
-      int scale = 960 + 5246 * pos.count<PAWN>() / 1024 + 60 * pos.non_pawn_material() / 4096 + 144 * depth / 1024;
+      int scale = 961 + 5244 * pos.count<PAWN>() / 1024 + 60 * pos.non_pawn_material() / 4096 + 139 * depth / 1024;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1077,7 +1077,7 @@ Value Eval::evaluate(const Position& pos, int* complexity, int depth) {
           *complexity = nnueComplexity;
 
       optimism = optimism * (280 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 782)) / 1024;
+      v = (nnue * scale + optimism * (scale - 783)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
