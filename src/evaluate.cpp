@@ -1044,14 +1044,6 @@ make_v:
 
 } // namespace Eval
 
-int a1 = 12, a2 = 7, a3 = 1781,
-    b1 = 1001, b2 = 5120, b3 = 61, b4 = 0,
-    c1 = 406, c2 = 424,
-    d1 = 272, d2 = 748,
-    e1 = 200, e2 = 214;
-
-TUNE(a1, a2, a3, b1, b2, b3, b4, c1, c2, d1, d2, e1, e2);
-
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
 
@@ -1063,14 +1055,14 @@ Value Eval::evaluate(const Position& pos, int* complexity, int depth) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive and several pieces remain. (~3 Elo)
-  bool useClassical = !useNNUE || (depth > a1 && (pos.count<ALL_PIECES>() > a2 && abs(psq) > a3));
+  bool useClassical = !useNNUE || (depth > 12 && (pos.count<ALL_PIECES>() > 7 && abs(psq) > 1763));
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
   else
   {
       int nnueComplexity;
-      int scale = b1 + b2 * pos.count<PAWN>() / 1024 + b3 * pos.non_pawn_material() / 4096 + b4 * depth / 1024;
+      int scale = 969 + 5201 * pos.count<PAWN>() / 1024 + 65 * pos.non_pawn_material() / 4096 + 102 * depth / 1024;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1078,20 +1070,20 @@ Value Eval::evaluate(const Position& pos, int* complexity, int depth) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  c1 * nnueComplexity
-                        + (c2 + optimism) * abs(psq - nnue)
+      nnueComplexity = (  391 * nnueComplexity
+                        + (412 + optimism) * abs(psq - nnue)
                         ) / 1024;
 
       // Return hybrid NNUE complexity to caller
       if (complexity)
           *complexity = nnueComplexity;
 
-      optimism = optimism * (d1 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - d2)) / 1024;
+      optimism = optimism * (259 + nnueComplexity) / 256;
+      v = (nnue * scale + optimism * (scale - 772)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
-  v = v * (e1 - pos.rule50_count()) / e2;
+  v = v * (187 - pos.rule50_count()) / 210;
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
