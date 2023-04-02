@@ -1050,7 +1050,7 @@ int a0 = 6, a1 = 15, a2 = 7, a3 = 1781,
     d1 = 272, d2 = 748,
     e1 = 200, e2 = 214;
 
-TUNE(a1, a2, a3, b1, b2, b3, b4, c1, c2, d1, d2, e1, e2);
+TUNE(a0, a1, a2, a3, b1, b2, b3, b4, c1, c2, d1, d2, e1, e2);
 
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
