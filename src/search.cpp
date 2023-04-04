@@ -480,7 +480,11 @@ void Thread::search() {
           double reduction = (1.4 + mainThread->previousTimeReduction) / (2.08 * timeReduction);
           double bestMoveInstability = 1 + 1.8 * totBestMoveChanges / Threads.size();
 
-          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability * mainThread->complexity;
+          // Scale time based on hashfull
+          double h = TT.hashfull();
+          double hashfull = -0.00003 * h*h + 0.001 * h + 1.066;
+
+          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability * mainThread->complexity * hashfull;
 
           // Cap used time in case of a single legal move for a better viewer experience in tournaments
           // yielding correct scores and sufficiently fast moves.
