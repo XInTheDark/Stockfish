@@ -1042,6 +1042,11 @@ make_v:
 
 } // namespace Eval
 
+int a = 2048, b = 0, c = 0;
+
+TUNE(a);
+TUNE(SetRange(-200, 200), b);
+TUNE(SetRange(-200, 200), c);
 
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
@@ -1054,7 +1059,7 @@ Value Eval::evaluate(const Position& pos, int* complexity, int depth) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  bool useClassical = !useNNUE || (depth < 17 && abs(psq) > 2048);
+  bool useClassical = !useNNUE || abs(psq) > a + b * depth * depth + c * depth;
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
