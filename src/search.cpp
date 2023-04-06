@@ -1183,6 +1183,12 @@ moves_loop: // When in check, search starts here
           && (*contHist[0])[movedPiece][to_sq(move)] >= 3722)
           r--;
 
+      // Decrease reduction if move is a check
+      if (givesCheck
+          && depth > 10
+          && abs(ss->staticEval) > 88)
+          r--;
+
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
                      + (*contHist[0])[movedPiece][to_sq(move)]
                      + (*contHist[1])[movedPiece][to_sq(move)]
