@@ -1185,8 +1185,7 @@ moves_loop: // When in check, search starts here
 
       // Decrease reduction if move is a check
       if (givesCheck
-          && depth > 10
-          && abs(ss->staticEval) > 88)
+          && depth > 10)
           r--;
 
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
