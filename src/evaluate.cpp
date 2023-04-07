@@ -1055,7 +1055,7 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
 
-  bool useClassical = !useNNUE || (abs(psq) > 2400 && pos.this_thread()->rootPos.count<ALL_PIECES>() > 6);
+  bool useClassical = !useNNUE || (abs(psq) > 2400 && pos.count<ALL_PIECES>() > 6);
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
