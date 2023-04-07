@@ -364,8 +364,8 @@ void Thread::search() {
 
               // Adjust optimism based on root move's previousScore
               int opt = 120 * prev / (std::abs(prev) + 161);
-              optimism[ us] = Value(std::max(opt, 0));
-              optimism[~us] = -opt;
+              optimism[ us] = Value(std::max(opt, -1));
+              optimism[~us] = -Value(opt);
           }
 
           // Start with a small aspiration window and, in the case of a fail
