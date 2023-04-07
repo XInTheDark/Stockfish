@@ -178,6 +178,14 @@ void Search::clear() {
   Tablebases::init(Options["SyzygyPath"]); // Free mapped files
 }
 
+int a1 = 10, a2 = 16502,
+    b1 = 120, b2 = 0, b3 = 161,
+    c1 = -9999;
+
+TUNE(a1, b1, b3);
+TUNE(SetRange(1, 30000), a2);
+TUNE(SetRange(-300, 300), b2);
+TUNE(SetRange(-9999, 9999), c1);
 
 /// MainThread::search() is started when the program receives the UCI 'go'
 /// command. It searches from the root position and outputs the "bestmove".
@@ -358,14 +366,14 @@ void Thread::search() {
           if (rootDepth >= 4)
           {
               Value prev = rootMoves[pvIdx].averageScore;
-              delta = Value(10) + int(prev) * prev / 16502;
+              delta = Value(a1) + int(prev) * prev / a2;
               alpha = std::max(prev - delta,-VALUE_INFINITE);
               beta  = std::min(prev + delta, VALUE_INFINITE);
 
               // Adjust optimism based on root move's previousScore
-              int opt = 120 * prev / (std::abs(prev) + 161);
-              optimism[ us] = Value(opt);
-              optimism[~us] = -optimism[us];
+              int opt = b1 * (prev + b2) / (std::abs(prev + b2) + b3);
+              optimism[ us] = Value(std::max(opt, c1));
+              optimism[~us] = Value(-opt);
           }
 
           // Start with a small aspiration window and, in the case of a fail
