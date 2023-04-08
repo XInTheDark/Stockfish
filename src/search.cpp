@@ -367,7 +367,7 @@ void Thread::search() {
                                     +  6 * (mainThread->iterValue[iterIdx] - bestValue)) / 619.6;
               fallingEval = std::clamp(fallingEval, 0.5, 1.5);
 
-              int contempt = us == WHITE ? 20 : 0;
+              int contempt = 20;
               int opt = 120 * (prev + contempt) / (std::abs(prev + contempt) + 161);
               opt *= (2 - fallingEval);
 
