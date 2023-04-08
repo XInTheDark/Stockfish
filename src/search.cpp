@@ -366,7 +366,9 @@ void Thread::search() {
               double fallingEval = (69 + 13 * (mainThread->bestPreviousAverageScore - bestValue)
                                     +  6 * (mainThread->iterValue[iterIdx] - bestValue)) / 619.6;
               fallingEval = std::clamp(fallingEval, 0.5, 1.5);
-              int opt = 120 * prev / (std::abs(prev) + 161);
+
+              int contempt = us == WHITE ? 20 : 0;
+              int opt = 120 * (prev + contempt) / (std::abs(prev + contempt) + 161);
               opt *= (2 - fallingEval);
 
               optimism[ us] = Value(opt);
