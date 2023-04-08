@@ -1123,7 +1123,7 @@ moves_loop: // When in check, search starts here
                   extension = -1;
 
               if (!tte->is_pv() && !PvNode)
-                  extension = -1 - (depth < 13);
+                  extension -= 1 + (depth < 13);
           }
 
           // Check extensions (~1 Elo)
