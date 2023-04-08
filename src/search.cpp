@@ -1123,6 +1123,12 @@ moves_loop: // When in check, search starts here
                   extension = -1;
           }
 
+          // Extension for high rule50 or repeated moves in the endgame
+          else if (   depth > 10
+                   && pos.count<ALL_PIECES>() - pos.count<PAWN>() <= 6
+                   && (pos.rule50_count() > 90 - depth || pos.has_repeated()))
+              extension = 1 + PvNode;
+
           // Check extensions (~1 Elo)
           else if (   givesCheck
                    && depth > 10
