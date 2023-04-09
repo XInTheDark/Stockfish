@@ -1046,7 +1046,7 @@ make_v:
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
 
-Value Eval::evaluate(const Position& pos, int* complexity) {
+Value Eval::evaluate(const Position& pos, int* complexity, bool hybrid) {
 
   Value v;
   Value psq = pos.psq_eg_stm();
@@ -1079,6 +1079,12 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
 
       optimism = optimism * (272 + nnueComplexity) / 256;
       v = (nnue * scale + optimism * (scale - 748)) / 1024;
+
+      if (hybrid)
+      {
+          Value hce = Evaluation<NO_TRACE>(pos).value();
+          v = (hce + v) / 2;
+      }
   }
 
   // Damp down the evaluation linearly when shuffling
