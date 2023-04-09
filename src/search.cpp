@@ -355,7 +355,7 @@ void Thread::search() {
           selDepth = 0;
 
           // Reset aspiration window starting size
-          if (rootDepth >= 4)
+          if (rootDepth >= 6)
           {
               Value prev = rootMoves[pvIdx].averageScore;
               delta = Value(10) + int(prev) * prev / 16502;
