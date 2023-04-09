@@ -290,7 +290,6 @@ void Thread::search() {
 
   bestValue = delta = alpha = -VALUE_INFINITE;
   beta = VALUE_INFINITE;
-  optimism[WHITE] = optimism[BLACK] = VALUE_ZERO;
 
   if (mainThread)
   {
@@ -361,11 +360,6 @@ void Thread::search() {
               delta = Value(10) + int(prev) * prev / 16502;
               alpha = std::max(prev - delta,-VALUE_INFINITE);
               beta  = std::min(prev + delta, VALUE_INFINITE);
-
-              // Adjust optimism based on root move's previousScore
-              int opt = 120 * prev / (std::abs(prev) + 161);
-              optimism[ us] = Value(opt);
-              optimism[~us] = -optimism[us];
           }
 
           // Start with a small aspiration window and, in the case of a fail
