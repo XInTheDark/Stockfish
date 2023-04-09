@@ -1496,8 +1496,9 @@ moves_loop: // When in check, search starts here
         if (ss->ttHit)
         {
             // Never assume anything about values stored in TT
-            if ((ss->staticEval = bestValue = tte->eval()) == VALUE_NONE)
-                ss->staticEval = bestValue = evaluate(pos);
+            if ((ss->staticEval = bestValue = tte->eval()) == VALUE_NONE
+                || abs(pos.psq_eg_stm()) > 2048)
+                ss->staticEval = bestValue = evaluate(pos, nullptr, true);
 
             // ttValue can be used as a better position evaluation (~13 Elo)
             if (    ttValue != VALUE_NONE
