@@ -148,7 +148,7 @@ namespace Stockfish::Eval::NNUE {
     // overaligning stack variables with alignas() doesn't work correctly.
 
     constexpr uint64_t alignment = CacheLineSize;
-    constexpr int delta = 24;
+    constexpr int delta = -66;
 
 #if defined(ALIGNAS_ON_STACK_VARIABLES_BROKEN)
     TransformedFeatureType transformedFeaturesUnaligned[
@@ -169,7 +169,7 @@ namespace Stockfish::Eval::NNUE {
     if (complexity)
         *complexity = abs(psqt - positional) / OutputScale;
 
-    // Give more value to positional evaluation when adjusted flag is set
+    // Give less value to positional evaluation when adjusted flag is set
     if (adjusted)
         return static_cast<Value>(((1024 - delta) * psqt + (1024 + delta) * positional) / (1024 * OutputScale));
     else
