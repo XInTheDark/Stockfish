@@ -1055,8 +1055,9 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
   bool useClassical = !useNNUE || abs(psq) > 2048;
+  bool useHybrid = useNNUE && pos.count<ALL_PIECES>() - pos.count<PAWN>() <= 6;
 
-  if (useClassical)
+  if (useClassical && !useHybrid)
       v = Evaluation<NO_TRACE>(pos).value();
   else
   {
@@ -1079,6 +1080,11 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
 
       optimism = optimism * (272 + nnueComplexity) / 256;
       v = (nnue * scale + optimism * (scale - 748)) / 1024;
+
+      if (useHybrid) {
+          Value hce = Evaluation<NO_TRACE>(pos).value();
+          v = (hce + v) / 2;
+      }
   }
 
   // Damp down the evaluation linearly when shuffling
