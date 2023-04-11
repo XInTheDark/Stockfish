@@ -477,8 +477,9 @@ void Thread::search() {
           timeReduction = lastBestMoveDepth + 8 < completedDepth ? 1.57 : 0.65;
           double reduction = (1.4 + mainThread->previousTimeReduction) / (2.08 * timeReduction);
           double bestMoveInstability = 1 + 1.8 * totBestMoveChanges / Threads.size();
+          double trickyPosition = 1.0 + std::min(0.0, 0.00025 * (394 - abs(bestValue)) * (abs(bestValue) - 236));
 
-          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability * mainThread->complexity;
+          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability * mainThread->complexity * trickyPosition;
 
           // Cap used time in case of a single legal move for a better viewer experience in tournaments
           // yielding correct scores and sufficiently fast moves.
