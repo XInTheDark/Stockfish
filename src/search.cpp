@@ -57,6 +57,13 @@ using std::string;
 using Eval::evaluate;
 using namespace Search;
 
+int a1 = 154,
+    b1 = 1449, b2 = 937, b3 = 941,
+    c1 = 3, c2 = 3,
+    d1 = 341, d2 = 470, d3 = 1710;
+
+TUNE(a1, b1, b2, b3, c1, c2, d1, d2, d3);
+
 namespace {
 
   // Different node types, used as a template parameter
@@ -64,7 +71,7 @@ namespace {
 
   // Futility margin
   Value futility_margin(Depth d, bool improving) {
-    return Value(154 * (d - improving));
+    return Value(a1 * (d - improving));
   }
 
   // Reductions lookup table, initialized at startup
@@ -72,17 +79,17 @@ namespace {
 
   Depth reduction(bool i, Depth d, int mn, Value delta, Value rootDelta) {
     int r = Reductions[d] * Reductions[mn];
-    return (r + 1449 - int(delta) * 937 / int(rootDelta)) / 1024 + (!i && r > 941);
+    return (r + b1 - int(delta) * b2 / int(rootDelta)) / 1024 + (!i && r > b3);
   }
 
-  constexpr int futility_move_count(bool improving, Depth depth) {
-    return improving ? (3 + depth * depth)
-                     : (3 + depth * depth) / 2;
+  int futility_move_count(bool improving, Depth depth) {
+    return improving ? (c1 + depth * depth)
+                     : (c2 + depth * depth) / 2;
   }
 
   // History and stats update bonus, based on depth
   int stat_bonus(Depth d) {
-    return std::min(341 * d - 470, 1710);
+    return std::min(d1 * d - d2, d3);
   }
 
   // Add a small random component to draw evaluations to avoid 3-fold blindness
