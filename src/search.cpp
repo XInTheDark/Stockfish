@@ -64,7 +64,7 @@ namespace {
 
   // Futility margin
   Value futility_margin(Depth d, bool improving) {
-    return Value(154 * (d - improving));
+    return Value(148 * (d - improving));
   }
 
   // Reductions lookup table, initialized at startup
@@ -72,7 +72,7 @@ namespace {
 
   Depth reduction(bool i, Depth d, int mn, Value delta, Value rootDelta) {
     int r = Reductions[d] * Reductions[mn];
-    return (r + 1449 - int(delta) * 937 / int(rootDelta)) / 1024 + (!i && r > 941);
+    return (r + 1429 - int(delta) * 911 / int(rootDelta)) / 1024 + (!i && r > 1016);
   }
 
   constexpr int futility_move_count(bool improving, Depth depth) {
@@ -82,7 +82,7 @@ namespace {
 
   // History and stats update bonus, based on depth
   int stat_bonus(Depth d) {
-    return std::min(341 * d - 470, 1710);
+    return std::min(342 * d - 478, 1888);
   }
 
   // Add a small random component to draw evaluations to avoid 3-fold blindness
