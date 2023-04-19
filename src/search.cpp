@@ -1171,6 +1171,10 @@ moves_loop: // When in check, search starts here
       if (cutNode)
           r += 2;
 
+      if (PvNode && bestMove
+      && (from_sq(move) == from_sq(bestMove) || to_sq(move) == to_sq(bestMove)))
+          r--;
+
       // Increase reduction if ttMove is a capture (~3 Elo)
       if (ttCapture)
           r++;
