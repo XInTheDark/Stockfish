@@ -256,6 +256,18 @@ void MainThread::search() {
 }
 
 
+int a1 = 69, a2 = 13, a3 = 6, a4 = 100,
+    b1 = 500, b2 = 1500,
+
+    c1 = 8, c2 = 1570, c3 = 650,
+    d1 = 1400, d2 = 2080,
+
+    e1 = 1000, e2 = 1800,
+
+    f1 = 500;
+
+TUNE(a1, a2, a3, a4, b1, b2, c1, c2, c3, d1, d2, e1, e2, f1);
+
 /// Thread::search() is the main iterative deepening loop. It calls search()
 /// repeatedly with increasing depth until the allocated thinking time has been
 /// consumed, the user stops the search, or the maximum search depth is reached.
@@ -456,18 +468,16 @@ void Thread::search() {
           && !Threads.stop
           && !mainThread->stopOnPonderhit)
       {
-          double fallingEval = (69 + 13 * (mainThread->bestPreviousAverageScore - bestValue)
-                                    +  6 * (mainThread->iterValue[iterIdx] - bestValue)) / 619.6;
-          fallingEval = std::clamp(fallingEval, 0.5, 1.5);
+          double fallingEval = (a1 + a2 * (mainThread->bestPreviousAverageScore - bestValue)
+                                    +  a3 * (mainThread->iterValue[iterIdx] - bestValue)) * a4 / 61960.0;
+          fallingEval = std::clamp(fallingEval, b1 / 1000.0, b2 / 1000.0);
 
           // If the bestMove is stable over several iterations, reduce time accordingly
-          timeReduction = lastBestMoveDepth + 8 < completedDepth ? 1.57 : 0.65;
-          double reduction = (1.4 + mainThread->previousTimeReduction) / (2.08 * timeReduction);
-          double bestMoveInstability = 1 + 1.8 * totBestMoveChanges / Threads.size();
-          int hash = TT.hashfull() + 1;
-          double hashfull = std::clamp(1.85 - 0.5 * log10(hash), 0.85, 1.75);
+          timeReduction = lastBestMoveDepth + c1 < completedDepth ? c2 / 1000.0 : c3 / 1000.0;
+          double reduction = (d1 / 1000.0 + mainThread->previousTimeReduction) / (d2 / 1000.0 * timeReduction);
+          double bestMoveInstability = e1 / 1000.0 + e2 / 1000.0 * totBestMoveChanges / Threads.size();
 
-          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability * hashfull;
+          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability;
 
           // Cap used time in case of a single legal move for a better viewer experience in tournaments
           // yielding correct scores and sufficiently fast moves.
@@ -485,7 +495,7 @@ void Thread::search() {
                   Threads.stop = true;
           }
           else if (   !mainThread->ponder
-                   && Time.elapsed() > totalTime * 0.50)
+                   && Time.elapsed() > totalTime * f1 / 1000.0)
               Threads.increaseDepth = false;
           else
               Threads.increaseDepth = true;
