@@ -1173,8 +1173,9 @@ moves_loop: // When in check, search starts here
           r--;
 
       // Decrease reduction if optimism is high
+      Value opt = *thisThread->optimism * (us == WHITE ? 1 : -1);
       if (depth > 7
-          && *thisThread->optimism > Value(75))
+          && opt > Value(75))
           r--;
 
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
