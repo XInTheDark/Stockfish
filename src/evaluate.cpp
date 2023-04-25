@@ -1068,9 +1068,6 @@ Value Eval::evaluate(const Position& pos) {
 
       Value nnue = NNUE::evaluate(pos, true);
 
-      dbg_mean_of((424 + optimism) * abs(psq - nnue) * 3 / 1024);
-      dbg_stdev_of((424 + optimism) * abs(psq - nnue) * 3 / 1024);
-
       optimism = optimism * (272 + (424 + optimism) * abs(psq - nnue) * 3 / 1024) / 256;
       v = (nnue * scale + optimism * (scale - 748)) / 1024;
   }
