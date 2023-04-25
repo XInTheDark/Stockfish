@@ -456,14 +456,14 @@ void Thread::search() {
           && !Threads.stop
           && !mainThread->stopOnPonderhit)
       {
-          double fallingEval = (69 + 13 * (mainThread->bestPreviousAverageScore - bestValue)
-                                    +  6 * (mainThread->iterValue[iterIdx] - bestValue)) * 101 / 61960;
-          fallingEval = std::clamp(fallingEval, 0.4488, 1.7121);
-9
+          double fallingEval = (71 + 14 * (mainThread->bestPreviousAverageScore - bestValue)
+                                    +  6 * (mainThread->iterValue[iterIdx] - bestValue)) * 99 / 61960;
+          fallingEval = std::clamp(fallingEval, 0.4363, 1.7539);
+
           // If the bestMove is stable over several iterations, reduce time accordingly
-          timeReduction = lastBestMoveDepth + 9 < completedDepth ? 1.7045 : 0.6042;
-          double reduction = (1.557 + mainThread->previousTimeReduction) / (2.1162 * timeReduction);
-          double bestMoveInstability = 1.055 + 1.8665 * totBestMoveChanges / Threads.size();
+          timeReduction = lastBestMoveDepth + 9 < completedDepth ? 1.6739 : 0.5726;
+          double reduction = (1.575 + mainThread->previousTimeReduction) / (2.1365 * timeReduction);
+          double bestMoveInstability = 1.0439 + 1.9417 * totBestMoveChanges / Threads.size();
 
           double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability;
 
@@ -483,7 +483,7 @@ void Thread::search() {
                   Threads.stop = true;
           }
           else if (   !mainThread->ponder
-                   && Time.elapsed() > totalTime * 0.51)
+                   && Time.elapsed() > totalTime * 0.512)
               Threads.increaseDepth = false;
           else
               Threads.increaseDepth = true;
