@@ -140,7 +140,7 @@ namespace Eval {
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
 
-Value Eval::evaluate(const Position& pos, int* complexity) {
+Value Eval::evaluate(const Position& pos) {
 
   assert(!pos.checkers());
 
@@ -159,10 +159,6 @@ Value Eval::evaluate(const Position& pos, int* complexity) {
   nnueComplexity = (  406 * nnueComplexity
                     + (424 + optimism) * abs(psq - nnue)
                     ) / 1024;
-
-  // Return NNUE complexity to caller
-  if (complexity)
-      *complexity = nnueComplexity;
 
   optimism = optimism * (272 + nnueComplexity) / 256;
   v = (nnue * scale + optimism * (scale - 748)) / 1024;
