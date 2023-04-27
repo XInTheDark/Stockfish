@@ -1058,8 +1058,6 @@ Value Eval::evaluate(const Position& pos) {
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
   bool useClassical = !useNNUE || abs(psq) > 2765;
 
-    dbg_hit_on(abs(psq) > 2765);
-
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
   else
