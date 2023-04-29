@@ -245,17 +245,6 @@ namespace {
   constexpr Score RookOnClosedFile = S(10, 5);
   constexpr Score RookOnOpenFile[] = { S(18, 8), S(49, 26) };
 
-  // ThreatByMinor/ByRook[attacked PieceType] contains bonuses according to
-  // which piece type attacks which one. Attacks on lesser pieces which are
-  // pawn-defended are not considered.
-  constexpr Score ThreatByMinor[PIECE_TYPE_NB] = {
-    S(0, 0), S(6, 37), S(64, 50), S(82, 57), S(103, 130), S(81, 163)
-  };
-
-  constexpr Score ThreatByRook[PIECE_TYPE_NB] = {
-    S(0, 0), S(3, 44), S(36, 71), S(44, 59), S(0, 39), S(60, 39)
-  };
-
   constexpr Value CorneredBishop = Value(50);
 
   // Assorted bonuses and penalties
@@ -263,21 +252,13 @@ namespace {
   constexpr Score BishopOnKingRing    = S( 24,  0);
   constexpr Score BishopXRayPawns     = S(  4,  5);
   constexpr Score FlankAttacks        = S(  8,  0);
-  constexpr Score Hanging             = S( 72, 40);
-  constexpr Score KnightOnQueen       = S( 16, 11);
   constexpr Score LongDiagonalBishop  = S( 45,  0);
   constexpr Score MinorBehindPawn     = S( 18,  3);
   constexpr Score PassedFile          = S( 13,  8);
   constexpr Score PawnlessFlank       = S( 19, 97);
   constexpr Score ReachableOutpost    = S( 33, 19);
-  constexpr Score RestrictedPiece     = S(  6,  7);
   constexpr Score RookOnKingRing      = S( 16,  0);
-  constexpr Score SliderOnQueen       = S( 62, 21);
-  constexpr Score ThreatByKing        = S( 24, 87);
-  constexpr Score ThreatByPawnPush    = S( 48, 39);
-  constexpr Score ThreatBySafePawn    = S(167, 99);
   constexpr Score TrappedRook         = S( 55, 13);
-  constexpr Score WeakQueenProtection = S( 14,  0);
   constexpr Score WeakQueen           = S( 57, 19);
 
 
@@ -626,106 +607,6 @@ namespace {
   }
 
 
-  // Evaluation::threats() assigns bonuses according to the types of the
-  // attacking and the attacked pieces.
-
-  template<Tracing T> template<Color Us>
-  Score Evaluation<T>::threats() const {
-
-    constexpr Color     Them     = ~Us;
-    constexpr Direction Up       = pawn_push(Us);
-    constexpr Bitboard  TRank3BB = (Us == WHITE ? Rank3BB : Rank6BB);
-
-    Bitboard b, weak, defended, nonPawnEnemies, stronglyProtected, safe;
-    Score score = SCORE_ZERO;
-
-    // Non-pawn enemies
-    nonPawnEnemies = pos.pieces(Them) & ~pos.pieces(PAWN);
-
-    // Squares strongly protected by the enemy, either because they defend the
-    // square with a pawn, or because they defend the square twice and we don't.
-    stronglyProtected =  attackedBy[Them][PAWN]
-                       | (attackedBy2[Them] & ~attackedBy2[Us]);
-
-    // Non-pawn enemies, strongly protected
-    defended = nonPawnEnemies & stronglyProtected;
-
-    // Enemies not strongly protected and under our attack
-    weak = pos.pieces(Them) & ~stronglyProtected & attackedBy[Us][ALL_PIECES];
-
-    // Bonus according to the kind of attacking pieces
-    if (defended | weak)
-    {
-        b = (defended | weak) & (attackedBy[Us][KNIGHT] | attackedBy[Us][BISHOP]);
-        while (b)
-            score += ThreatByMinor[type_of(pos.piece_on(pop_lsb(b)))];
-
-        b = weak & attackedBy[Us][ROOK];
-        while (b)
-            score += ThreatByRook[type_of(pos.piece_on(pop_lsb(b)))];
-
-        if (weak & attackedBy[Us][KING])
-            score += ThreatByKing;
-
-        b =  ~attackedBy[Them][ALL_PIECES]
-           | (nonPawnEnemies & attackedBy2[Us]);
-        score += Hanging * popcount(weak & b);
-
-        // Additional bonus if weak piece is only protected by a queen
-        score += WeakQueenProtection * popcount(weak & attackedBy[Them][QUEEN]);
-    }
-
-    // Bonus for restricting their piece moves
-    b =   attackedBy[Them][ALL_PIECES]
-       & ~stronglyProtected
-       &  attackedBy[Us][ALL_PIECES];
-    score += RestrictedPiece * popcount(b);
-
-    // Protected or unattacked squares
-    safe = ~attackedBy[Them][ALL_PIECES] | attackedBy[Us][ALL_PIECES];
-
-    // Bonus for attacking enemy pieces with our relatively safe pawns
-    b = pos.pieces(Us, PAWN) & safe;
-    b = pawn_attacks_bb<Us>(b) & nonPawnEnemies;
-    score += ThreatBySafePawn * popcount(b);
-
-    // Find squares where our pawns can push on the next move
-    b  = shift<Up>(pos.pieces(Us, PAWN)) & ~pos.pieces();
-    b |= shift<Up>(b & TRank3BB) & ~pos.pieces();
-
-    // Keep only the squares which are relatively safe
-    b &= ~attackedBy[Them][PAWN] & safe;
-
-    // Bonus for safe pawn threats on the next move
-    b = pawn_attacks_bb<Us>(b) & nonPawnEnemies;
-    score += ThreatByPawnPush * popcount(b);
-
-    // Bonus for threats on the next moves against enemy queen
-    if (pos.count<QUEEN>(Them) == 1)
-    {
-        bool queenImbalance = pos.count<QUEEN>() == 1;
-
-        Square s = pos.square<QUEEN>(Them);
-        safe =   mobilityArea[Us]
-              & ~pos.pieces(Us, PAWN)
-              & ~stronglyProtected;
-
-        b = attackedBy[Us][KNIGHT] & attacks_bb<KNIGHT>(s);
-
-        score += KnightOnQueen * popcount(b & safe) * (1 + queenImbalance);
-
-        b =  (attackedBy[Us][BISHOP] & attacks_bb<BISHOP>(s, pos.pieces()))
-           | (attackedBy[Us][ROOK  ] & attacks_bb<ROOK  >(s, pos.pieces()));
-
-        score += SliderOnQueen * popcount(b & safe & attackedBy2[Us]) * (1 + queenImbalance);
-    }
-
-    if constexpr (T)
-        Trace::add(THREAT, Us, score);
-
-    return score;
-  }
-
   // Evaluation::passed() evaluates the passed pawns and candidate passed
   // pawns of the given color.
 
@@ -1015,9 +896,6 @@ namespace {
     if (lazy_skip(LazyThreshold2))
         goto make_v;
 
-    score +=  threats<WHITE>() - threats<BLACK>()
-            + space<  WHITE>() - space<  BLACK>();
-
 make_v:
     // Derive single value from mg and eg parts of score
     Value v = winnable(score);
@@ -1127,9 +1005,7 @@ std::string Eval::trace(Position& pos) {
      << "|     Queens | " << Term(QUEEN)
      << "|   Mobility | " << Term(MOBILITY)
      << "|King safety | " << Term(KING)
-     << "|    Threats | " << Term(THREAT)
      << "|     Passed | " << Term(PASSED)
-     << "|      Space | " << Term(SPACE)
      << "|   Winnable | " << Term(WINNABLE)
      << "+------------+-------------+-------------+-------------+\n"
      << "|      Total | " << Term(TOTAL)
