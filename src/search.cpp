@@ -880,6 +880,8 @@ namespace {
         Eval::NNUE::hint_common_parent_position(pos);
     }
 
+moves_loop: // When in check, search starts here
+
     // Step 11. If the position is not in TT, decrease depth by 2 (or by 4 if the TT entry for the current position was hit and the stored depth is greater than or equal to the current depth).
     // Use qsearch if depth is equal or below zero (~9 Elo)
     if (    PvNode
@@ -893,8 +895,6 @@ namespace {
         &&  depth >= 7
         && !ttMove)
         depth -= 2;
-
-moves_loop: // When in check, search starts here
 
     // Step 12. A small Probcut idea, when we are in check (~4 Elo)
     probCutBeta = beta + 391;
