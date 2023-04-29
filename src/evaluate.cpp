@@ -152,7 +152,7 @@ namespace Trace {
   enum Tracing { NO_TRACE, TRACE };
 
   enum Term { // The first 8 entries are reserved for PieceType
-    MATERIAL = 8, IMBALANCE, MOBILITY, THREAT, PASSED, SPACE, WINNABLE, TOTAL, TERM_NB
+    MATERIAL = 8, IMBALANCE, MOBILITY, PASSED, WINNABLE, TOTAL, TERM_NB
   };
 
   Score scores[TERM_NB][COLOR_NB];
@@ -190,10 +190,9 @@ using namespace Trace;
 
 namespace {
 
-  // Threshold for lazy and space evaluation
+  // Threshold for lazy evaluation
   constexpr Value LazyThreshold1    =  Value(3622);
   constexpr Value LazyThreshold2    =  Value(1962);
-  constexpr Value SpaceThreshold    =  Value(11551);
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
   constexpr int KingAttackWeights[PIECE_TYPE_NB] = { 0, 0, 76, 46, 45, 14 };
@@ -278,9 +277,7 @@ namespace {
     template<Color Us> void initialize();
     template<Color Us, PieceType Pt> Score pieces();
     template<Color Us> Score king() const;
-    template<Color Us> Score threats() const;
     template<Color Us> Score passed() const;
-    template<Color Us> Score space() const;
     Value winnable(Score score) const;
 
     const Position& pos;
@@ -696,47 +693,6 @@ namespace {
 
     if constexpr (T)
         Trace::add(PASSED, Us, score);
-
-    return score;
-  }
-
-
-  // Evaluation::space() computes a space evaluation for a given side, aiming to improve game
-  // play in the opening. It is based on the number of safe squares on the four central files
-  // on ranks 2 to 4. Completely safe squares behind a friendly pawn are counted twice.
-  // Finally, the space bonus is multiplied by a weight which decreases according to occupancy.
-
-  template<Tracing T> template<Color Us>
-  Score Evaluation<T>::space() const {
-
-    // Early exit if, for example, both queens or 6 minor pieces have been exchanged
-    if (pos.non_pawn_material() < SpaceThreshold)
-        return SCORE_ZERO;
-
-    constexpr Color Them     = ~Us;
-    constexpr Direction Down = -pawn_push(Us);
-    constexpr Bitboard SpaceMask =
-      Us == WHITE ? CenterFiles & (Rank2BB | Rank3BB | Rank4BB)
-                  : CenterFiles & (Rank7BB | Rank6BB | Rank5BB);
-
-    // Find the available squares for our pieces inside the area defined by SpaceMask
-    Bitboard safe =   SpaceMask
-                   & ~pos.pieces(Us, PAWN)
-                   & ~attackedBy[Them][PAWN];
-
-    // Find all squares which are at most three squares behind some friendly pawn
-    Bitboard behind = pos.pieces(Us, PAWN);
-    behind |= shift<Down>(behind);
-    behind |= shift<Down+Down>(behind);
-
-    // Compute space score based on the number of safe squares and number of our pieces
-    // increased with number of total blocked pawns in position.
-    int bonus = popcount(safe) + popcount(behind & safe & ~attackedBy[Them][ALL_PIECES]);
-    int weight = pos.count<ALL_PIECES>(Us) - 3 + std::min(pe->blocked_count(), 9);
-    Score score = make_score(bonus * weight * weight / 16, 0);
-
-    if constexpr (T)
-        Trace::add(SPACE, Us, score);
 
     return score;
   }
