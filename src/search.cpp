@@ -722,7 +722,7 @@ namespace {
     {
         // Never assume anything about values stored in TT
         ss->staticEval = eval = tte->eval();
-        if (eval == VALUE_NONE)
+        if (eval == VALUE_NONE || tte->depth() < 12)
             ss->staticEval = eval = evaluate(pos);
         else
         {
