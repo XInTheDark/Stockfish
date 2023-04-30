@@ -255,13 +255,6 @@ void MainThread::search() {
   std::cout << sync_endl;
 }
 
-int a1 = 1850, a2 = 500, a3 = 0, a4 = 850, a5 = 1750;
-
-TUNE(a1);
-TUNE(SetRange(-5000, 5000), a2);
-TUNE(SetRange(-100, 100), a3);
-TUNE(a4, a5);
-
 /// Thread::search() is the main iterative deepening loop. It calls search()
 /// repeatedly with increasing depth until the allocated thinking time has been
 /// consumed, the user stops the search, or the maximum search depth is reached.
