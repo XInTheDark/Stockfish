@@ -1042,13 +1042,6 @@ make_v:
 
 } // namespace Eval
 
-int a1 = 1011, a2 = 64, a3 = 0,
-    b1 = 2048, b2 = 8;
-
-TUNE(a1, a2);
-TUNE(SetRange(-51200, 51200), a3);
-TUNE(b1, b2);
-
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
 
@@ -1059,12 +1052,12 @@ Value Eval::evaluate(const Position& pos, int depth) {
   Value v;
   Value psq = pos.psq_eg_stm();
 
-  int scale = a1 + a2 * pos.non_pawn_material() / 4096 + a3 * depth / 1024;
+  int scale = 1055 + 66 * pos.non_pawn_material() / 4096 + 3509 * depth / 1024;
 
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  bool useClassical = !useNNUE || (abs(psq) > b1 * scale / 1024 && pos.count<ALL_PIECES>() >= b2);
+  bool useClassical = !useNNUE || (abs(psq) > 2299 * scale / 1024 && pos.count<ALL_PIECES>() >= 7);
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
