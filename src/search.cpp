@@ -471,7 +471,7 @@ void Thread::search() {
           double reduction = (1.4 + mainThread->previousTimeReduction) / (2.08 * timeReduction);
           double bestMoveInstability = 1 + 1.8 * totBestMoveChanges / Threads.size();
           int hash = TT.hashfull();
-          double hashfull = std::clamp(a1 / 1000.0 - a2 / 1000.0 * log10(std::max(hash + a3, 1)), a4 / 1000.0, a5 / 1000.0);
+          double hashfull = std::clamp(1.852 - 1.417 * log10(std::max(hash - 7, 1)), 0.982, 1.802);
 
           double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability * hashfull;
 
