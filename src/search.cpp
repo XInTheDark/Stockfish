@@ -1174,7 +1174,7 @@ moves_loop: // When in check, search starts here
 
       // More reduction for null moves
       if ((ss-1)->currentMove == MOVE_NULL)
-          r += 2;
+          r += (depth < 10) + (depth < 16);
 
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
                      + (*contHist[0])[movedPiece][to_sq(move)]
