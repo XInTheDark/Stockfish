@@ -1172,8 +1172,8 @@ moves_loop: // When in check, search starts here
       else if (move == ttMove)
           r--;
 
-      // More reduction for null moves
-      if ((ss-1)->currentMove == MOVE_NULL)
+      // More reduction for null moves at low depths
+      if ((ss-1)->currentMove == MOVE_NULL && depth < 13)
           r += 2;
 
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
