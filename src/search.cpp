@@ -777,8 +777,9 @@ namespace {
         &&  eval < 25128) // larger than VALUE_KNOWN_WIN, but smaller than TB wins
         return eval;
 
-    // Step 9. Null move search with verification search (~35 Elo)
+    // Step 9. Null move search with verification search at low depths (~35 Elo)
     if (   !PvNode
+        && depth <= 12
         && (ss-1)->currentMove != MOVE_NULL
         && (ss-1)->statScore < 18755
         &&  eval >= beta
