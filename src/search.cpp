@@ -504,6 +504,10 @@ void Thread::search() {
                 skill.best ? skill.best : skill.pick_best(multiPV)));
 }
 
+int a1 = 58, a2 = 768,
+    b1 = 588, b2 = 5;
+
+TUNE(a1, a2, b1, b2);
 
 namespace {
 
@@ -1204,8 +1208,8 @@ moves_loop: // When in check, search starts here
           {
               // Adjust full depth search based on LMR results - if result
               // was good enough search deeper, if it was bad enough search shallower
-              const bool doDeeperSearch = value > (bestValue + 58 + 12 * (newDepth - d));
-              const bool doEvenDeeperSearch = value > bestValue + 588 && ss->doubleExtensions <= 5;
+              const bool doDeeperSearch = value > (bestValue + a1 + a2 * (newDepth - d) / 64);
+              const bool doEvenDeeperSearch = value > bestValue + b1 && ss->doubleExtensions <= b2;
               const bool doShallowerSearch = value < bestValue + newDepth;
 
               ss->doubleExtensions = ss->doubleExtensions + doEvenDeeperSearch;
