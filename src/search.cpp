@@ -255,6 +255,18 @@ void MainThread::search() {
   std::cout << sync_endl;
 }
 
+int a1 = 69, a2 = 13, a3 = 60,
+    a4 = 500, a5 = 1500,
+
+    b0 = 8, b1 = 1570, b2 = 650,
+
+    c1 = 1400, c2 = 2080,
+
+    d1 = 1000, d2 = 1800,
+
+    e1 = 500;
+
+TUNE(a1, a2, a3, a4, a5, b0, b1, b2, c1, c2, d1, d2, e1);
 
 /// Thread::search() is the main iterative deepening loop. It calls search()
 /// repeatedly with increasing depth until the allocated thinking time has been
@@ -456,14 +468,14 @@ void Thread::search() {
           && !Threads.stop
           && !mainThread->stopOnPonderhit)
       {
-          double fallingEval = (69 + 13 * (mainThread->bestPreviousAverageScore - bestValue)
-                                    +  6 * (mainThread->iterValue[iterIdx] - bestValue)) / 619.6;
-          fallingEval = std::clamp(fallingEval, 0.5, 1.5);
+          double fallingEval = (a1 + a2 * (mainThread->bestPreviousAverageScore - bestValue)
+                                    +  a3 * (mainThread->iterValue[iterIdx] - bestValue)) / 6196.0;
+          fallingEval = std::clamp(fallingEval, a4 / 1000.0, a5 / 1000.0);
 
           // If the bestMove is stable over several iterations, reduce time accordingly
-          timeReduction = lastBestMoveDepth + 8 < completedDepth ? 1.57 : 0.65;
-          double reduction = (1.4 + mainThread->previousTimeReduction) / (2.08 * timeReduction);
-          double bestMoveInstability = 1 + 1.8 * totBestMoveChanges / Threads.size();
+          timeReduction = lastBestMoveDepth + b0 < completedDepth ? b1 / 1000.0 : b2 / 1000.0;
+          double reduction = (c1 / 1000.0 + mainThread->previousTimeReduction) / (c2 / 1000.0 * timeReduction);
+          double bestMoveInstability = d1 / 1000.0 + d2 / 1000.0 * totBestMoveChanges / Threads.size();
 
           double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability;
 
@@ -483,7 +495,7 @@ void Thread::search() {
                   Threads.stop = true;
           }
           else if (   !mainThread->ponder
-                   && Time.elapsed() > totalTime * 0.50)
+                   && Time.elapsed() > totalTime * e1 / 1000.0)
               Threads.increaseDepth = false;
           else
               Threads.increaseDepth = true;
