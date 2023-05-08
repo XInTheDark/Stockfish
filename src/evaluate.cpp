@@ -1062,15 +1062,15 @@ Value Eval::evaluate(const Position& pos) {
       v = Evaluation<NO_TRACE>(pos).value();
   else
   {
-      int scale = 1011 + pos.non_pawn_material() / 64;
+      int scale = 967 + pos.non_pawn_material() / 64;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
 
       Value nnue = NNUE::evaluate(pos, true);
 
-      optimism = optimism * (274 + (443 + optimism) * abs(psq - nnue) / 1024) / 256;
-      v = (nnue * scale + optimism * (scale - 752)) / 1024;
+      optimism = optimism * (274 + (454 + optimism) * abs(psq - nnue) / 1024) / 256;
+      v = (nnue * scale + optimism * (scale - 791)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
