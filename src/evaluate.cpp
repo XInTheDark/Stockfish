@@ -1043,6 +1043,10 @@ make_v:
 } // namespace Eval
 
 
+int a1 = 2000, a2 = 50, b1 = 967, b2 = 64, c1 = 402, c2 = 454, d1 = 274, d2 = 791, e1 = 200;
+
+TUNE(a1, a2, b1, b2, c1, c2, d1, d2, e1);
+
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
 
@@ -1056,7 +1060,7 @@ Value Eval::evaluate(const Position& pos) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  int nnueThreshold = 2000 + 50 * (pos.count<ALL_PIECES>() - pos.count<PAWN>());
+  int nnueThreshold = a1 + a2 * (pos.count<ALL_PIECES>() - pos.count<PAWN>());
   bool useClassical = !useNNUE || abs(psq) > nnueThreshold;
 
   if (useClassical)
@@ -1064,7 +1068,7 @@ Value Eval::evaluate(const Position& pos) {
   else
   {
       int nnueComplexity;
-      int scale = 967 + pos.non_pawn_material() / 64;
+      int scale = b1 + b2 * pos.non_pawn_material() / 4096;
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
@@ -1072,16 +1076,16 @@ Value Eval::evaluate(const Position& pos) {
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
-      nnueComplexity = (  402 * nnueComplexity
-                        + (454 + optimism) * abs(psq - nnue)
+      nnueComplexity = (  c1 * nnueComplexity
+                        + (c2 + optimism) * abs(psq - nnue)
                         ) / 1024;
 
-      optimism = optimism * (274 + nnueComplexity) / 256;
-      v = (nnue * scale + optimism * (scale - 791)) / 1024;
+      optimism = optimism * (d1 + nnueComplexity) / 256;
+      v = (nnue * scale + optimism * (scale - d2)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
-  v = v * (200 - pos.rule50_count()) / 214;
+  v = v * (e1 - pos.rule50_count()) / 214;
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
