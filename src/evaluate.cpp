@@ -1043,14 +1043,16 @@ make_v:
 } // namespace Eval
 
 
-int a1 = 2000, a2 = 50, b1 = 967, b2 = 64, c1 = 402, c2 = 454, d1 = 274, d2 = 791, e1 = 200;
+int a1 = 2000, a2 = 10, b1 = 967, b2 = 64, c1 = 402, c2 = 454, d1 = 274, d2 = 791, e1 = 200;
 
-TUNE(a1, a2, b1, b2, c1, c2, d1, d2, e1);
+TUNE(a1);
+TUNE(SetRange(-64, 64), a2);
+TUNE(b1, b2, c1, c2, d1, d2, e1);
 
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
 
-Value Eval::evaluate(const Position& pos) {
+Value Eval::evaluate(const Position& pos, int depth) {
 
   assert(!pos.checkers());
 
@@ -1060,7 +1062,7 @@ Value Eval::evaluate(const Position& pos) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  int nnueThreshold = a1 + a2 * (pos.count<ALL_PIECES>() - pos.count<PAWN>());
+  int nnueThreshold = a1 + a2 * depth;
   bool useClassical = !useNNUE || abs(psq) > nnueThreshold;
 
   if (useClassical)
