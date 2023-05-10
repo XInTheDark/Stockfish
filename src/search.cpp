@@ -256,6 +256,9 @@ void MainThread::search() {
 }
 
 
+int a1 = 102, a2 = 147, c1 = 50, c2 = 50;
+TUNE(a1, a2);
+TUNE(SetRange(-200, 200), c1, c2);
 /// Thread::search() is the main iterative deepening loop. It calls search()
 /// repeatedly with increasing depth until the allocated thinking time has been
 /// consumed, the user stops the search, or the maximum search depth is reached.
@@ -353,7 +356,7 @@ void Thread::search() {
           beta  = std::min(prev + delta, VALUE_INFINITE);
 
           // Adjust optimism based on root move's previousScore
-          int opt = 102 * prev / (std::abs(prev) + 147);
+          int opt = a1 * (prev + c1) / (std::abs(prev + c2) + a2);
           optimism[ us] = Value(opt);
           optimism[~us] = -optimism[us];
 
