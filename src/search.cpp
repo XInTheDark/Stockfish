@@ -63,19 +63,19 @@ namespace {
   enum NodeType { NonPV, PV, Root };
 
   // Futility margin
-  Value futility_margin(Depth d, bool improving) {
+  Value futility_margin(Depth d, int improving) {
     return Value(154 * (d - improving));
   }
 
   // Reductions lookup table, initialized at startup
   int Reductions[MAX_MOVES]; // [depth or moveNumber]
 
-  Depth reduction(bool i, Depth d, int mn, Value delta, Value rootDelta) {
+  Depth reduction(int i, Depth d, int mn, Value delta, Value rootDelta) {
     int r = Reductions[d] * Reductions[mn];
     return (r + 1449 - int(delta) * 937 / int(rootDelta)) / 1024 + (!i && r > 941);
   }
 
-  constexpr int futility_move_count(bool improving, Depth depth) {
+  constexpr int futility_move_count(int improving, Depth depth) {
     return improving ? (3 + depth * depth)
                      : (3 + depth * depth) / 2;
   }
@@ -545,10 +545,10 @@ namespace {
     Move ttMove, move, excludedMove, bestMove;
     Depth extension, newDepth;
     Value bestValue, value, ttValue, eval, maxValue, probCutBeta;
-    bool givesCheck, improving, priorCapture, singularQuietLMR;
+    bool givesCheck, priorCapture, singularQuietLMR;
     bool capture, moveCountPruning, ttCapture;
     Piece movedPiece;
-    int moveCount, captureCount, quietCount, improvement;
+    int moveCount, captureCount, quietCount, improvement, improving;
 
     // Step 1. Initialize node
     Thread* thisThread = pos.this_thread();
@@ -708,7 +708,7 @@ namespace {
     {
         // Skip early pruning when in check
         ss->staticEval = eval = VALUE_NONE;
-        improving = false;
+        improving = 0;
         improvement = 0;
         goto moves_loop;
     }
@@ -753,7 +753,8 @@ namespace {
     improvement =   (ss-2)->staticEval != VALUE_NONE ? ss->staticEval - (ss-2)->staticEval
                   : (ss-4)->staticEval != VALUE_NONE ? ss->staticEval - (ss-4)->staticEval
                   :                                    156;
-    improving = improvement > 0;
+    improving = improvement > 0 ? 1 :
+            improvement < -512 ? -1 : 0;
 
     // Step 7. Razoring (~1 Elo).
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
