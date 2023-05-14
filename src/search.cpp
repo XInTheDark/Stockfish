@@ -64,7 +64,7 @@ namespace {
 
   // Futility margin
   Value futility_margin(Depth d, int improving) {
-    return Value(154 * (d - improving));
+    return Value(139 * (d - improving));
   }
 
   // Reductions lookup table, initialized at startup
@@ -72,18 +72,18 @@ namespace {
 
   Depth reduction(int i, Depth d, int mn, Value delta, Value rootDelta) {
     int r = Reductions[d] * Reductions[mn];
-    return (r + 1449 - int(delta) * 937 / int(rootDelta)) / 1024 + (i <= 0 && r > 941);
+    return (r + 1458 - int(delta) * 922 / int(rootDelta)) / 1024 + (i <= 0 && r > 971);
   }
 
   constexpr int futility_move_count(int improving, Depth depth) {
-    return improving == 0 ? (3 + depth * depth) / 2 :
+    return improving == 0 ? (3 + depth * depth) * 482 / 1024 :
            improving == 1 ? (3 + depth * depth) :
-           (3 + depth * depth) / 4;
+           (3 + depth * depth) * 272 / 1024;
   }
 
   // History and stats update bonus, based on depth
   int stat_bonus(Depth d) {
-    return std::min(341 * d - 470, 1710);
+    return std::min(346 * d - 460, 1650);
   }
 
   // Add a small random component to draw evaluations to avoid 3-fold blindness
@@ -755,7 +755,7 @@ namespace {
                   : (ss-4)->staticEval != VALUE_NONE ? ss->staticEval - (ss-4)->staticEval
                   :                                    156;
     improving = improvement > 0 ? 1 :
-            improvement < -512 ? -1 : 0;
+            improvement < -483 ? -1 : 0;
 
     // Step 7. Razoring (~1 Elo).
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
@@ -825,7 +825,7 @@ namespace {
         }
     }
 
-    probCutBeta = beta + 186 - 54 * improving;
+    probCutBeta = beta + 174 - 52 * improving;
 
     // Step 10. ProbCut (~10 Elo)
     // If we have a good enough capture (or queen promotion) and a reduced search returns a value
