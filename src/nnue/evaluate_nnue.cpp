@@ -141,6 +141,9 @@ namespace Stockfish::Eval::NNUE {
         featureTransformer->hint_common_access(pos);
   }
 
+int delta = 24;
+TUNE(SetRange(-256, 256), delta);
+
   // Evaluation function. Perform differential calculation.
   Value evaluate(const Position& pos, bool adjusted, int* complexity) {
 
@@ -148,7 +151,6 @@ namespace Stockfish::Eval::NNUE {
     // overaligning stack variables with alignas() doesn't work correctly.
 
     constexpr uint64_t alignment = CacheLineSize;
-    constexpr int delta = 24;
 
 #if defined(ALIGNAS_ON_STACK_VARIABLES_BROKEN)
     TransformedFeatureType transformedFeaturesUnaligned[
