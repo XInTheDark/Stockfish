@@ -1076,7 +1076,7 @@ Value Eval::evaluate(const Position& pos) {
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
 
-      Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
+      Value nnue = NNUE::evaluate(pos, &nnueComplexity);
 
       // Blend nnue complexity with (semi)classical complexity
       nnueComplexity = (  b1 * nnueComplexity
@@ -1152,7 +1152,7 @@ std::string Eval::trace(Position& pos) {
   ss << "\nClassical evaluation   " << to_cp(v) << " (white side)\n";
   if (Eval::useNNUE)
   {
-      v = NNUE::evaluate(pos, false);
+      v = NNUE::evaluate(pos);
       v = pos.side_to_move() == WHITE ? v : -v;
       ss << "NNUE evaluation        " << to_cp(v) << " (white side)\n";
   }
