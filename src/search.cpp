@@ -256,6 +256,13 @@ void MainThread::search() {
 }
 
 
+int c_min = 1, c_max = 2047,
+    a1 = 1024, a2 = 4096;
+
+TUNE(SetRange(1, 2047), c_min, c_max);
+TUNE(a1);
+TUNE(SetRange(1, 65536), a2);
+
 /// Thread::search() is the main iterative deepening loop. It calls search()
 /// repeatedly with increasing depth until the allocated thinking time has been
 /// consumed, the user stops the search, or the maximum search depth is reached.
@@ -394,7 +401,11 @@ void Thread::search() {
               // re-search, otherwise exit the loop.
               if (bestValue <= alpha)
               {
-                  beta = (alpha + beta) / 2;
+                  // Scale window size based on bestValue
+                  int alphaScale = a1 + (int)bestValue * bestValue / a2;
+
+                  alphaScale = std::clamp(alphaScale, c_min, c_max);
+                  beta = (alpha * alphaScale + beta * (2048 - alphaScale)) / 2048;
                   alpha = std::max(bestValue - delta, -VALUE_INFINITE);
 
                   failedHighCnt = 0;
