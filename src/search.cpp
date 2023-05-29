@@ -752,7 +752,7 @@ namespace {
     improvement =   (ss-2)->staticEval != VALUE_NONE ? ss->staticEval - (ss-2)->staticEval
                   : (ss-4)->staticEval != VALUE_NONE ? ss->staticEval - (ss-4)->staticEval
                   :                                    163;
-    improving = improvement <= 0 ? 0 :
+    improving = improvement < 0 ? 0 :
                 improvement < depth + 4 ? 1 : 2;
 
     // Step 7. Razoring (~1 Elo).
