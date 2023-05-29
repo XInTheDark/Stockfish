@@ -754,7 +754,7 @@ namespace {
                   :                                    163;
     improving = improvement <= 0 ? 0 :
                 improvement < depth + 4 ? 1 :
-                improvement <= alpha ? 2 : 3;
+                improvement <= beta ? 2 : 3;
 
     // Step 7. Razoring (~1 Elo).
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
