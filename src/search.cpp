@@ -755,8 +755,6 @@ namespace {
     improving = improvement <= 0 ? 0 :
                 std::clamp(improvement / (100 + depth), 1, 4);
 
-      dbg_hit_on(improving >= 4);
-
     // Step 7. Razoring (~1 Elo).
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
     // return a fail low.
