@@ -395,7 +395,7 @@ void Thread::search() {
               if (bestValue <= alpha)
               {
                   // Scale window size based on depth
-                  int alphaScale = 1079 - (int)rootDepth * rootDepth / 247 - 3 * (int)rootDepth / 2;
+                  int alphaScale = 1075 - (int)rootDepth * rootDepth / 291 - 3 * (int)rootDepth;
 
                   alphaScale = std::clamp(alphaScale, 0, 2048);
                   beta = (alpha * alphaScale + beta * (2048 - alphaScale)) / 2048;
