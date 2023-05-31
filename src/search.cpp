@@ -394,7 +394,11 @@ void Thread::search() {
               // re-search, otherwise exit the loop.
               if (bestValue <= alpha)
               {
-                  beta = (alpha + beta) / 2;
+                  // Scale window size based on depth
+                  int alphaScale = 1079 - (int)rootDepth * rootDepth / 247 - 3 * (int)rootDepth / 2;
+
+                  alphaScale = std::clamp(alphaScale, 0, 2048);
+                  beta = (alpha * alphaScale + beta * (2048 - alphaScale)) / 2048;
                   alpha = std::max(bestValue - delta, -VALUE_INFINITE);
 
                   failedHighCnt = 0;
