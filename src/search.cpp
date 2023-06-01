@@ -1112,6 +1112,12 @@ moves_loop: // When in check, search starts here
                    && move == ss->killers[0]
                    && (*contHist[0])[movedPiece][to_sq(move)] >= 5480)
               extension = 1;
+
+          // rule50 extensions
+          else if ( PvNode
+              && pos.rule50_count() >= 50
+              && bestValue > 87)
+              extension = 1;
       }
 
       // Add extension to new depth
