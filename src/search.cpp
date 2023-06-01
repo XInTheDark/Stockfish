@@ -1115,8 +1115,7 @@ moves_loop: // When in check, search starts here
 
           // rule50 extensions
           else if ( PvNode
-              && pos.rule50_count() >= 50
-              && bestValue > 87)
+              && pos.rule50_count() >= 50)
               extension = 1;
       }
 
