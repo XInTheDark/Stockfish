@@ -383,6 +383,10 @@ constexpr Square flip_file(Square s) { // Swap A1 <-> H1
   return Square(s ^ SQ_H1);
 }
 
+constexpr Square rotate_180(Square s) { // Swap A1 <-> H8
+  return Square(flip_file(flip_rank(s)));
+}
+
 constexpr Piece operator~(Piece pc) {
   return Piece(pc ^ 8); // Swap color of piece B_KNIGHT <-> W_KNIGHT
 }
@@ -477,6 +481,14 @@ constexpr Move make_move(Square from, Square to) {
 template<MoveType T>
 constexpr Move make(Square from, Square to, PieceType pt = KNIGHT) {
   return Move(T + ((pt - KNIGHT) << 12) + (from << 6) + to);
+}
+
+constexpr bool is_non_pawn_rank(Square s) {
+  return rank_of(s) == RANK_1 || rank_of(s) == RANK_8;
+}
+
+constexpr bool is_non_piece_type(Piece pc) {
+  return pc == 7 || pc == 8;
 }
 
 /// Based on a congruential pseudo random number generator

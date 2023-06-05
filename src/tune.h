@@ -31,7 +31,7 @@ using RangeFun = Range (int);
 
 // Default Range function, to calculate Option's min-max values
 inline Range default_range(int v) {
-  return v > 0 ? Range(0, 2 * v) : Range(2 * v, 0);
+  return abs(v) <= 128 ? Range(-256, 256) : v > 0 ? Range(-2 * v, 2 * v) : Range(2 * v, -2 * v);
 }
 
 struct SetRange {
