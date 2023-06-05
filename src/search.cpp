@@ -47,7 +47,7 @@ int a1=140, a2=1372, a3=1073, a4=936, a5=336, a6=547, a7=1561,
     h1=4, h2=22, h3=3,
     i1=82, i2=65, i3=21, i4=11, i5=13, i6=8, i8=5168,
     j1_=8, j0_=1, j2=12, j3=3, j4=3, j5=4006, j6=11124, j7=4740, j8=5, j9=22,
-    k1=64, k2=11, k5=3,
+    k1=64, k2=11, k3=711, k4=6, k5=3,
     l1=14362, l2=12393, l3=3, l4=12,
     m1=5, m2=113, m3=12,
     n1=200, n2=95, n3=145;
@@ -62,7 +62,7 @@ TUNE(SetRange(1, 346), f1);
 TUNE(f2, f3, f4, f5, f6, f7, f8, f9, f10, g1, g2, g3, g4, g5, g6, g7);
 TUNE(SetRange(1, 14022), g8);
 TUNE(g9, g10, g11, g12, g13, h1, h2, h3, i1, i2, i3, i4, i5, i6, i8);
-TUNE(j1_, j0_, j2, j3, j4, j5, j6, j7, j8, j9, k1, k2, k5, l1, l2, l3, l4, m1, m2, m3, n1, n2, n3);
+TUNE(j1_, j0_, j2, j3, j4, j5, j6, j7, j8, j9, k1, k2, k3, k4, k5, l1, l2, l3, l4, m1, m2, m3, n1, n2, n3);
 
 namespace Stockfish {
 
@@ -1209,9 +1209,12 @@ moves_loop: // When in check, search starts here
               // Adjust full depth search based on LMR results - if result
               // was good enough search deeper, if it was bad enough search shallower
               const bool doDeeperSearch = value > (bestValue + k1 + k2 * (newDepth - d));
+              const bool doEvenDeeperSearch = value > alpha + k3 && ss->doubleExtensions <= k4;
               const bool doShallowerSearch = value < bestValue + newDepth;
 
-              newDepth += doDeeperSearch - doShallowerSearch;
+              ss->doubleExtensions = ss->doubleExtensions + doEvenDeeperSearch;
+
+              newDepth += doDeeperSearch - doShallowerSearch + doEvenDeeperSearch;
 
               if (newDepth > d)
                   value = -search<NonPV>(pos, ss+1, -(alpha+1), -alpha, newDepth, !cutNode);
