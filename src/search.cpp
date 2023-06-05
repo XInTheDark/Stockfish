@@ -37,21 +37,6 @@
 #include "syzygy/tbprobe.h"
 #include "nnue/evaluate_nnue.h"
 
-using namespace Stockfish;
-
-int a0=-258,a1=-399,
-    b0=-17,b1=83,
-    c0=9435;
-
-TUNE(a0, a1, b0, b1, c0);
-
-//Hidden layer biases
-int nb[2] = {a0,a1};
-//Output layer weights
-int nwo[2] = {b0,b1};
-//Output layer bias
-double nbo = c0 / 10000.0;
-
 namespace Stockfish {
 
 namespace Search {
