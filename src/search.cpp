@@ -1062,9 +1062,9 @@ moves_loop: // When in check, search starts here
            /* &&  ttValue != VALUE_NONE Already implicit in the next condition */
               &&  abs(ttValue) < VALUE_KNOWN_WIN
               && (tte->bound() & BOUND_LOWER)
-              &&  tte->depth() >= depth - 3)
+              &&  tte->depth() >= depth - 4)
           {
-              Value singularBeta = ttValue - (89 + 71 * (ss->ttPv && !PvNode)) * depth / 64;
+              Value singularBeta = ttValue - (40 + 31 * (ss->ttPv && !PvNode)) * depth / 32;
               Depth singularDepth = (depth - 1) / 2;
 
               ss->excludedMove = move;
@@ -1104,7 +1104,7 @@ moves_loop: // When in check, search starts here
 
               // If the eval of ttMove is less than alpha, we reduce it (negative extension) (~1 Elo)
               else if (ttValue <= alpha)
-                  extension = -1;
+                  extension = -1 - !PvNode;
           }
 
           // Check extensions (~1 Elo)
