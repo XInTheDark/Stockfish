@@ -1042,6 +1042,9 @@ make_v:
 
 } // namespace Eval
 
+int pv=2304, nonpv=2048;
+
+TUNE(pv, nonpv);
 
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
@@ -1056,7 +1059,7 @@ Value Eval::evaluate(const Position& pos, bool PvNode) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  const int nnueThreshold = PvNode ? 2304 : 2048;
+  int nnueThreshold = PvNode ? pv : nonpv;
   bool useClassical = !useNNUE || abs(psq) > nnueThreshold;
 
   if (useClassical)
