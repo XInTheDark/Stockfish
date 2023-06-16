@@ -1067,11 +1067,7 @@ Value Eval::evaluate(const Position& pos) {
 
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
-      Value optimism = 109 * nnue / (std::abs(nnue) + 141);
-
-      // Blend optimism with nnue complexity and (semi)classical complexity
-      optimism += optimism * (nnueComplexity + abs(psq - nnue)) / 512;
-      v = (nnue * (945 + npm) + optimism * (150 + npm)) / 1024;
+      v = (nnue * (945 + npm)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
