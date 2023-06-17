@@ -310,7 +310,7 @@ void Thread::search() {
 
   multiPV = std::min(multiPV, rootMoves.size());
 
-  contempt = Options["Contempt"] * PawnValueEg / 100;
+  int ct = Options["Contempt"] * PawnValueEg / 100;
 
   int searchAgainCounter = 0;
 
@@ -360,7 +360,7 @@ void Thread::search() {
           optimism[~us] = -optimism[us];
 
           // Adjust contempt based on root move's previousScore
-          contempt += 88 * prev / (std::abs(prev) + 200);
+          contempt = Value(ct) + 88 * prev / (std::abs(prev) + 200);
 
           // Start with a small aspiration window and, in the case of a fail
           // high/low, re-search with a bigger window until we don't fail
