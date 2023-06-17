@@ -465,7 +465,12 @@ void Thread::search() {
           double reduction = (1.4 + mainThread->previousTimeReduction) / (2.08 * timeReduction);
           double bestMoveInstability = 1 + 1.8 * totBestMoveChanges / Threads.size();
 
-          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability;
+          // TM contempt: use more/less time when we are in a drawish position
+          int ct = Options["Contempt"];
+          double contempt = 1 + (300 - abs(bestValue)) * ct / 10000.0;
+          contempt = std::clamp(contempt, 1.0, 1.5);
+
+          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability * contempt;
 
           // Cap used time in case of a single legal move for a better viewer experience in tournaments
           // yielding correct scores and sufficiently fast moves.
