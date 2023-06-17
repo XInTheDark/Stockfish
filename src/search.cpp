@@ -21,6 +21,7 @@
 #include <cmath>
 #include <cstring>   // For std::memset
 #include <iostream>
+#include <numeric>
 #include <sstream>
 
 #include "evaluate.h"
@@ -465,7 +466,28 @@ void Thread::search() {
           double reduction = (1.4 + mainThread->previousTimeReduction) / (2.08 * timeReduction);
           double bestMoveInstability = 1 + 1.8 * totBestMoveChanges / Threads.size();
 
-          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability;
+          // Input features of the neural network (position of pieces)
+          size_t k = 0;
+          int ft[736];
+          for (Square s = SQ_A1; s <= SQ_H8; ++s)
+          {
+              for (Piece pc = W_PAWN; pc <= B_KING; ++pc)
+              {
+                  if ((is_non_pawn_rank(s) && type_of(pc) == PAWN) || is_non_piece_type(pc))
+                      continue;
+                  ft[k] = (us == WHITE) ? rootPos.piece_on(s) == pc
+                                        : rootPos.piece_on(rotate_180(s)) == pc;
+                  k++;
+              }
+          }
+          // Matrix multiplication
+          int neuron[2];
+          for (size_t i = 0; i < 2; ++i)
+              neuron[i] = std::max(0, std::inner_product(ft, ft+736, nw[i], 0) + nb[i]); // ReLU activation function
+
+          double nn = std::clamp(std::inner_product(neuron, neuron+2, nwo, 0) / 3750.0 + nbo, 0.4, 2.0);
+
+          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability * nn;
 
           // Cap used time in case of a single legal move for a better viewer experience in tournaments
           // yielding correct scores and sufficiently fast moves.
