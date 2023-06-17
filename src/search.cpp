@@ -255,6 +255,9 @@ void MainThread::search() {
   std::cout << sync_endl;
 }
 
+int ct=20, E=300, M=150;
+TUNE(SetRange(-100, 100), ct);
+TUNE(E, M);
 
 /// Thread::search() is the main iterative deepening loop. It calls search()
 /// repeatedly with increasing depth until the allocated thinking time has been
@@ -465,7 +468,11 @@ void Thread::search() {
           double reduction = (1.4 + mainThread->previousTimeReduction) / (2.08 * timeReduction);
           double bestMoveInstability = 1 + 1.8 * totBestMoveChanges / Threads.size();
 
-          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability;
+          // Time contempt: use more/less time when we are in a drawish position
+          double contempt = 1 + (E - abs(bestValue)) * ct / 10000.0;
+          contempt = std::clamp(contempt, 1.0, M / 100.0);
+
+          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability * contempt;
 
           // Cap used time in case of a single legal move for a better viewer experience in tournaments
           // yielding correct scores and sufficiently fast moves.
