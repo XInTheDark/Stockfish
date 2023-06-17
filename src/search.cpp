@@ -467,7 +467,7 @@ void Thread::search() {
 
           // TM contempt: use more/less time when we are in a drawish position
           int ct = Options["Contempt"];
-          double contempt = 1 + (300 - abs(bestValue)) * ct / 10000.0;
+          double contempt = 1 + (450 - abs(bestValue)) * ct / 10000.0;
           contempt = std::clamp(contempt, 1.0, 1.5);
 
           double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability * contempt;
