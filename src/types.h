@@ -158,11 +158,11 @@ constexpr int nw[2][736] =
 ,-8,-23,81,51,-56,-7,40,31,-76,18,25,-1,36,19,-29,-27,-11,3,-29,-24,-20,-2,42,4,-88,30,-9,84,-52,-28,4,-96,-46,-61,-84,85}
 };
 // Hidden layer biases
-constexpr int nb[2] = {-212,-647};
+constexpr int nb[2] = {-258,-399};
 // Output layer weights
-constexpr int nwo[2] = {17,27};
+constexpr int nwo[2] = {-17,83};
 // Output layer bias
-constexpr double nbo = 0.5827;
+constexpr double nbo = 0.9435;
 
 /// A move needs 16 bits to be stored
 ///
