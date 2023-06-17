@@ -487,7 +487,12 @@ void Thread::search() {
 
           double nn = std::clamp(std::inner_product(neuron, neuron+2, nwo, 0) / 3750.0 + nbo, 0.4, 2.0);
 
-          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability * nn;
+          // TM contempt: use more/less time when we are in a drawish position
+          int ct = Options["Time Contempt"];
+          double contempt = 1 + (300 - abs(bestValue)) * ct / 10000.0;
+          contempt = std::clamp(contempt, 1.0, 1.5);
+
+          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability * nn * contempt;
 
           // Cap used time in case of a single legal move for a better viewer experience in tournaments
           // yielding correct scores and sufficiently fast moves.
