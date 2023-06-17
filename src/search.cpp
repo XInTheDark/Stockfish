@@ -310,6 +310,8 @@ void Thread::search() {
 
   multiPV = std::min(multiPV, rootMoves.size());
 
+  contempt = Options["Contempt"] * PawnValueEg / 100;
+
   int searchAgainCounter = 0;
 
   // Iterative deepening loop until requested to stop or the target depth is reached
