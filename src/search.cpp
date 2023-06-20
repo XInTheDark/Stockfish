@@ -1158,7 +1158,7 @@ moves_loop: // When in check, search starts here
 
       // Decrease reduction for PvNodes based on depth (~2 Elo)
       if (PvNode)
-          r -= 1 + 12 / (3 + depth) + (ss->ply > 0 && ss->ply < 5);
+          r -= 1 + 12 / (3 + depth) - std::max(8 - ss->ply, 0) / 4;
 
       // Decrease reduction if ttMove has been singularly extended (~1 Elo)
       if (singularQuietLMR)
