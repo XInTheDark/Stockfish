@@ -979,7 +979,8 @@ namespace {
     // Initialize score by reading the incrementally updated scores included in
     // the position object (material + piece square tables) and the material
     // imbalance. Score is computed internally from the white point of view.
-    Score score = pos.psq_score() + me->imbalance() + pos.this_thread()->contempt;
+    Score score = pos.psq_score() + me->imbalance()
+                + (pos.side_to_move() == WHITE ? pos.this_thread()->contempt : 0);
 
     // Probe the pawn hash table
     pe = Pawns::probe(pos);
@@ -1067,7 +1068,7 @@ Value Eval::evaluate(const Position& pos) {
 
       Color stm = pos.side_to_move();
       Value optimism = pos.this_thread()->optimism[stm];
-      Value contempt = stm == WHITE ? pos.this_thread()->contempt : -pos.this_thread()->contempt;
+      Value contempt = stm == WHITE ? pos.this_thread()->contempt : Value(0);
 
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
