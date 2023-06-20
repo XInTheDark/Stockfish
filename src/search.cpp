@@ -588,10 +588,7 @@ namespace {
             return alpha;
     }
     else
-    {
         thisThread->rootDelta = beta - alpha;
-        ss->mainline = true;
-    }
 
     assert(0 <= ss->ply && ss->ply < MAX_PLY);
 
@@ -610,6 +607,7 @@ namespace {
     ttMove =  rootNode ? thisThread->rootMoves[thisThread->pvIdx].pv[0]
             : ss->ttHit    ? tte->move() : MOVE_NONE;
     ttCapture = ttMove && pos.capture_stage(ttMove);
+    ss->ttm = ttMove;
 
     // At this point, if excluded, skip straight to step 6, static eval. However,
     // to save indentation, we list the condition in all code between here and there.
@@ -831,6 +829,8 @@ namespace {
     if (    PvNode
         && !ttMove)
         depth -= 2 + 2 * (ss->ttHit && tte->depth() >= depth);
+    else if (PvNode && ttMove && !(ss-1)->ttm)
+        depth++;
 
     if (depth <= 0)
         return qsearch<PV>(pos, ss, alpha, beta);
@@ -963,7 +963,6 @@ moves_loop: // When in check, search starts here
       capture = pos.capture_stage(move);
       movedPiece = pos.moved_piece(move);
       givesCheck = pos.gives_check(move);
-      ss->mainline = moveCount == 1 && ((ss-1)->mainline || rootNode);
 
       // Calculate new depth for this move
       newDepth = depth - 1;
@@ -1162,7 +1161,7 @@ moves_loop: // When in check, search starts here
 
       // Decrease reduction for PvNodes based on depth (~2 Elo)
       if (PvNode)
-          r -= 1 + 12 / (3 + depth) + (ss-1)->mainline;
+          r -= 1 + 12 / (3 + depth);
 
       // Decrease reduction if ttMove has been singularly extended (~1 Elo)
       if (singularQuietLMR)
