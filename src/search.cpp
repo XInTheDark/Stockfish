@@ -588,7 +588,10 @@ namespace {
             return alpha;
     }
     else
+    {
         thisThread->rootDelta = beta - alpha;
+        ss->mainline = true;
+    }
 
     assert(0 <= ss->ply && ss->ply < MAX_PLY);
 
@@ -960,6 +963,7 @@ moves_loop: // When in check, search starts here
       capture = pos.capture_stage(move);
       movedPiece = pos.moved_piece(move);
       givesCheck = pos.gives_check(move);
+      ss->mainline = moveCount == 1 && ((ss-1)->mainline || rootNode);
 
       // Calculate new depth for this move
       newDepth = depth - 1;
@@ -1158,7 +1162,7 @@ moves_loop: // When in check, search starts here
 
       // Decrease reduction for PvNodes based on depth (~2 Elo)
       if (PvNode)
-          r -= 1 + 12 / (3 + depth) - std::max(8 - ss->ply, 0) / 4;
+          r -= 1 + 12 / (3 + depth) + (ss-1)->mainline;
 
       // Decrease reduction if ttMove has been singularly extended (~1 Elo)
       if (singularQuietLMR)
