@@ -1320,7 +1320,7 @@ moves_loop: // When in check, search starts here
               else
               {
                   // Reduce other moves if we have found at least one score improvement (~2 Elo)
-                  if (   depth > 2
+                  if (   depth > 3
                       && depth < 12
                       && beta  <  14362
                       && value > -12393)
