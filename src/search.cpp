@@ -465,7 +465,11 @@ void Thread::search() {
           double reduction = (1.4 + mainThread->previousTimeReduction) / (2.08 * timeReduction);
           double bestMoveInstability = 1 + 1.8 * totBestMoveChanges / Threads.size();
 
-          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability;
+          // Use more time at start of game
+          const int ply = rootPos.game_ply();
+          double startOfGame = std::max(2.5 - ply / 20.0, 1.0);
+
+          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability * startOfGame;
 
           // Cap used time in case of a single legal move for a better viewer experience in tournaments
           // yielding correct scores and sufficiently fast moves.
