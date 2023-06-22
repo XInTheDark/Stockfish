@@ -36,6 +36,13 @@
 #include "syzygy/tbprobe.h"
 #include "nnue/evaluate_nnue.h"
 
+using namespace Stockfish;
+
+int a1=82, a2=65, a3=64,
+    b1=21, b2=11, b3=13;
+
+TUNE(a1, a2, a3, b1, b2, b3);
+
 namespace Stockfish {
 
 namespace Search {
@@ -1064,7 +1071,8 @@ moves_loop: // When in check, search starts here
               && (tte->bound() & BOUND_LOWER)
               &&  tte->depth() >= depth - 3)
           {
-              Value singularBeta = ttValue - (82 + 65 * (ss->ttPv && !PvNode)) * depth / 64;
+              const int margin = (a1 + a2 * (ss->ttPv && !PvNode)) * depth;
+              Value singularBeta = ttValue - margin * a3 / 4096;
               Depth singularDepth = (depth - 1) / 2;
 
               ss->excludedMove = move;
@@ -1078,11 +1086,11 @@ moves_loop: // When in check, search starts here
 
                   // Avoid search explosion by limiting the number of double extensions
                   if (  !PvNode
-                      && value < singularBeta - 21
-                      && ss->doubleExtensions <= 11)
+                      && value < singularBeta - b1
+                      && ss->doubleExtensions <= b2)
                   {
                       extension = 2;
-                      depth += depth < 13;
+                      depth += depth < b3;
                   }
               }
 
