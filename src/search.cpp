@@ -467,7 +467,7 @@ void Thread::search() {
 
           // Use more time at start of game
           const int ply = rootPos.game_ply();
-          double startOfGame = std::max(2.5 - ply / 20.0, 1.0);
+          double startOfGame = std::max(2.0 - ply / 22.5, 1.0);
 
           double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability * startOfGame;
 
