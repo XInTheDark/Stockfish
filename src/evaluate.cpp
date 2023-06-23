@@ -1042,6 +1042,11 @@ make_v:
 
 } // namespace Eval
 
+int a1 = 2500, a2 = 96, a3 = 482, a4 = 2048;
+TUNE(a1);
+TUNE(SetRange(-5120, 5120), a2);
+TUNE(SetRange(-5120, 5120), a3);
+TUNE(a4);
 
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
@@ -1057,7 +1062,8 @@ Value Eval::evaluate(const Position& pos) {
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
   const int gamePly = pos.game_ply();
-  const bool useClassical = !useNNUE || (abs(psq) > 2048 && gamePly > 20);
+  const int nnueThreshold = std::max(a1 - a2 * gamePly * gamePly / 1024 - a3 * gamePly / 256, a4);
+  const bool useClassical = !useNNUE || abs(psq) > nnueThreshold;
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
