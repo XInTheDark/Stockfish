@@ -1056,7 +1056,7 @@ Value Eval::evaluate(const Position& pos) {
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  const int gamePly = pos.game_ply();
+  const int gamePly = pos.this_thread()->rootPos.game_ply();
   const bool useClassical = !useNNUE || (abs(psq) > 2048 && gamePly > 20);
 
   if (useClassical)
