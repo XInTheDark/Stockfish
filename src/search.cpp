@@ -611,7 +611,7 @@ namespace {
     // At this point, if excluded, skip straight to step 6, static eval. However,
     // to save indentation, we list the condition in all code between here and there.
     if (!excludedMove)
-        ss->ttPv = PvNode || (ss->ttHit && tte->is_pv() && tte->depth() >= depth);
+        ss->ttPv = PvNode || (ss->ttHit && tte->is_pv() && tte->depth() >= depth - 1);
 
     // At non-PV nodes we check for an early TT cutoff
     if (  !PvNode
