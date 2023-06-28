@@ -288,7 +288,7 @@ void Thread::search() {
 
   ss->pv = pv;
 
-  bestValue = -VALUE_INFINITE;
+  bestValue = ss->bestValue = -VALUE_INFINITE;
 
   if (mainThread)
   {
@@ -366,7 +366,7 @@ void Thread::search() {
               // Adjust the effective depth searched, but ensuring at least one effective increment for every
               // four searchAgain steps (see issue #2717).
               Depth adjustedDepth = std::max(1, rootDepth - failedHighCnt - 3 * (searchAgainCounter + 1) / 4);
-              bestValue = Stockfish::search<Root>(rootPos, ss, alpha, beta, adjustedDepth, false);
+              bestValue = ss->bestValue = Stockfish::search<Root>(rootPos, ss, alpha, beta, adjustedDepth, false);
 
               // Bring the best move to the front. It is critical that sorting
               // is done with a stable algorithm because all the values but the
@@ -707,6 +707,7 @@ namespace {
     {
         // Skip early pruning when in check
         ss->staticEval = eval = VALUE_NONE;
+        ss->bestValue = VALUE_NONE;
         improving = false;
         improvement = 0;
         goto moves_loop;
@@ -746,12 +747,12 @@ namespace {
     }
 
     // Set up the improvement variable, which is the difference between the current
-    // static evaluation and the previous static evaluation at our turn (if we were
+    // best value and the previous static evaluation at our turn (if we were
     // in check at our previous move we look at the move prior to it). The improvement
     // margin and the improving flag are used in various pruning heuristics.
-    improvement =   (ss-2)->staticEval != VALUE_NONE ? ss->staticEval - (ss-2)->staticEval
-                  : (ss-4)->staticEval != VALUE_NONE ? ss->staticEval - (ss-4)->staticEval
-                  :                                    173;
+    improvement =   (ss-2)->bestValue != VALUE_NONE ? ss->bestValue - (ss-2)->bestValue
+                  : (ss-4)->bestValue != VALUE_NONE ? ss->bestValue - (ss-4)->bestValue
+                  :                                    0;
     improving = improvement > 0;
 
     // Step 7. Razoring (~1 Elo).
@@ -1301,7 +1302,7 @@ moves_loop: // When in check, search starts here
 
       if (value > bestValue)
       {
-          bestValue = value;
+          bestValue = ss->bestValue = value;
 
           if (value > alpha)
           {
@@ -1481,6 +1482,8 @@ moves_loop: // When in check, search starts here
             ss->staticEval = bestValue = (ss-1)->currentMove != MOVE_NULL ? evaluate(pos)
                                                                           : -(ss-1)->staticEval;
 
+        ss->bestValue = bestValue;
+
         // Stand pat. Return immediately if static value is at least beta
         if (bestValue >= beta)
         {
@@ -1545,13 +1548,13 @@ moves_loop: // When in check, search starts here
 
                 if (futilityValue <= alpha)
                 {
-                    bestValue = std::max(bestValue, futilityValue);
+                    bestValue = ss->bestValue = std::max(bestValue, futilityValue);
                     continue;
                 }
 
                 if (futilityBase <= alpha && !pos.see_ge(move, VALUE_ZERO + 1))
                 {
-                    bestValue = std::max(bestValue, futilityBase);
+                    bestValue = ss->bestValue = std::max(bestValue, futilityBase);
                     continue;
                 }
             }
@@ -1595,7 +1598,7 @@ moves_loop: // When in check, search starts here
         // Step 8. Check for a new best move
         if (value > bestValue)
         {
-            bestValue = value;
+            bestValue = ss->bestValue = value;
 
             if (value > alpha)
             {
