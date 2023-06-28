@@ -409,7 +409,7 @@ void Thread::search() {
               else
                   break;
 
-              delta += delta / 3;
+              delta += Value(10);
 
               assert(alpha >= -VALUE_INFINITE && beta <= VALUE_INFINITE);
           }
@@ -1097,6 +1097,10 @@ moves_loop: // When in check, search starts here
               else if (ttValue >= beta)
                   extension = -2 - !PvNode;
 
+              // If we are on a cutNode, reduce it based on depth (negative extension) (~1 Elo)
+               else if (cutNode)
+                   extension = depth > 8 && depth < 17 ? -3 : -1;
+
               // If the eval of ttMove is less than value, we reduce it (negative extension) (~1 Elo)
               else if (ttValue <= value)
                   extension = -1;
@@ -1318,12 +1322,12 @@ moves_loop: // When in check, search starts here
               }
               else
               {
-                  // Reduce other moves if we have found at least one score improvement (~1 Elo)
-                  // Reduce more for depth > 3 and depth < 12 (~1 Elo)
-                  if (   depth > 1
-                      && beta  <  14362
-                      && value > -12393)
-                      depth -= depth > 3 && depth < 12 ? 2 : 1;
+                  // Reduce other moves if we have found at least one score improvement (~2 Elo)
+                   if (   depth > 2
+                       && depth < 12
+                       && beta  <  14362
+                       && value > -12393)
+                       depth -= 2;
 
                   assert(depth > 0);
                   alpha = value; // Update alpha! Always alpha < beta
