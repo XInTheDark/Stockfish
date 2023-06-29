@@ -86,8 +86,8 @@ namespace {
   }
 
   // Add a small random component to draw evaluations to avoid 3-fold blindness
-  Value value_draw(const Position& pos) {
-    const int drawCost = 10 * UCI::NormalizeToPawnValue / 100;
+  Value value_draw(const Position& pos, const int depth = 0) {
+    const int drawCost = (10 + depth / 2) * UCI::NormalizeToPawnValue / 100;
     int drawNow = pos.side_to_move() == pos.this_thread()->rootColor ? -drawCost : drawCost;
     return Value(drawNow - 1 + (pos.this_thread()->nodes & 0x2));
   }
@@ -203,7 +203,7 @@ void MainThread::search() {
   {
       rootMoves.emplace_back(MOVE_NONE);
       sync_cout << "info depth 0 score "
-                << UCI::value(rootPos.checkers() ? -VALUE_MATE : value_draw(rootPos))
+                << UCI::value(rootPos.checkers() ? -VALUE_MATE : value_draw(rootPos, rootDepth))
                 << sync_endl;
   }
   else
@@ -521,10 +521,10 @@ namespace {
     // if the opponent had an alternative move earlier to this position.
     if (   !rootNode
         && pos.rule50_count() >= 3
-        && alpha < value_draw(pos)
+        && alpha < value_draw(pos, depth)
         && pos.has_game_cycle(ss->ply))
     {
-        alpha = value_draw(pos);
+        alpha = value_draw(pos, depth);
         if (alpha >= beta)
             return alpha;
     }
@@ -576,7 +576,7 @@ namespace {
             || pos.is_draw(ss->ply)
             || ss->ply >= MAX_PLY)
             return (ss->ply >= MAX_PLY && !ss->inCheck) ? evaluate(pos)
-                                                        : value_draw(pos);
+                                                        : value_draw(pos, depth);
 
         // Step 3. Mate distance pruning. Even if we mate at the next move our score
         // would be at best mate_in(ss->ply+1), but if alpha is already bigger because
@@ -1363,7 +1363,7 @@ moves_loop: // When in check, search starts here
     if (!moveCount)
         bestValue = excludedMove ? alpha :
                     ss->inCheck  ? mated_in(ss->ply)
-                                 : value_draw(pos);
+                                 : value_draw(pos, depth);
 
     // If there is a move which produces search value greater than alpha we update stats of searched moves
     else if (bestMove)
