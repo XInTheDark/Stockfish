@@ -178,6 +178,9 @@ void Search::clear() {
   Tablebases::init(Options["SyzygyPath"]); // Free mapped files
 }
 
+int a1 = 4, a2 = 16;
+TUNE(SetRange(0, 16), a1);
+TUNE(SetRange(1, 32), a2);
 
 /// MainThread::search() is started when the program receives the UCI 'go'
 /// command. It searches from the root position and outputs the "bestmove".
@@ -1237,6 +1240,11 @@ moves_loop: // When in check, search starts here
       {
           (ss+1)->pv = pv;
           (ss+1)->pv[0] = MOVE_NONE;
+
+          if (rootNode
+              && depth > a1 && depth < a2
+              && move != ttMove)
+              newDepth++;
 
           value = -search<PV>(pos, ss+1, -beta, -alpha, newDepth, false);
       }
