@@ -63,7 +63,7 @@ public:
   std::atomic<uint64_t> nodes, tbHits, bestMoveChanges;
   int selDepth, nmpMinPly;
   Value bestValue, optimism[COLOR_NB];
-  bool decisive;
+  bool decisiveWinning, decisiveLosing;
 
   Position rootPos;
   StateInfo rootState;
