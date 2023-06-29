@@ -1052,12 +1052,12 @@ Value Eval::evaluate(const Position& pos) {
 
   Value v;
   Value psq = pos.psq_eg_stm();
-  const bool winning = pos.this_thread()->decisiveWinning, losing = pos.this_thread()->decisiveLosing;
+  const bool losing = pos.this_thread()->decisiveLosing;
 
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  bool useClassical = !useNNUE || losing || (!winning && abs(psq) > 2048);
+  bool useClassical = !useNNUE || (!losing && abs(psq) > 2048);
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
