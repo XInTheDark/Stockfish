@@ -449,6 +449,7 @@ void Thread::search() {
       {
           totBestMoveChanges += th->bestMoveChanges;
           th->bestMoveChanges = 0;
+          th->decisive = abs(th->bestValue) >= UCI::NormalizeToPawnValue;
       }
 
       // Do we have time for the next iteration? Can we stop searching now?
