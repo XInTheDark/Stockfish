@@ -255,6 +255,8 @@ void MainThread::search() {
   std::cout << sync_endl;
 }
 
+int v1 = 328, v2 = -328;
+TUNE(v1, v2);
 
 /// Thread::search() is the main iterative deepening loop. It calls search()
 /// repeatedly with increasing depth until the allocated thinking time has been
@@ -449,8 +451,8 @@ void Thread::search() {
       {
           totBestMoveChanges += th->bestMoveChanges;
           th->bestMoveChanges = 0;
-          th->decisiveWinning = th->bestValue >= UCI::NormalizeToPawnValue;
-          th->decisiveLosing  = th->bestValue <= -UCI::NormalizeToPawnValue;
+          th->decisiveWinning = th->bestValue >= v1;
+          th->decisiveLosing  = th->bestValue <= v2;
       }
 
       // Do we have time for the next iteration? Can we stop searching now?

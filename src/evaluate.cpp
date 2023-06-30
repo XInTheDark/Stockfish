@@ -1042,6 +1042,9 @@ make_v:
 
 } // namespace Eval
 
+int a1 = 2048, b1 = 0, b2 = 0;
+TUNE(a1);
+TUNE(SetRange(-2048, 2048), b1, b2);
 
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
@@ -1052,12 +1055,13 @@ Value Eval::evaluate(const Position& pos) {
 
   Value v;
   Value psq = pos.psq_eg_stm();
-  const bool losing = pos.this_thread()->decisiveLosing;
+  const bool winning = pos.this_thread()->decisiveWinning, losing = pos.this_thread()->decisiveLosing;
 
   // We use the much less accurate but faster Classical eval when the NNUE
   // option is set to false. Otherwise we use the NNUE eval unless the
   // PSQ advantage is decisive. (~4 Elo at STC, 1 Elo at LTC)
-  bool useClassical = !useNNUE || (!losing && abs(psq) > 2048);
+  const int nnueThreshold = a1 + b1 * winning + b2 * losing;
+  const bool useClassical = !useNNUE || abs(psq) > nnueThreshold;
 
   if (useClassical)
       v = Evaluation<NO_TRACE>(pos).value();
