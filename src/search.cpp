@@ -38,31 +38,32 @@
 
 using namespace Stockfish;
 
-int a1=140, a2=1372, a3=1073, a4=936, a5=336, a6=547, a7=1561,
-    b1=20570,
-    c1=10, c2=15799, c3=109, c4=141, c5=10,
-    e0=18, e1=1817, e2=173, e3=456, e4=252, e5=9, e6=306, e7=24923, e8=17329, e9=21, e10=100, e11=258,
-    f1=173, f2=6, f3=4, f4=168, f5=61, f6=3, f7=3, f8=8, f9=413, f10=4,
-    g1=7, g2=197, g3=248, g5=205, g6=6, g7=3832, g8=7011, g9=12, g10=112, g11=138, g12=27, g13=16,
-    h1=4, h2=22, h3=3,
-    i1=8, i2=17, i3=3, i4=1, i6=8, i8=5168, i9=3, i10=3, i11=2,
-    j1_=8, j0_=1, j2=12, j3=3, j4=3, j5=4006, j6=11124, j7=4740, j8=5, j9=22,
-    k1=64, k2=11, k3=711, k4=6, k5=3,
-    l1=14362, l2=12393, l3=2, l4=12,
-    m1=5, m2=113, m3=12,
-    n1=200, n2=0, n3=0, n4=95, n5=145;
+int a1=135, a2=1400, a3=1209, a4=953, a5=349, a6=541, a7=1641,
+    b1=19780,
+    c1=9, c2=16731, c3=112, c4=155,
+    e0=19, e1=1942, e2=174, e3=462, e4=265, e5=9, e6=329, e7=26463, e8=17169, e9=23, e11=270,
+    f1=179, f2=6, f3=4, f4=165, f5=57, f6=3, f7=3, f8=8, f9=442, f10=4,
+    g1=8, g2=181, g3=273, g5=202, g6=6, g7=4242, g8=7104, g9=14, g10=111, g11=137, g12=29, g13=16,
+    h1=4, h2=24, h3=3,
+    sb1=72, sb2=61, sb3=19, sb4=12,
+    i1=7, i2=14, i3=3, i4=1, i6=8, i8=4760, i9=3, i10=3, i11=2,
+    j1_=7, j0_=1, j2=6, j4=3, j5=3719, j6=10201, j7=4433, j8=6, j9=20,
+    k1=66, k2=11, k3=650, k4=7, k5=3,
+    l1=12712, l2=10951, l3=2, l4=11,
+    m1=5, m2=119, m3=11,
+    n1=205, n2=485, n3=96, n4=84, n5=145;
 
 
 TUNE(a1, a2, a3, a4, a5, a6, a7, b1, c1);
 TUNE(SetRange(1, 31598), c2);
-TUNE(c3, c4, c5, e0, e1, e2, e3, e4, e5);
+TUNE(c3, c4, e0, e1, e2, e3, e4, e5);
 TUNE(SetRange(1, 612), e6);
-TUNE(e7, e8, e9, e10, e11);
+TUNE(e7, e8, e9, e11);
 TUNE(SetRange(1, 346), f1);
 TUNE(f2, f3, f4, f5, f6, f7, f8, f9, f10, g1, g2, g3, g5, g6, g7);
 TUNE(SetRange(1, 14022), g8);
-TUNE(g9, g10, g11, g12, g13, h1, h2, h3, i1, i2, i3, i4, i6, i8, i9, i10, i11);
-TUNE(j1_, j0_, j2, j3, j4, j5, j6, j7, j8, j9, k1, k2, k3, k4, k5, l1, l2, l3, l4, m1, m2, m3, n1);
+TUNE(g9, g10, g11, g12, g13, h1, h2, h3, sb1, sb2, sb3, sb4, i1, i2, i3, i4, i6, i8, i9, i10, i11);
+TUNE(j1_, j0_, j2, j4, j5, j6, j7, j8, j9, k1, k2, k3, k4, k5, l1, l2, l3, l4, m1, m2, m3, n1);
 TUNE(SetRange(-5000, 5000), n2, n3);
 TUNE(n4, n5);
 
@@ -97,7 +98,7 @@ namespace {
     return Value(a1 * (d - improving));
   }
 
-  // Reductions lookup table, initialized at startup
+  // Reductions lookup table initialized at startup
   int Reductions[MAX_MOVES]; // [depth or moveNumber]
 
   Depth reduction(bool i, Depth d, int mn, Value delta, Value rootDelta) {
@@ -122,7 +123,7 @@ namespace {
 
   // Skill structure is used to implement strength limit. If we have an uci_elo then
   // we convert it to a suitable fractional skill level using anchoring to CCRL Elo
-  // (goldfish 1.13 = 2000) and a fit through Ordo derived Elo for match (TC 60+0.6)
+  // (goldfish 1.13 = 2000) and a fit through Ordo derived Elo for a match (TC 60+0.6)
   // results spanning a wide range of k values.
   struct Skill {
     Skill(int skill_level, int uci_elo) {
@@ -439,7 +440,7 @@ void Thread::search() {
               else
                   break;
 
-              delta += Value(c5);
+              delta += delta / 3;
 
               assert(alpha >= -VALUE_INFINITE && beta <= VALUE_INFINITE);
           }
@@ -809,10 +810,11 @@ namespace {
         && (ss-1)->statScore < e8
         &&  eval >= beta
         &&  eval >= ss->staticEval
-        &&  ss->staticEval >= beta - e9 * depth - improvement / e10 + e11
+        &&  ss->staticEval >= beta - e9 * depth + e11
         && !excludedMove
         &&  pos.non_pawn_material(us)
-        && (ss->ply >= thisThread->nmpMinPly))
+        &&  ss->ply >= thisThread->nmpMinPly
+        &&  beta > VALUE_TB_LOSS_IN_MAX_PLY)
     {
         assert(eval - beta >= 0);
 
@@ -1190,7 +1192,7 @@ moves_loop: // When in check, search starts here
 
       // Decrease reduction for PvNodes based on depth (~2 Elo)
       if (PvNode)
-          r -= j0_ + j2 / (j3 + depth);
+          r -= j0_ + (depth < j2);
 
       // Decrease reduction if ttMove has been singularly extended (~1 Elo)
       if (singularQuietLMR)
@@ -1735,7 +1737,7 @@ moves_loop: // When in check, search starts here
 
     if (!pos.capture_stage(bestMove))
     {
-        int bonus2 = bestValue > beta + 145 ? bonus1               // larger bonus
+        int bonus2 = bestValue > beta + n5 ? bonus1               // larger bonus
                                             : stat_bonus(depth);   // smaller bonus
 
         // Increase stats for the best move in case it was a quiet move
