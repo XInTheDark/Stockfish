@@ -45,7 +45,7 @@ int a1=135, a2=1400, a3=1209, a4=953, a5=349, a6=541, a7=1641,
     f1=179, f2=6, f3=4, f4=165, f5=57, f6=3, f7=3, f8=8, f9=442, f10=4,
     g1=8, g2=181, g3=273, g5=202, g6=6, g7=4242, g8=7104, g9=14, g10=111, g11=137, g12=29, g13=16,
     h1=4, h2=24, h3=3,
-    sb1=72, sb2=61, sb3=19, sb4=12,
+    sb1=72, sb2=61, sb3=19, sb4=11, sb5=12,
     i1=7, i2=14, i3=3, i4=1, i6=8, i8=4760, i9=3, i10=3, i11=2,
     j1_=7, j0_=1, j2=6, j4=3, j5=3719, j6=10201, j7=4433, j8=6, j9=20,
     k1=66, k2=11, k3=650, k4=7, k5=3,
@@ -62,7 +62,7 @@ TUNE(e7, e8, e9, e11);
 TUNE(SetRange(1, 346), f1);
 TUNE(f2, f3, f4, f5, f6, f7, f8, f9, f10, g1, g2, g3, g5, g6, g7);
 TUNE(SetRange(1, 14022), g8);
-TUNE(g9, g10, g11, g12, g13, h1, h2, h3, sb1, sb2, sb3, sb4, i1, i2, i3, i4, i6, i8, i9, i10, i11);
+TUNE(g9, g10, g11, g12, g13, h1, h2, h3, sb1, sb2, sb3, sb4, sb5, i1, i2, i3, i4, i6, i8, i9, i10, i11);
 TUNE(j1_, j0_, j2, j4, j5, j6, j7, j8, j9, k1, k2, k3, k4, k5, l1, l2, l3, l4, m1, m2, m3, n1);
 TUNE(SetRange(-5000, 5000), n2, n3);
 TUNE(n4, n5);
@@ -1095,7 +1095,7 @@ moves_loop: // When in check, search starts here
               && (tte->bound() & BOUND_LOWER)
               &&  tte->depth() >= depth - h3)
           {
-              Value singularBeta = ttValue - (82 + 65 * (ss->ttPv && !PvNode)) * depth / 64;
+              Value singularBeta = ttValue - (sb1 + sb2 * (ss->ttPv && !PvNode)) * depth / 64;
               Depth singularDepth = (depth - 1) / 2;
 
               ss->excludedMove = move;
@@ -1109,11 +1109,11 @@ moves_loop: // When in check, search starts here
 
                   // Avoid search explosion by limiting the number of double extensions
                   if (  !PvNode
-                      && value < singularBeta - 21
-                      && ss->doubleExtensions <= 11)
+                      && value < singularBeta - sb3
+                      && ss->doubleExtensions <= sb4)
                   {
                       extension = 2;
-                      depth += depth < 13;
+                      depth += depth < sb5;
                   }
               }
 
