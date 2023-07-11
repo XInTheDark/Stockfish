@@ -450,7 +450,7 @@ void Thread::search() {
           totBestMoveChanges += th->bestMoveChanges;
           th->bestMoveChanges = 0;
           th->decisiveWinning = th->bestValue >= 320;
-          th->decisiveLosing  = th->bestValue <= 313;
+          th->decisiveLosing  = th->bestValue <= -313;
       }
 
       // Do we have time for the next iteration? Can we stop searching now?
