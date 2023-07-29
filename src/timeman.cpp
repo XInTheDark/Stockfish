@@ -100,8 +100,8 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
   optimumTime = TimePoint(optScale * timeLeft);
 
-  // Never use more than a certain percentage of the available time for this move
-  // (scales based on TC)
+  // Never use more than 85% (or 80% if there is no increment)
+  // of the available time for this move
   const double maxTimePercentage = 0.8 + 0.05 * (limits.inc[us] > 0);
   maximumTime = TimePoint(std::min(maxTimePercentage * limits.time[us] - moveOverhead, maxScale * optimumTime)) - 10;
 
