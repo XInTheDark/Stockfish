@@ -1121,6 +1121,7 @@ moves_loop: // When in check, search starts here
 
       // Add extension to new depth
       newDepth += extension;
+      depth += extension;
       ss->doubleExtensions = (ss-1)->doubleExtensions + (extension == 2);
 
       // Speculative prefetch as early as possible
