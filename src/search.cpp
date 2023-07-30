@@ -38,29 +38,29 @@
 
 using namespace Stockfish;
 
-int a1=135, a2=1400, a3=1209, a4=953, a5=349, a6=541, a7=1641,
-    b1=19780,
-    c1=9, c2=16731, c3=112, c4=155,
-    e0=19, e1=1942, e2=174, e3=462, e4=265, e5=9, e6=329, e7=26463, e8=17169, e9=23, e11=270,
-    f1=179, f2=6, f3=4, f4=165, f5=57, f6=3, f7=3, f8=8, f9=442, f10=4,
-    g1=8, g2=181, g3=273, g5=202, g6=6, g7=4242, g8=7104, g9=14, g10=111, g11=137, g12=29, g13=16,
-    h1=4, h2=24, h3=3,
-    sb1=72, sb2=61, sb3=19, sb4=11, sb5=12,
-    i1=7, i2=14, i3=3, i4=1, i6=8, i8=4760, i9=3, i10=3, i11=2,
-    j1_=7, j0_=1, j2=6, j4=3, j5=3719, j6=10201, j7=4433, j8=6, j9=20,
-    k1=66, k2=11, k3=650, k4=7, k5=3,
-    l1=12712, l2=10951, l3=2, l4=11,
-    m1=5, m2=119, m3=11,
-    n1=205, n2=485, n3=96, n4=84, n5=145;
+int a0=140, a1=40, a2=1567, a3=1282, a4=882, a5=360, a6=473, a7=1567,
+    b1=19336,
+    c1=9, c2=15395, c3=101, c4=125,
+    e0=23, e1=2157, e3=460, e4=258, e5=10, e6=315, e7=29876, e8=15700, e9=25, e11=286,
+    f1=145, f2=6, f3=4, f4=184, f5=63, f6=3, f8=7, f9=427, f10=4,
+    g1=8, g2=184, g3=255, g5=201, g6=6, g7=4446, g8=7348, g9=11, g10=94, g11=130, g12=20, g13=20,
+    h1=4, h2=23, h3=3,
+    sb1=75, sb2=69, sb3=20, sb4=11, sb5=14,
+    i1=7, i2=15, i3=3, i4=1, i6=8, i8=5111, i9=3, i10=3, i11=2,
+    j1_=7, j0_=1, j2=4, j4=3, j5=4128, j6=9685, j7=4460, j8=6, j9=22,
+    k1=74, k2=10, k3=674, k4=7, k5=3,
+    l1=11963, l2=11553, l3=2, l4=11,
+    m1=5, m2=139, m3=11,
+    n1=198, n2=606, n3=463, n4=84, n5=151;
 
 
-TUNE(a1, a2, a3, a4, a5, a6, a7, b1, c1);
+TUNE(a0, a1, a2, a3, a4, a5, a6, a7, b1, c1);
 TUNE(SetRange(1, 31598), c2);
-TUNE(c3, c4, e0, e1, e2, e3, e4, e5);
+TUNE(c3, c4, e0, e1, e3, e4, e5);
 TUNE(SetRange(1, 612), e6);
 TUNE(e7, e8, e9, e11);
 TUNE(SetRange(1, 346), f1);
-TUNE(f2, f3, f4, f5, f6, f7, f8, f9, f10, g1, g2, g3, g5, g6, g7);
+TUNE(f2, f3, f4, f5, f6, f8, f9, f10, g1, g2, g3, g5, g6, g7);
 TUNE(SetRange(1, 14022), g8);
 TUNE(g9, g10, g11, g12, g13, h1, h2, h3, sb1, sb2, sb3, sb4, sb5, i1, i2, i3, i4, i6, i8, i9, i10, i11);
 TUNE(j1_, j0_, j2, j4, j5, j6, j7, j8, j9, k1, k2, k3, k4, k5, l1, l2, l3, l4, m1, m2, m3, n1);
@@ -95,7 +95,7 @@ namespace {
 
   // Futility margin
   Value futility_margin(Depth d, bool noTtCutNode, bool improving) {
-    return Value((140 - 40 * noTtCutNode) * (d - improving));
+    return Value((a0 - a1 * noTtCutNode) * (d - improving));
   }
 
   // Reductions lookup table initialized at startup
