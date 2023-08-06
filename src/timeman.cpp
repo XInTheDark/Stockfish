@@ -98,9 +98,11 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
       maxScale = std::min(6.3, 1.5 + 0.11 * mtg);
   }
 
-  // Never use more than 80% of the available time for this move
   optimumTime = TimePoint(optScale * timeLeft);
-  maximumTime = TimePoint(std::min(0.8 * limits.time[us] - moveOverhead, maxScale * optimumTime)) - 10;
+
+  // Never use more than a certain % of the available time for this move (scale based on ply)
+  double maxTimePercentage = std::min(0.75 + 0.0120 * std::pow(ply, 0.45), 0.90);
+  maximumTime = TimePoint(std::min(maxTimePercentage * limits.time[us] - moveOverhead, maxScale * optimumTime)) - 10;
 
   if (Options["Ponder"])
       optimumTime += optimumTime / 4;
