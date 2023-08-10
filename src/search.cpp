@@ -1371,7 +1371,7 @@ moves_loop: // When in check, search starts here
     // Bonus for prior countermove that caused the fail low
     else if (!priorCapture && prevSq != SQ_NONE)
     {
-        int bonus = (depth > 5) + (PvNode || cutNode) + (bestValue < alpha - 113 * depth) + ((ss-1)->moveCount > 12);
+        int bonus = (depth > 5) + (PvNode || cutNode) + (bestValue < alpha - 172 * depth) + ((ss-1)->moveCount > 11);
         update_continuation_histories(ss-1, pos.piece_on(prevSq), prevSq, stat_bonus(depth) * bonus);
     }
 
@@ -1495,7 +1495,7 @@ moves_loop: // When in check, search starts here
         if (bestValue > alpha)
             alpha = bestValue;
 
-        futilityBase = std::min(ss->staticEval, bestValue) + 200;
+        futilityBase = std::min(ss->staticEval, bestValue) + 196;
     }
 
     const PieceToHistory* contHist[] = { (ss-1)->continuationHistory, (ss-2)->continuationHistory,
@@ -1564,12 +1564,12 @@ moves_loop: // When in check, search starts here
 
             // Continuation history based pruning (~3 Elo)
             if (   !capture
-                && (*contHist[0])[pos.moved_piece(move)][to_sq(move)] < 0
-                && (*contHist[1])[pos.moved_piece(move)][to_sq(move)] < 0)
+                && (*contHist[0])[pos.moved_piece(move)][to_sq(move)] < 946
+                && (*contHist[1])[pos.moved_piece(move)][to_sq(move)] < 415)
                 continue;
 
             // Do not search moves with bad enough SEE values (~5 Elo)
-            if (!pos.see_ge(move, Value(-95)))
+            if (!pos.see_ge(move, Value(-71)))
                 continue;
         }
 
@@ -1702,7 +1702,7 @@ moves_loop: // When in check, search starts here
 
     if (!pos.capture_stage(bestMove))
     {
-        int bestMoveBonus = bestValue > beta + 145 ? quietMoveBonus  // larger bonus
+        int bestMoveBonus = bestValue > beta + 119 ? quietMoveBonus  // larger bonus
                                             : stat_bonus(depth);     // smaller bonus
 
         // Increase stats for the best move in case it was a quiet move
