@@ -775,10 +775,10 @@ namespace {
     // Step 9. Null move search with verification search (~35 Elo)
     if (   !PvNode
         && (ss-1)->currentMove != MOVE_NULL
-        && (ss-1)->statScore < 17329
+        && (ss-1)->statScore < 12881
         &&  eval >= beta
         &&  eval >= ss->staticEval
-        &&  ss->staticEval >= beta - 21 * depth + 258
+        &&  ss->staticEval >= beta - 25 * depth + 283
         && !excludedMove
         &&  pos.non_pawn_material(us)
         &&  ss->ply >= thisThread->nmpMinPly
@@ -787,7 +787,7 @@ namespace {
         assert(eval - beta >= 0);
 
         // Null move dynamic reduction based on depth and eval
-        Depth R = std::min(int(eval - beta) / 173, 6) + depth / 3 + 4;
+        Depth R = std::min(int(eval - beta) / 155, 7) + depth / 3 + 4;
 
         ss->currentMove = MOVE_NULL;
         ss->continuationHistory = &thisThread->continuationHistory[0][0][NO_PIECE][0];
@@ -832,11 +832,11 @@ namespace {
         return qsearch<PV>(pos, ss, alpha, beta);
 
     if (    cutNode
-        &&  depth >= 8
+        &&  depth >= 7
         && !ttMove)
         depth -= 2;
 
-    probCutBeta = beta + 168 - 61 * improving;
+    probCutBeta = beta + 178 - 74 * improving;
 
     // Step 11. ProbCut (~10 Elo)
     // If we have a good enough capture (or queen promotion) and a reduced search returns a value
@@ -892,12 +892,12 @@ namespace {
 moves_loop: // When in check, search starts here
 
     // Step 12. A small Probcut idea, when we are in check (~4 Elo)
-    probCutBeta = beta + 413;
+    probCutBeta = beta + 357;
     if (   ss->inCheck
         && !PvNode
         && ttCapture
         && (tte->bound() & BOUND_LOWER)
-        && tte->depth() >= depth - 4
+        && tte->depth() >= depth - 3
         && ttValue >= probCutBeta
         && abs(ttValue) <= VALUE_KNOWN_WIN
         && abs(beta) <= VALUE_KNOWN_WIN)
@@ -983,15 +983,15 @@ moves_loop: // When in check, search starts here
           {
               // Futility pruning for captures (~2 Elo)
               if (   !givesCheck
-                  && lmrDepth < 7
+                  && lmrDepth < 8
                   && !ss->inCheck
-                  && ss->staticEval + 197 + 248 * lmrDepth + PieceValue[EG][pos.piece_on(to_sq(move))]
+                  && ss->staticEval + 206 + 286 * lmrDepth + PieceValue[EG][pos.piece_on(to_sq(move))]
                    + captureHistory[movedPiece][to_sq(move)][type_of(pos.piece_on(to_sq(move)))] / 7 < alpha)
                   continue;
 
               Bitboard occupied;
               // SEE based pruning (~11 Elo)
-              if (!pos.see_ge(move, occupied, Value(-205) * depth))
+              if (!pos.see_ge(move, occupied, Value(-203) * depth))
               {
                  if (depth < 2 - capture)
                     continue;
@@ -1020,18 +1020,18 @@ moves_loop: // When in check, search starts here
 
               // Continuation history based pruning (~2 Elo)
               if (   lmrDepth < 6
-                  && history < -3832 * depth)
+                  && history < -4134 * depth)
                   continue;
 
               history += 2 * thisThread->mainHistory[us][from_to(move)];
 
-              lmrDepth += history / 7011;
+              lmrDepth += history / 6707;
               lmrDepth = std::max(lmrDepth, -2);
 
               // Futility pruning: parent node (~13 Elo)
               if (   !ss->inCheck
-                  && lmrDepth < 12
-                  && ss->staticEval + 112 + 138 * lmrDepth <= alpha)
+                  && lmrDepth < 10
+                  && ss->staticEval + 107 + 144 * lmrDepth <= alpha)
                   continue;
 
               lmrDepth = std::max(lmrDepth, 0);
