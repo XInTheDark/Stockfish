@@ -1098,6 +1098,13 @@ moves_loop: // When in check, search starts here
                    && move == ss->killers[0]
                    && (*contHist[0])[movedPiece][to_sq(move)] >= 5168)
               extension = 1;
+
+          // Optimism-based extensions
+          else if (PvNode
+               && depth > 8
+               && thisThread->bestValue > 200
+               && thisThread->optimism[us] < -64)
+              extension = 1;
       }
 
       // Add extension to new depth
