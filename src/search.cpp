@@ -456,16 +456,16 @@ void Thread::search() {
           && !Threads.stop
           && !mainThread->stopOnPonderhit)
       {
-          double fallingEval = (69 + 13 * (mainThread->bestPreviousAverageScore - bestValue)
-                                    +  6 * (mainThread->iterValue[iterIdx] - bestValue)) / 619.6;
-          fallingEval = std::clamp(fallingEval, 0.5, 1.5);
+          double evalInstability = (69 + 13 * abs(mainThread->bestPreviousAverageScore - bestValue)
+                                    +  6 * abs(mainThread->iterValue[iterIdx] - bestValue)) / 619.6;
+          evalInstability = std::clamp(evalInstability, 0.5, 1.5);
 
           // If the bestMove is stable over several iterations, reduce time accordingly
           timeReduction = lastBestMoveDepth + 8 < completedDepth ? 1.57 : 0.65;
           double reduction = (1.4 + mainThread->previousTimeReduction) / (2.08 * timeReduction);
           double bestMoveInstability = 1 + 1.8 * totBestMoveChanges / Threads.size();
 
-          double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability;
+          double totalTime = Time.optimum() * evalInstability * reduction * bestMoveInstability;
 
           // Cap used time in case of a single legal move for a better viewer experience in tournaments
           // yielding correct scores and sufficiently fast moves.
