@@ -819,6 +819,8 @@ namespace {
             if (v >= beta)
                 return nullValue;
         }
+        else if (depth > 1 && depth < 14)
+            depth--;
     }
 
     // Step 10. If the position doesn't have a ttMove, decrease depth by 2
