@@ -116,7 +116,7 @@ namespace {
   Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, bool cutNode);
 
   template <NodeType nodeType>
-  Value qsearch(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth = 0);
+  Value qsearch(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth = 0, bool pruneLess = false);
 
   Value value_to_tt(Value v, int ply);
   Value value_from_tt(Value v, int ply, int r50c);
@@ -528,8 +528,9 @@ namespace {
     }
 
     // Dive into quiescence search when the depth reaches zero
+    // Prune less in qsearch if PvNode
     if (depth <= 0)
-        return qsearch<PvNode ? PV : NonPV>(pos, ss, alpha, beta);
+        return qsearch<PvNode ? PV : NonPV>(pos, ss, alpha, beta, PvNode);
 
     assert(-VALUE_INFINITE <= alpha && alpha < beta && beta <= VALUE_INFINITE);
     assert(PvNode || (alpha == beta - 1));
@@ -829,7 +830,7 @@ namespace {
         depth -= 2 + 2 * (ss->ttHit && tte->depth() >= depth);
 
     if (depth <= 0)
-        return qsearch<PV>(pos, ss, alpha, beta);
+        return qsearch<PV>(pos, ss, alpha, beta, true);
 
     if (    cutNode
         &&  depth >= 8
@@ -1382,7 +1383,7 @@ moves_loop: // When in check, search starts here
   // function with zero depth, or recursively with further decreasing depth per call.
   // (~155 Elo)
   template <NodeType nodeType>
-  Value qsearch(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth) {
+  Value qsearch(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, bool pruneLess) {
 
     static_assert(nodeType != Root);
     constexpr bool PvNode = nodeType == PV;
@@ -1524,7 +1525,7 @@ moves_loop: // When in check, search starts here
         moveCount++;
 
         // Step 6. Pruning.
-        if (bestValue > VALUE_TB_LOSS_IN_MAX_PLY)
+        if (!pruneLess && bestValue > VALUE_TB_LOSS_IN_MAX_PLY)
         {
             // Futility pruning and moveCount pruning (~10 Elo)
             if (   !givesCheck
@@ -1581,7 +1582,7 @@ moves_loop: // When in check, search starts here
 
         // Step 7. Make and search the move
         pos.do_move(move, st, givesCheck);
-        value = -qsearch<nodeType>(pos, ss+1, -beta, -alpha, depth - 1);
+        value = -qsearch<nodeType>(pos, ss+1, -beta, -alpha, depth - 1, pruneLess);
         pos.undo_move(move);
 
         assert(value > -VALUE_INFINITE && value < VALUE_INFINITE);
