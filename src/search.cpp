@@ -703,14 +703,7 @@ namespace {
     CapturePieceToHistory& captureHistory = thisThread->captureHistory;
 
     // Step 6. Static evaluation of the position
-    if (ss->inCheck)
-    {
-        // Skip early pruning when in check
-        ss->staticEval = eval = VALUE_NONE;
-        improving = false;
-        goto moves_loop;
-    }
-    else if (excludedMove)
+    if (excludedMove)
     {
         // Providing the hint that this node's accumulator will be used often brings significant Elo gain (13 Elo)
         Eval::NNUE::hint_common_parent_position(pos);
@@ -735,6 +728,12 @@ namespace {
         ss->staticEval = eval = evaluate(pos);
         // Save static evaluation into the transposition table
         tte->save(posKey, VALUE_NONE, ss->ttPv, BOUND_NONE, DEPTH_NONE, MOVE_NONE, eval);
+    }
+
+    if (ss->inCheck) {
+        // Skip early pruning when in check
+        improving = false;
+        goto moves_loop;
     }
 
     // Use static evaluation difference to improve quiet move ordering (~4 Elo)
@@ -1455,42 +1454,37 @@ moves_loop: // When in check, search starts here
         return ttValue;
 
     // Step 4. Static evaluation of the position
-    if (ss->inCheck)
-        bestValue = futilityBase = -VALUE_INFINITE;
-    else
+    if (ss->ttHit)
     {
-        if (ss->ttHit)
-        {
-            // Never assume anything about values stored in TT
-            if ((ss->staticEval = bestValue = tte->eval()) == VALUE_NONE)
-                ss->staticEval = bestValue = evaluate(pos);
+        // Never assume anything about values stored in TT
+        if ((ss->staticEval = bestValue = tte->eval()) == VALUE_NONE)
+            ss->staticEval = bestValue = evaluate(pos);
 
-            // ttValue can be used as a better position evaluation (~13 Elo)
-            if (    ttValue != VALUE_NONE
-                && (tte->bound() & (ttValue > bestValue ? BOUND_LOWER : BOUND_UPPER)))
-                bestValue = ttValue;
-        }
-        else
-            // In case of null move search use previous static eval with a different sign
-            ss->staticEval = bestValue = (ss-1)->currentMove != MOVE_NULL ? evaluate(pos)
-                                                                          : -(ss-1)->staticEval;
-
-        // Stand pat. Return immediately if static value is at least beta
-        if (bestValue >= beta)
-        {
-            // Save gathered info in transposition table
-            if (!ss->ttHit)
-                tte->save(posKey, value_to_tt(bestValue, ss->ply), false, BOUND_LOWER,
-                          DEPTH_NONE, MOVE_NONE, ss->staticEval);
-
-            return bestValue;
-        }
-
-        if (bestValue > alpha)
-            alpha = bestValue;
-
-        futilityBase = std::min(ss->staticEval, bestValue) + 200;
+        // ttValue can be used as a better position evaluation (~13 Elo)
+        if (    ttValue != VALUE_NONE
+            && (tte->bound() & (ttValue > bestValue ? BOUND_LOWER : BOUND_UPPER)))
+            bestValue = ttValue;
     }
+    else
+        // In case of null move search use previous static eval with a different sign
+        ss->staticEval = bestValue = (ss-1)->currentMove != MOVE_NULL ? evaluate(pos)
+                                                                      : -(ss-1)->staticEval;
+
+    // Stand pat. Return immediately if static value is at least beta
+    if (bestValue >= beta)
+    {
+        // Save gathered info in transposition table
+        if (!ss->ttHit)
+            tte->save(posKey, value_to_tt(bestValue, ss->ply), false, BOUND_LOWER,
+                      DEPTH_NONE, MOVE_NONE, ss->staticEval);
+
+        return bestValue;
+    }
+
+    if (bestValue > alpha)
+        alpha = bestValue;
+
+    futilityBase = std::min(ss->staticEval, bestValue) + 200;
 
     const PieceToHistory* contHist[] = { (ss-1)->continuationHistory, (ss-2)->continuationHistory,
                                           nullptr                   , (ss-4)->continuationHistory,
