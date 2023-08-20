@@ -986,7 +986,8 @@ moves_loop: // When in check, search starts here
                   && lmrDepth < 7
                   && !ss->inCheck
                   && ss->staticEval + 197 + 248 * lmrDepth + PieceValue[pos.piece_on(to_sq(move))]
-                   + captureHistory[movedPiece][to_sq(move)][type_of(pos.piece_on(to_sq(move)))] / 7 < alpha)
+                   + captureHistory[movedPiece][to_sq(move)][type_of(pos.piece_on(to_sq(move)))] / 7 < alpha
+                  && !pruneLess)
                   continue;
 
               // SEE based pruning for captures and checks (~11 Elo)
@@ -1013,7 +1014,8 @@ moves_loop: // When in check, search starts here
               // Futility pruning: parent node (~13 Elo)
               if (   !ss->inCheck
                   && lmrDepth < 12
-                  && ss->staticEval + 112 + 138 * lmrDepth <= alpha)
+                  && ss->staticEval + 112 + 138 * lmrDepth <= alpha
+                  && !pruneLess)
                   continue;
 
               lmrDepth = std::max(lmrDepth, 0);
