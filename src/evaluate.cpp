@@ -138,7 +138,7 @@ namespace Eval {
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
 
-Value Eval::evaluate(const Position& pos) {
+Value Eval::evaluate(const Position& pos, int depth) {
 
   assert(!pos.checkers());
 
@@ -150,7 +150,7 @@ Value Eval::evaluate(const Position& pos) {
   Color stm = pos.side_to_move();
   Value optimism = pos.this_thread()->optimism[stm];
 
-  Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
+  Value nnue = NNUE::evaluate(pos, true, &nnueComplexity, depth);
 
   int material =  pos.non_pawn_material(stm) - pos.non_pawn_material(~stm)
                 + 126 * (pos.count<PAWN>(stm) - pos.count<PAWN>(~stm));
