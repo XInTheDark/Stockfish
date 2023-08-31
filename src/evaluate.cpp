@@ -150,7 +150,7 @@ Value Eval::simple_eval(const Position& pos, Color c) {
 /// evaluate() is the evaluator for the outer world. It returns a static
 /// evaluation of the position from the point of view of the side to move.
 
-Value Eval::evaluate(const Position& pos) {
+Value Eval::evaluate(const Position& pos, int depth) {
 
   assert(!pos.checkers());
 
@@ -160,7 +160,7 @@ Value Eval::evaluate(const Position& pos) {
   int simpleEval = simple_eval(pos, stm);
 
 
-  if (abs(simpleEval) >= QueenValue + 16 * shuffling * shuffling)
+  if (depth < 16 && abs(simpleEval) >= QueenValue + 16 * shuffling * shuffling)
       v = Value(simpleEval);
   else
   {
