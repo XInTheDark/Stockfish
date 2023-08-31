@@ -160,7 +160,7 @@ Value Eval::evaluate(const Position& pos, int depth) {
   int simpleEval = simple_eval(pos, stm);
 
 
-  if (depth < 16 && abs(simpleEval) >= QueenValue + 16 * shuffling * shuffling)
+  if (depth < 16 && abs(simpleEval) >= QueenValue + 4 * shuffling * shuffling)
       v = Value(simpleEval);
   else
   {
