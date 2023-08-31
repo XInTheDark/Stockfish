@@ -158,9 +158,10 @@ Value Eval::evaluate(const Position& pos) {
   Color stm      = pos.side_to_move();
   int shuffling  = pos.rule50_count();
   int simpleEval = simple_eval(pos, stm);
+  Value bestValue = pos.this_thread()->bestValue;
 
 
-  if (abs(simpleEval) >= QueenValue + 16 * shuffling * shuffling)
+  if (bestValue > 300 && abs(simpleEval) >= QueenValue + 16 * shuffling * shuffling)
       v = Value(simpleEval);
   else
   {
