@@ -181,8 +181,8 @@ Value Eval::evaluate(const Position& pos) {
       Value optimism = pos.this_thread()->optimism[stm];
 
       // Blend optimism and eval with nnue complexity and material imbalance
-      optimism += optimism * (nnueComplexity + abs(simpleEval - nnue)) * v4 / 2097152;
-      nnue     -= nnue     * (nnueComplexity + abs(simpleEval - nnue)) * v5 / 2097152;
+      optimism += (int) optimism * (nnueComplexity + abs(simpleEval - nnue)) * (long long) v4 / 2097152;
+      nnue     -= (int) nnue     * (nnueComplexity + abs(simpleEval - nnue)) * (long long) v5 / 2097152;
 
       v = (  nnue     * (v6 + npm + v7 * pos.count<PAWN>() / 64)
            + optimism * (v8 + npm + v9 * pos.count<PAWN>() / 64)) / 1024;
