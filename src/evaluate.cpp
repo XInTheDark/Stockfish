@@ -52,6 +52,12 @@
 
 using namespace std;
 
+using namespace Stockfish;
+
+int v1=2057, v2=16, v3=64, v4=4096, v5=64,
+    v6=915, v7=576, v8=154, v9=64, v10=200;
+TUNE(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10);
+
 namespace Stockfish {
 
 namespace Eval {
@@ -159,8 +165,8 @@ Value Eval::evaluate(const Position& pos) {
   int shuffling  = pos.rule50_count();
   int simpleEval = simple_eval(pos, stm) + (int(pos.key() & 7) - 3);
 
-  bool lazy = abs(simpleEval) >=   RookValue + KnightValue
-                                 + 16 * shuffling * shuffling
+  bool lazy = abs(simpleEval) >=   v1
+                                 + v2 * shuffling * shuffling
                                  + abs(pos.this_thread()->bestValue)
                                  + abs(pos.this_thread()->rootSimpleEval);
 
@@ -171,19 +177,19 @@ Value Eval::evaluate(const Position& pos) {
       int nnueComplexity;
       Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
 
-      int npm = pos.non_pawn_material() / 64;
+      int npm = pos.non_pawn_material() * v3 / 4096;
       Value optimism = pos.this_thread()->optimism[stm];
 
       // Blend optimism and eval with nnue complexity and material imbalance
-      optimism += optimism * (nnueComplexity + abs(simpleEval - nnue)) / 512;
-      nnue     -= nnue     * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
+      optimism += optimism * (nnueComplexity + abs(simpleEval - nnue)) * v4 / 2097152;
+      nnue     -= nnue     * (nnueComplexity + abs(simpleEval - nnue)) * v5 / 2097152;
 
-      v = (  nnue     * (915 + npm + 9 * pos.count<PAWN>())
-           + optimism * (154 + npm +     pos.count<PAWN>())) / 1024;
+      v = (  nnue     * (v6 + npm + v7 * pos.count<PAWN>() / 64)
+           + optimism * (v8 + npm + v9 * pos.count<PAWN>() / 64)) / 1024;
   }
 
   // Damp down the evaluation linearly when shuffling
-  v = v * (200 - shuffling) / 214;
+  v = v * (v10 - shuffling) / 214;
 
   // Guarantee evaluation does not hit the tablebase range
   v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
