@@ -73,7 +73,7 @@ namespace {
 
   // Futility margin
   Value futility_margin(Depth d, bool noTtCutNode, bool improving) {
-    return Value((140 - 40 * noTtCutNode) * (d - improving));
+    return Value((148 - 38 * noTtCutNode) * (d - improving));
   }
 
   // Reductions lookup table initialized at startup
@@ -81,8 +81,8 @@ namespace {
 
   Depth reduction(bool i, Depth d, int mn, Value delta, Value rootDelta) {
     int reductionScale = Reductions[d] * Reductions[mn];
-    return  (reductionScale + 1372 - int(delta) * 1073 / int(rootDelta)) / 1024
-          + (!i && reductionScale > 936);
+    return  (reductionScale + 1492 - int(delta) * 1104 / int(rootDelta)) / 1024
+          + (!i && reductionScale > 919);
   }
 
   constexpr int futility_move_count(bool improving, Depth depth) {
@@ -92,7 +92,7 @@ namespace {
 
   // History and stats update bonus, based on depth
   int stat_bonus(Depth d) {
-    return std::min(336 * d - 547, 1561);
+      return std::min(384 * d - 494, 1625);
   }
 
   // Add a small random component to draw evaluations to avoid 3-fold blindness
@@ -172,7 +172,7 @@ namespace {
 void Search::init() {
 
   for (int i = 1; i < MAX_MOVES; ++i)
-      Reductions[i] = int((20.57 + std::log(Threads.size()) / 2) * std::log(i));
+      Reductions[i] = int((22.03 + std::log(Threads.size()) / 2) * std::log(i));
 }
 
 
@@ -358,12 +358,12 @@ void Thread::search() {
 
           // Reset aspiration window starting size
           Value prev = rootMoves[pvIdx].averageScore;
-          delta = Value(10) + int(prev) * prev / 15799;
+          delta = Value(10) + int(prev) * prev / 16035;
           alpha = std::max(prev - delta,-VALUE_INFINITE);
           beta  = std::min(prev + delta, VALUE_INFINITE);
 
           // Adjust optimism based on root move's previousScore
-          int opt = 109 * prev / (std::abs(prev) + 141);
+          int opt = 112 * prev / (std::abs(prev) + 150);
           optimism[ us] = Value(opt);
           optimism[~us] = -optimism[us];
 
