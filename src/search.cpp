@@ -473,7 +473,7 @@ void Thread::search() {
           // If the bestMove is stable over several iterations, reduce time accordingly
           timeReduction = lastBestMoveDepth + 8 < completedDepth ? 1.57 : 0.65;
           double reduction = (1.4 + mainThread->previousTimeReduction) / (2.08 * timeReduction);
-          double bestMoveInstability = 1 + 7.5 * std::log10(std::pow(totBestMoveChanges, 2)) / Threads.size();
+          double bestMoveInstability = 1 + 7.5 * std::log10(totBestMoveChanges) / Threads.size();
 
           double totalTime = Time.optimum() * fallingEval * reduction * bestMoveInstability;
 
