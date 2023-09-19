@@ -1132,40 +1132,40 @@ moves_loop: // When in check, search starts here
       // Decrease further on cutNodes. (~1 Elo)
       if (   ss->ttPv
           && !likelyFailLow)
-          rScale -= cutNode && tte->depth() >= depth ? 2901 : 1637;
+          rScale -= cutNode && tte->depth() >= depth ? 2722 : 1696;
 
       // Decrease reduction if opponent's move count is high (~1 Elo)
       if ((ss-1)->moveCount > 8)
-          rScale -= 1067;
+          rScale -= 1128;
 
       // Increase reduction for cut nodes (~3 Elo)
       if (cutNode)
-          rScale += 2160;
+          rScale += 2105;
 
       // Increase reduction if ttMove is a capture (~3 Elo)
       if (ttCapture)
-          rScale += 971;
+          rScale += 984;
 
       // Decrease reduction for PvNodes (~2 Elo)
       if (PvNode)
-          rScale -= 976;
+          rScale -= 1007;
 
       // Decrease reduction if ttMove has been singularly extended (~1 Elo)
       if (singularQuietLMR)
-          rScale -= 965;
+          rScale -= 1046;
 
       // Increase reduction on repetition (~1 Elo)
       if (   move == (ss-4)->currentMove
           && pos.has_repeated())
-          rScale += 1983;
+          rScale += 2087;
 
       // Increase reduction if next ply has a lot of fail high (~5 Elo)
       if ((ss+1)->cutoffCnt > 3)
-          rScale += 1092;
+          rScale += 1168;
 
       // Decrease reduction for first generated move (ttMove)
       else if (move == ttMove)
-          rScale -= 1005;
+          rScale -= 1077;
 
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
                      + (*contHist[0])[movedPiece][to_sq(move)]
