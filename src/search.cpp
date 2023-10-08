@@ -742,9 +742,9 @@ namespace {
     }
     else
     {
-        if (depth < 6)
-            // Use qsearch value for shallow depths
-            ss->staticEval = eval = qsearch<PvNode ? PV : NonPV>(pos, ss, alpha, beta);
+        // Use depth 1 search value for evaluation
+        if (depth > 1)
+            ss->staticEval = eval = search<PvNode ? PV : NonPV>(pos, ss, alpha, beta, 1, false);
         else
             ss->staticEval = eval = evaluate(pos);
         // Save static evaluation into the transposition table
