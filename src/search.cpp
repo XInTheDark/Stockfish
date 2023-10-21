@@ -981,6 +981,7 @@ moves_loop: // When in check, search starts here
       Value delta = beta - alpha;
 
       Depth r = reduction(improving, depth, moveCount, delta, thisThread->rootDelta);
+      int rScale = 0;
 
       // Step 14. Pruning at shallow depth (~120 Elo).
       // Depth conditions are important for mate finding.
@@ -1136,40 +1137,40 @@ moves_loop: // When in check, search starts here
       // Decrease reduction if position is or has been on the PV (~4 Elo)
       if (   ss->ttPv
           && !likelyFailLow)
-          r -= cutNode && tte->depth() >= depth ? 3 : 2;
+          rScale -= cutNode && tte->depth() >= depth ? 2579 : 1803;
 
       // Decrease reduction if opponent's move count is high (~1 Elo)
       if ((ss-1)->moveCount > 7)
-          r--;
+          rScale -= 1065;
 
       // Increase reduction for cut nodes (~3 Elo)
       if (cutNode)
-          r += 2;
+          rScale += 2152;
 
       // Increase reduction if ttMove is a capture (~3 Elo)
       if (ttCapture)
-          r++;
+          rScale += 925;
 
       // Decrease reduction for PvNodes (~2 Elo)
       if (PvNode)
-          r--;
+          rScale -= 843;
 
       // Decrease reduction if ttMove has been singularly extended (~1 Elo)
       if (singularQuietLMR)
-          r--;
+          rScale -= 995;
 
       // Increase reduction on repetition (~1 Elo)
       if (   move == (ss-4)->currentMove
           && pos.has_repeated())
-          r += 2;
+          rScale += 2088;
 
       // Increase reduction if next ply has a lot of fail high (~5 Elo)
       if ((ss+1)->cutoffCnt > 3)
-          r++;
+          rScale += 1244;
 
       // Decrease reduction for first generated move (ttMove)
       else if (move == ttMove)
-          r--;
+          rScale -= 1083;
 
       ss->statScore =  2 * thisThread->mainHistory[us][from_to(move)]
                      + (*contHist[0])[movedPiece][to_sq(move)]
@@ -1179,6 +1180,7 @@ moves_loop: // When in check, search starts here
 
       // Decrease/increase reduction for moves with a good/bad history (~25 Elo)
       r -= ss->statScore / (10216 + 3855 * (depth > 5 && depth < 23));
+      r += std::round(rScale / 1000.0);
 
       // Step 17. Late moves reduction / extension (LMR, ~117 Elo)
       // We use various heuristics for the sons of a node after the first son has
