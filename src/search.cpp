@@ -900,8 +900,6 @@ namespace {
                     return value - (probCutBeta - beta);
                 }
             }
-
-        Eval::NNUE::hint_common_parent_position(pos);
     }
 
 moves_loop: // When in check, search starts here
