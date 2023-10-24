@@ -172,8 +172,10 @@ Value Eval::evaluate(const Position& pos) {
         v = Value(simpleEval);
     else
     {
-        int   nnueComplexity;
-        Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
+        int nnueComplexity;
+        int delta = 4 * pos.count<ALL_PIECES>() - 64;
+
+        Value nnue = NNUE::evaluate(pos, true, &nnueComplexity, delta);
 
         Value optimism = pos.this_thread()->optimism[stm];
 
