@@ -155,7 +155,7 @@ void hint_common_parent_position(const Position& pos) {
 }
 
 // Evaluation function. Perform differential calculation.
-Value evaluate(const Position& pos, bool adjusted, int* complexity, int delta) {
+Value evaluate(const Position& pos, int* complexity, int delta) {
 
     // We manually align the arrays on the stack because with gcc < 9.3
     // overaligning stack variables with alignas() doesn't work correctly.
@@ -181,12 +181,9 @@ Value evaluate(const Position& pos, bool adjusted, int* complexity, int delta) {
     if (complexity)
         *complexity = abs(psqt - positional) / OutputScale;
 
-    // Give more value to positional evaluation when adjusted flag is set
-    if (adjusted)
-        return static_cast<Value>(((1024 - delta) * psqt + (1024 + delta) * positional)
-                                  / (1024 * OutputScale));
-    else
-        return static_cast<Value>((psqt + positional) / OutputScale);
+    // Adjust the weight of positional evaluation according to delta
+    return static_cast<Value>(((1024 - delta) * psqt + (1024 + delta) * positional)
+                              / (1024 * OutputScale));
 }
 
 struct NnueEvalTrace {

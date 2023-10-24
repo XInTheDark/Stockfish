@@ -175,7 +175,7 @@ Value Eval::evaluate(const Position& pos) {
         int nnueComplexity;
         int delta = 4 * pos.count<ALL_PIECES>() - 64;
 
-        Value nnue = NNUE::evaluate(pos, true, &nnueComplexity, delta);
+        Value nnue = NNUE::evaluate(pos, &nnueComplexity, delta);
 
         Value optimism = pos.this_thread()->optimism[stm];
 
@@ -218,7 +218,7 @@ std::string Eval::trace(Position& pos) {
     ss << std::showpoint << std::showpos << std::fixed << std::setprecision(2) << std::setw(15);
 
     Value v;
-    v = NNUE::evaluate(pos, false);
+    v = NNUE::evaluate(pos);
     v = pos.side_to_move() == WHITE ? v : -v;
     ss << "NNUE evaluation        " << 0.01 * UCI::to_cp(v) << " (white side)\n";
 
