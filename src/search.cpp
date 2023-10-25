@@ -45,6 +45,15 @@
 #include "tt.h"
 #include "uci.h"
 
+using namespace Stockfish;
+
+int a0=10, a1=17470, b1=113, b2=0, b3=0, b4=109,
+c1=113, c2=0, c3=0, c4=109;
+
+TUNE(a0, b1, b4, c1, c4);
+TUNE(SetRange(1, 34940), a1);
+TUNE(SetRange(-256, 256), b2, b3, c2, c3);
+
 namespace Stockfish {
 
 namespace Search {
@@ -364,14 +373,13 @@ void Thread::search() {
 
             // Reset aspiration window starting size
             Value avg = rootMoves[pvIdx].averageScore;
-            delta     = Value(10) + int(avg) * avg / 17470;
+            delta     = Value(a0) + int(avg) * avg / a1;
             alpha     = std::max(avg - delta, -VALUE_INFINITE);
             beta      = std::min(avg + delta, VALUE_INFINITE);
 
             // Adjust optimism based on root move's averageScore (~4 Elo)
-            int opt       = 113 * avg / (std::abs(avg) + 109);
-            optimism[us]  = Value(opt);
-            optimism[~us] = -optimism[us];
+            optimism[us]  = b1 * (avg + b2) / (std::abs(avg + b3) + b4);
+            optimism[~us] = -c1 * (avg + c2) / (std::abs(avg + c3) + c4);
 
             // Start with a small aspiration window and, in the case of a fail
             // high/low, re-search with a bigger window until we don't fail
