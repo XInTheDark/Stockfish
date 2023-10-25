@@ -81,7 +81,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
     // Use more time if we have more time than the opponent.
     Color them = ~us;
     double advExtra = 1.0;
-    if (limits.time[us] > limits.time[them]) {
+    if (limits.time[us] - limits.time[them] > 3000) {
         double timeRatio = double(limits.time[us]) / limits.time[them],
                 incRatio = double(limits.inc[them]) / limits.inc[us];
         advExtra = std::clamp(1.0 + 0.2 * std::log10(timeRatio) + 0.1 * timeRatio
