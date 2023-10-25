@@ -78,6 +78,16 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
     double optConstant = std::min(0.00335 + 0.0003 * std::log10(limits.time[us] / 1000.0), 0.0048);
     double maxConstant = std::max(3.6 + 3.0 * std::log10(limits.time[us] / 1000.0), 2.7);
 
+    // Use more time if we have more time than the opponent.
+    Color them = ~us;
+    double advExtra = 1.0;
+    if (limits.time[us] > limits.time[them]) {
+        double timeRatio = double(limits.time[us]) / limits.time[them],
+                incRatio = double(limits.inc[them]) / limits.inc[us];
+        advExtra = std::clamp(1.0 + 0.2 * std::log10(timeRatio) + 0.1 * timeRatio
+                - 1.0 * std::log10(std::max(incRatio, 0.1)), 1.0, 3.0);
+    }
+
     // A user may scale time usage by setting UCI option "Slow Mover"
     // Default is 100 and changing this value will probably lose elo.
     timeLeft = slowMover * timeLeft / 100;
@@ -89,7 +99,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
     {
         optScale = std::min(0.0120 + std::pow(ply + 3.3, 0.44) * optConstant,
                             0.2 * limits.time[us] / double(timeLeft))
-                 * optExtra;
+                 * optExtra * advExtra;
         maxScale = std::min(6.8, maxConstant + ply / 12.2);
     }
 
