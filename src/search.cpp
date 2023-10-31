@@ -362,15 +362,15 @@ void Thread::search() {
             // Reset UCI info selDepth for each depth and each PV line
             selDepth = 0;
 
-            // Reset aspiration window starting size
+            // Adjust optimism based on root move's averageScore (~4 Elo)
             Value avg = rootMoves[pvIdx].averageScore;
-            delta     = Value(10) + int(avg) * avg / 15335;
+            optimism[us]  =  103 * (avg + 33) / (std::abs(avg + 34) + 119);
+            optimism[~us] = -116 * (avg + 40) / (std::abs(avg + 12) + 123);
+
+            // Reset aspiration window starting size
+            delta     = Value(5) + (abs(optimism[us]) + abs(optimism[~us])) / 10;
             alpha     = std::max(avg - delta, -VALUE_INFINITE);
             beta      = std::min(avg + delta, VALUE_INFINITE);
-
-            // Adjust optimism based on root move's averageScore (~4 Elo)
-            optimism[us]  = 103 * (avg + 33) / (std::abs(avg + 34) + 119);
-            optimism[~us] = -116 * (avg + 40) / (std::abs(avg + 12) + 123);
 
             // Start with a small aspiration window and, in the case of a fail
             // high/low, re-search with a bigger window until we don't fail
