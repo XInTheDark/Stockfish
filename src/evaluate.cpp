@@ -143,6 +143,8 @@ void NNUE::verify() {
 }
 }
 
+int a0=915, a1=9, a2=154, b1=64, b2=64;
+TUNE(a0, a1, a2, b1, b2);
 
 // Returns a static, purely materialistic evaluation of the position from
 // the point of view of the given color. It can be divided by PawnValue to get
@@ -178,10 +180,10 @@ Value Eval::evaluate(const Position& pos) {
         Value optimism = pos.this_thread()->optimism[stm];
 
         // Blend optimism and eval with nnue complexity and material imbalance
-        optimism += optimism * (nnueComplexity + abs(simpleEval - nnue)) / 512;
-        nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) / 32768;
+        optimism += optimism * (nnueComplexity + abs(simpleEval - nnue)) * b1 / 32768;
+        nnue -= nnue * (nnueComplexity + abs(simpleEval - nnue)) * b2 / 2097152;
 
-        v = (nnue * (915 + 9 * pos.count<PAWN>()) + optimism * 154) / 1024;
+        v = (nnue * (a0 + a1 * pos.count<PAWN>()) + optimism * a2) / 1024;
     }
 
     // Damp down the evaluation linearly when shuffling
