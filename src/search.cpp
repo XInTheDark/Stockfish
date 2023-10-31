@@ -1119,6 +1119,9 @@ moves_loop:  // When in check, search starts here
         if ((ss - 1)->moveCount > 7)
             r--;
 
+        // Decrease reduction for low ply count, and increase reduction for high ply count
+        r -= std::max((9 - ss->ply) / 4, -3);
+
         // Increase reduction for cut nodes (~3 Elo)
         if (cutNode)
             r += 2;
