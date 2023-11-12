@@ -185,6 +185,10 @@ Value Eval::evaluate(const Position& pos) {
         v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
     }
 
+    // Small penalty for repeating moves when we are winning
+    if (pos.this_thread()->bestValue > 20)
+        v -= pos.has_repeated() * 8;
+
     // Damp down the evaluation linearly when shuffling
     v = v * (200 - shuffling) / 214;
 
