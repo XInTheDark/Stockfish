@@ -175,7 +175,7 @@ Value Eval::evaluate(const Position& pos) {
         Value optimism = pos.this_thread()->optimism[stm];
 
         // Give more weight to positional evaluation (using delta) based on optimism
-        int delta = (int)optimism * optimism / 120;
+        int delta = 44 - int(optimism) * optimism / 400;
         int nnueComplexity;
 
         Value nnue = NNUE::evaluate(pos, delta, &nnueComplexity);
