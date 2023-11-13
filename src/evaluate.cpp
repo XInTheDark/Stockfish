@@ -172,10 +172,13 @@ Value Eval::evaluate(const Position& pos) {
         v = Value(simpleEval);
     else
     {
-        int   nnueComplexity;
-        Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
-
         Value optimism = pos.this_thread()->optimism[stm];
+
+        // Give more weight to positional evaluation (using delta) based on optimism
+        int delta = (int)optimism * optimism / 120;
+        int nnueComplexity;
+
+        Value nnue = NNUE::evaluate(pos, delta, &nnueComplexity);
 
         // Blend optimism and eval with nnue complexity and material imbalance
         optimism += optimism * (nnueComplexity + abs(simpleEval - nnue)) / 512;
@@ -216,7 +219,7 @@ std::string Eval::trace(Position& pos) {
     ss << std::showpoint << std::showpos << std::fixed << std::setprecision(2) << std::setw(15);
 
     Value v;
-    v = NNUE::evaluate(pos, false);
+    v = NNUE::evaluate(pos, 0);
     v = pos.side_to_move() == WHITE ? v : -v;
     ss << "NNUE evaluation        " << 0.01 * UCI::to_cp(v) << " (white side)\n";
 
