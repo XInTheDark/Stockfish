@@ -155,13 +155,12 @@ void hint_common_parent_position(const Position& pos) {
 }
 
 // Evaluation function. Perform differential calculation.
-Value evaluate(const Position& pos, bool adjusted, int* complexity) {
+Value evaluate(const Position& pos, bool adjusted, int* complexity, int delta) {
 
     // We manually align the arrays on the stack because with gcc < 9.3
     // overaligning stack variables with alignas() doesn't work correctly.
 
     constexpr uint64_t alignment = CacheLineSize;
-    constexpr int      delta     = 24;
 
 #if defined(ALIGNAS_ON_STACK_VARIABLES_BROKEN)
     TransformedFeatureType

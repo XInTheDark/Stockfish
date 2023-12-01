@@ -155,7 +155,8 @@ Value Eval::simple_eval(const Position& pos, Color c) {
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
 // of the position from the point of view of the side to move.
-Value Eval::evaluate(const Position& pos) {
+// The delta flag is used to give more weight to positional evaluation.
+Value Eval::evaluate(const Position& pos, int delta) {
 
     assert(!pos.checkers());
 
@@ -173,7 +174,7 @@ Value Eval::evaluate(const Position& pos) {
     else
     {
         int   nnueComplexity;
-        Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
+        Value nnue = NNUE::evaluate(pos, true, &nnueComplexity, delta);
 
         Value optimism = pos.this_thread()->optimism[stm];
 
