@@ -738,7 +738,7 @@ Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, boo
     }
     else
     {
-        ss->staticEval = eval = evaluate(pos, 16);
+        ss->staticEval = eval = evaluate(pos, 12);
         // Save static evaluation into the transposition table
         tte->save(posKey, VALUE_NONE, ss->ttPv, BOUND_NONE, DEPTH_NONE, MOVE_NONE, eval);
     }
