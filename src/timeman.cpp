@@ -112,7 +112,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 }
 
 bool TimeManagement::has_time_advantage(Color us) {
-    if (timeleft[us] < 6000)
+    if (timeleft[us] < 5000)
         return false;
     return timeleft[us] > timeleft[~us] * 3;
 }
