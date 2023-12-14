@@ -1044,8 +1044,7 @@ moves_loop:  // When in check, search starts here
                 && tte->depth() >= depth - 3)
             {
                 int singularBetaBonus = Limits.use_time_management() ?
-                  Time.has_time_advantage(us) ? -6 :
-                  Time.has_time_advantage(~us) ? 3 : 0 : 0;
+                  Time.has_time_advantage(us) ? -8 : 0 : 0;
 
                 Value singularBeta    = ttValue - (66 + 58 * (ss->ttPv && !PvNode) + singularBetaBonus)
                                         * depth / 64;
