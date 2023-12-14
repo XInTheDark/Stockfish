@@ -1043,8 +1043,13 @@ moves_loop:  // When in check, search starts here
                 && abs(ttValue) < VALUE_TB_WIN_IN_MAX_PLY && (tte->bound() & BOUND_LOWER)
                 && tte->depth() >= depth - 3)
             {
-                Value singularBeta  = ttValue - (66 + 58 * (ss->ttPv && !PvNode)) * depth / 64;
-                Depth singularDepth = newDepth / 2;
+                int singularBetaBonus = Limits.use_time_management() ?
+                  Time.has_time_advantage(us) ? -6 :
+                  Time.has_time_advantage(~us) ? 3 : 0 : 0;
+
+                Value singularBeta    = ttValue - (66 + 58 * (ss->ttPv && !PvNode) + singularBetaBonus)
+                                        * depth / 64;
+                Depth singularDepth   = newDepth / 2;
 
                 ss->excludedMove = move;
                 value =

@@ -38,6 +38,7 @@ class TimeManagement {
     TimePoint elapsed() const {
         return Search::Limits.npmsec ? TimePoint(Threads.nodes_searched()) : now() - startTime;
     }
+    bool has_time_advantage(Color us);
 
     int64_t availableNodes;  // When in 'nodes as time' mode
 
@@ -45,6 +46,8 @@ class TimeManagement {
     TimePoint startTime;
     TimePoint optimumTime;
     TimePoint maximumTime;
+
+    TimePoint timeleft[COLOR_NB];
 };
 
 extern TimeManagement Time;

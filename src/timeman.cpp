@@ -41,6 +41,8 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
     if (limits.time[us] == 0)
         return;
 
+    timeleft[us] = limits.time[us], timeleft[~us] = limits.time[~us];
+
     TimePoint moveOverhead = TimePoint(Options["Move Overhead"]);
     TimePoint slowMover    = TimePoint(Options["Slow Mover"]);
     TimePoint npmsec       = TimePoint(Options["nodestime"]);
@@ -107,6 +109,12 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 
     if (Options["Ponder"])
         optimumTime += optimumTime / 4;
+}
+
+bool TimeManagement::has_time_advantage(Color us) {
+    if (timeleft[us] < 6000)
+        return false;
+    return timeleft[us] > timeleft[~us] * 3;
 }
 
 }  // namespace Stockfish
