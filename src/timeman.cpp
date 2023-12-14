@@ -114,7 +114,7 @@ void TimeManagement::init(Search::LimitsType& limits, Color us, int ply) {
 bool TimeManagement::has_time_advantage(Color us) {
     if (timeleft[us] < 5000)
         return false;
-    return timeleft[us] > timeleft[~us] * 3;
+    return timeleft[us] > timeleft[~us] * 5 / 2;
 }
 
 }  // namespace Stockfish
