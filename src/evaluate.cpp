@@ -152,6 +152,15 @@ Value Eval::simple_eval(const Position& pos, Color c) {
          + (pos.non_pawn_material(c) - pos.non_pawn_material(~c));
 }
 
+int a1=2057, a2=16,
+    b1=512, b2=32768, b3=64,
+    c1=915, c2=9, c3=154;
+
+TUNE(a1, a2);
+TUNE(SetRange(1, 2048), b1);
+TUNE(SetRange(1, 131072), b2);
+TUNE(SetRange(1, 256), b3);
+TUNE(c1, c2, c3);
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
 // of the position from the point of view of the side to move.
@@ -164,7 +173,7 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = simple_eval(pos, stm) + (int(pos.key() & 7) - 3);
 
-    bool lazy = abs(simpleEval) >= RookValue + KnightValue + 16 * shuffling * shuffling
+    bool lazy = abs(simpleEval) >= a1 + a2 * shuffling * shuffling
                                      + abs(pos.this_thread()->bestValue)
                                      + abs(pos.this_thread()->rootSimpleEval);
 
@@ -177,11 +186,11 @@ Value Eval::evaluate(const Position& pos) {
         Value optimism = pos.this_thread()->optimism[stm];
 
         // Blend optimism and eval with nnue complexity and material imbalance
-        optimism += optimism * abs(simpleEval - nnue) / 512;
-        nnue -= nnue * abs(simpleEval - nnue) / 32768;
+        optimism += optimism * abs(simpleEval - nnue) / b1;
+        nnue -= nnue * abs(simpleEval - nnue) / b2;
 
-        int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+        int npm = pos.non_pawn_material() / b3;
+        v       = (nnue * (c1 + npm + c2 * pos.count<PAWN>()) + optimism * (c3 + npm)) / 1024;
     }
 
     // Damp down the evaluation linearly when shuffling
