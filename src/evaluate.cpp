@@ -165,7 +165,7 @@ Value Eval::evaluate(const Position& pos) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = simple_eval(pos, stm) + (int(pos.key() & 7) - 3);
 
-    bool lazy = std::abs(simpleEval) >= RookValue + KnightValue + 16 * shuffling * shuffling
+    bool lazy = std::abs(simpleEval) >= 1867 + 14 * shuffling * shuffling
                                           + std::abs(pos.this_thread()->bestValue)
                                           + std::abs(pos.this_thread()->rootSimpleEval);
 
@@ -173,17 +173,16 @@ Value Eval::evaluate(const Position& pos) {
         v = Value(simpleEval);
     else
     {
-        int   nnueComplexity;
-        Value nnue = NNUE::evaluate(pos, true, &nnueComplexity);
+        Value nnue = NNUE::evaluate(pos, true);
 
         Value optimism = pos.this_thread()->optimism[stm];
 
         // Blend optimism and eval with nnue complexity and material imbalance
-        optimism += optimism * (nnueComplexity + std::abs(simpleEval - nnue)) / 512;
-        nnue -= nnue * (nnueComplexity + std::abs(simpleEval - nnue)) / 32768;
+        optimism += optimism * abs(simpleEval - nnue) / 274;
+        nnue -= nnue * abs(simpleEval - nnue) / 28463;
 
-        int npm = pos.non_pawn_material() / 64;
-        v       = (nnue * (915 + npm + 9 * pos.count<PAWN>()) + optimism * (154 + npm)) / 1024;
+        int npm = pos.non_pawn_material() / 78;
+        v       = (nnue * (900 + npm + 9 * pos.count<PAWN>()) + optimism * (141 + npm)) / 1024;
     }
 
     // Damp down the evaluation linearly when shuffling
