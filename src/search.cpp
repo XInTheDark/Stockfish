@@ -1022,7 +1022,8 @@ moves_loop:  // When in check, search starts here
                 }
 
                 // SEE based pruning for captures and checks (~11 Elo)
-                if (!pos.see_ge(move, -187 * depth))
+                if (pos.non_pawn_material(us) && pos.non_pawn_material(~us)
+                    && !pos.see_ge(move, -187 * depth))
                     continue;
             }
             else
@@ -1052,7 +1053,8 @@ moves_loop:  // When in check, search starts here
                 lmrDepth = std::max(lmrDepth, 0);
 
                 // Prune moves with negative SEE (~4 Elo)
-                if (!pos.see_ge(move, -26 * lmrDepth * lmrDepth))
+                if (pos.non_pawn_material(us) && pos.non_pawn_material(~us)
+                    && !pos.see_ge(move, -26 * lmrDepth * lmrDepth))
                     continue;
             }
         }
