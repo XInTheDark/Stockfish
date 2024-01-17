@@ -195,7 +195,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
 // of the position from the point of view of the side to move.
-Value Eval::evaluate(const Position& pos, int optimism) {
+Value Eval::evaluate(const Position& pos, int optimism, const Position& rootPos) {
 
     assert(!pos.checkers());
 
@@ -204,12 +204,15 @@ Value Eval::evaluate(const Position& pos, int optimism) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = simple_eval(pos, stm);
 
-    bool lazy = std::abs(simpleEval) > 2550;
+    // If root position has few pieces, always use large net.
+    bool bigNet = rootPos.count<ALL_PIECES>() <= 11;
+
+    bool lazy = !bigNet && std::abs(simpleEval) > 2550;
     if (lazy)
         v = simpleEval;
     else
     {
-        bool smallNet = std::abs(simpleEval) > 1050;
+        bool smallNet = !bigNet && std::abs(simpleEval) > 1050;
 
         int nnueComplexity;
 
@@ -231,6 +234,10 @@ Value Eval::evaluate(const Position& pos, int optimism) {
     v = std::clamp(int(v), VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
 
     return v;
+}
+
+Value Eval::evaluate(const Position& pos, int optimism) {
+    return evaluate(pos, optimism, *(new Position()));
 }
 
 // Like evaluate(), but instead of returning a value, it returns
