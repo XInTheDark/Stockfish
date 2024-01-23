@@ -229,6 +229,7 @@ class Worker {
     RootMoves rootMoves;
     Depth     rootDepth, completedDepth;
     Value     rootDelta;
+    int       rootSimpleEval;
 
     size_t thread_idx;
 

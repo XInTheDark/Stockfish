@@ -195,7 +195,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
 // of the position from the point of view of the side to move.
-Value Eval::evaluate(const Position& pos, int optimism) {
+Value Eval::evaluate(const Position& pos, int optimism, int rootSimpleEval) {
 
     assert(!pos.checkers());
 
@@ -204,7 +204,7 @@ Value Eval::evaluate(const Position& pos, int optimism) {
     int   shuffling  = pos.rule50_count();
     int   simpleEval = simple_eval(pos, stm);
 
-    bool lazy = std::abs(simpleEval) > 2550;
+    bool lazy = std::abs(rootSimpleEval) < 1050 && std::abs(simpleEval) > 2550;
     if (lazy)
         v = simpleEval;
     else

@@ -270,6 +270,8 @@ void Search::Worker::iterative_deepening() {
         (ss - i)->staticEval = VALUE_NONE;
     }
 
+    rootSimpleEval = Eval::simple_eval(rootPos, us);
+
     for (int i = 0; i <= MAX_PLY + 2; ++i)
         (ss + i)->ply = i;
 
@@ -592,7 +594,7 @@ Value Search::Worker::search(
         // Step 2. Check for aborted search and immediate draw
         if (threads.stop.load(std::memory_order_relaxed) || pos.is_draw(ss->ply)
             || ss->ply >= MAX_PLY)
-            return (ss->ply >= MAX_PLY && !ss->inCheck) ? evaluate(pos, thisThread->optimism[us])
+            return (ss->ply >= MAX_PLY && !ss->inCheck) ? evaluate(pos, optimism[us], rootSimpleEval)
                                                         : value_draw(thisThread->nodes);
 
         // Step 3. Mate distance pruning. Even if we mate at the next move our score
@@ -746,7 +748,7 @@ Value Search::Worker::search(
         // Never assume anything about values stored in TT
         unadjustedStaticEval = ss->staticEval = eval = tte->eval();
         if (eval == VALUE_NONE)
-            unadjustedStaticEval = ss->staticEval = eval = evaluate(pos, thisThread->optimism[us]);
+            unadjustedStaticEval = ss->staticEval = eval = evaluate(pos, optimism[us], rootSimpleEval);
         else if (PvNode)
             Eval::NNUE::hint_common_parent_position(pos);
 
@@ -758,7 +760,7 @@ Value Search::Worker::search(
     }
     else
     {
-        unadjustedStaticEval = ss->staticEval = eval = evaluate(pos, thisThread->optimism[us]);
+        unadjustedStaticEval = ss->staticEval = eval = evaluate(pos, optimism[us], rootSimpleEval);
         ss->staticEval = eval = to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
 
         // Static evaluation is saved as it was before adjustment by correction history
@@ -1464,7 +1466,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
 
     // Step 2. Check for an immediate draw or maximum ply reached
     if (pos.is_draw(ss->ply) || ss->ply >= MAX_PLY)
-        return (ss->ply >= MAX_PLY && !ss->inCheck) ? evaluate(pos, thisThread->optimism[us])
+        return (ss->ply >= MAX_PLY && !ss->inCheck) ? evaluate(pos, optimism[us], rootSimpleEval)
                                                     : VALUE_DRAW;
 
     assert(0 <= ss->ply && ss->ply < MAX_PLY);
@@ -1497,7 +1499,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
             // Never assume anything about values stored in TT
             if ((unadjustedStaticEval = ss->staticEval = bestValue = tte->eval()) == VALUE_NONE)
                 unadjustedStaticEval = ss->staticEval = bestValue =
-                  evaluate(pos, thisThread->optimism[us]);
+                  evaluate(pos, optimism[us], rootSimpleEval);
             ss->staticEval = bestValue =
               to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
 
@@ -1510,7 +1512,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
         {
             // In case of null move search, use previous static eval with a different sign
             unadjustedStaticEval = ss->staticEval = bestValue =
-              (ss - 1)->currentMove != Move::null() ? evaluate(pos, thisThread->optimism[us])
+              (ss - 1)->currentMove != Move::null() ? evaluate(pos, optimism[us], rootSimpleEval)
                                                     : -(ss - 1)->staticEval;
             ss->staticEval = bestValue =
               to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
