@@ -1041,7 +1041,8 @@ moves_loop:  // When in check, search starts here
                     {
                         extension = 2;
 
-                        if ((value < singularBeta - 50 && !ttCapture) || value < singularBeta - 200)
+                        int tripleExtMargin = std::max(80 - depth * 2, 0);
+                        if (value < singularBeta - tripleExtMargin && !ttCapture)
                             extension = 3;
 
                         depth += (depth < 16 || extension == 3);
