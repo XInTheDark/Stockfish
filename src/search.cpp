@@ -572,8 +572,9 @@ Value Search::Worker::search(
     (ss + 2)->killers[0] = (ss + 2)->killers[1] = Move::none();
     (ss + 2)->cutoffCnt                         = 0;
     ss->doubleExtensions                        = (ss - 1)->doubleExtensions;
-    Square prevSq = ((ss - 1)->currentMove).is_ok() ? ((ss - 1)->currentMove).to_sq() : SQ_NONE;
-    ss->statScore = 0;
+    Square prevSq  = ((ss - 1)->currentMove).is_ok() ? ((ss - 1)->currentMove).to_sq() : SQ_NONE;
+    ss->statScore  = 0;
+    ss->staticEval = VALUE_NONE;
 
     // Step 4. Transposition table lookup.
     excludedMove = ss->excludedMove;
@@ -687,7 +688,8 @@ Value Search::Worker::search(
     if (ss->inCheck)
     {
         // Skip early pruning when in check
-        ss->staticEval = eval = VALUE_NONE;
+        ss->staticEval = eval = (ss - 2)->staticEval == VALUE_NONE
+                               ? (ss - 4)->staticEval : (ss - 2)->staticEval;
         improving             = false;
         goto moves_loop;
     }
