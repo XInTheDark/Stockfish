@@ -1071,20 +1071,9 @@ moves_loop:  // When in check, search starts here
                     extension = -1;
             }
 
-            // Check extensions (~1 Elo)
-            else if (givesCheck && depth > 10)
-                extension = 1;
-
             // Quiet ttMove extensions (~1 Elo)
             else if (PvNode && move == ttMove && move == ss->killers[0]
                      && (*contHist[0])[movedPiece][move.to_sq()] >= 4339)
-                extension = 1;
-
-            // Recapture extensions (~1 Elo)
-            else if (PvNode && move == ttMove && move.to_sq() == prevSq
-                     && thisThread->captureHistory[movedPiece][move.to_sq()]
-                                                  [type_of(pos.piece_on(move.to_sq()))]
-                          > 4356)
                 extension = 1;
         }
 
@@ -1107,10 +1096,6 @@ moves_loop:  // When in check, search starts here
         // Decrease reduction if position is or has been on the PV (~5 Elo)
         if (ss->ttPv)
             r -= 1 + (ttValue > alpha) + (ttValue > beta && tte->depth() >= depth);
-
-        // Decrease reduction if opponent's move count is high (~1 Elo)
-        if ((ss - 1)->moveCount > 7)
-            r--;
 
         // Increase reduction for cut nodes (~4 Elo)
         if (cutNode)
