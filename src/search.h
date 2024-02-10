@@ -37,6 +37,9 @@
 
 namespace Stockfish {
 
+inline int i1=1180, i2=785, i3=852;
+TUNE(i1, i2, i3);
+
 // Different node types, used as a template parameter
 enum NodeType {
     NonPV,
@@ -211,8 +214,8 @@ class Worker {
 
     Depth reduction(bool i, Depth d, int mn, int delta) {
         int reductionScale = reductions[d] * reductions[mn];
-        return (reductionScale + 1177 - int(delta) * 776 / int(rootDelta)) / 1024
-             + (!i && reductionScale > 842);
+        return (reductionScale + i1 - int(delta) * i2 / int(rootDelta)) / 1024
+             + (!i && reductionScale > i3);
     }
 
     // Get a pointer to the search manager, only allowed to be called by the
