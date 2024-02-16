@@ -835,6 +835,7 @@ Value Search::Worker::search(
     probCutBeta = beta + 181 - 68 * improving;
     if (
       !PvNode && depth > 3
+      && ss->ply % 2 == 1
       && std::abs(beta) < VALUE_TB_WIN_IN_MAX_PLY
       // If value from transposition table is lower than probCutBeta, don't attempt probCut
       // there and in further interactions with transposition table cutoff depth is set to depth - 3
