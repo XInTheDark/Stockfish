@@ -1032,7 +1032,7 @@ moves_loop:  // When in check, search starts here
                 && std::abs(ttValue) < VALUE_TB_WIN_IN_MAX_PLY && (tte->bound() & BOUND_LOWER)
                 && tte->depth() >= depth - 3)
             {
-                Value singularBeta  = ttValue - (78 + 54 * (ss->ttPv && !PvNode)) * depth / 64;
+                Value singularBeta  = ttValue - (78 + 56 * (ss->ttPv && !PvNode)) * depth / 64;
                 Depth singularDepth = newDepth / 2;
 
                 ss->excludedMove = move;
@@ -1047,7 +1047,7 @@ moves_loop:  // When in check, search starts here
                     // We make sure to limit the extensions in some way to avoid a search explosion
                     if (!PvNode && ss->multipleExtensions <= 16)
                     {
-                        extension = 2 + (value < singularBeta - 60 && !ttCapture);
+                        extension = 2 + (value < singularBeta - 48 && !ttCapture);
                         depth += depth < 16;
                     }
                 }
