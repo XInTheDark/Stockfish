@@ -1050,7 +1050,8 @@ moves_loop:  // When in check, search starts here
                         extension = 2;
                         depth += depth < 16;
 
-                        if (value < singularBeta - 78 && !ttCapture && thisThread->optimism[us] > 85)
+                        if (value < singularBeta - 78 && !ttCapture
+                            && std::abs(thisThread->optimism[us]) > 85)
                         {
                             extension = 3 + (ttValue > alpha && tte->depth() >= depth);
                         }
