@@ -1050,7 +1050,7 @@ moves_loop:  // When in check, search starts here
                     // We make sure to limit the extensions in some way to avoid a search explosion
                     if (!PvNode && ss->multipleExtensions <= 16)
                     {
-                        // Adjust singularBeta parameters based on optimism
+                        // Adjust triple extension margin based on optimism
                         int tripleExtMargin = 85 - opt / 5;
                         extension = 2 + (value < singularBeta - tripleExtMargin && !ttCapture);
                         depth += depth < 16;
