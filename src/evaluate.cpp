@@ -186,7 +186,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 }
 
 
-int SMALLNET = 1050;
+int SMALLNET = 1087;
 TUNE(SMALLNET);
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
