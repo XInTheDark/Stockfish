@@ -1619,6 +1619,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
 }
 
 Depth Search::Worker::reduction(bool i, Depth d, int mn, int delta) {
+    mn = std::max(mn - 2, 1);  // same base reduction for first 3 moves
     int reductionScale = reductions[d] * reductions[mn];
     return (reductionScale + 1118 - delta * 793 / rootDelta) / 1024 + (!i && reductionScale > 863);
 }
