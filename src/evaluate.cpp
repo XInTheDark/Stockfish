@@ -77,11 +77,7 @@ NNUE::EvalFiles NNUE::load_networks(const std::string& rootDirectory,
 
     for (auto& [netSize, evalFile] : evalFiles)
     {
-        // Replace with
-        // options[evalFile.optionName]
-        // once fishtest supports the uci option EvalFileSmall
-        std::string user_eval_file =
-          netSize == Small ? evalFile.defaultName : options[evalFile.optionName];
+        std::string user_eval_file = options[evalFile.optionName];
 
         if (user_eval_file.empty())
             user_eval_file = evalFile.defaultName;
@@ -149,11 +145,8 @@ void NNUE::verify(const OptionsMap&                                        optio
 
     for (const auto& [netSize, evalFile] : evalFiles)
     {
-        // Replace with
-        // options[evalFile.optionName]
-        // once fishtest supports the uci option EvalFileSmall
-        std::string user_eval_file =
-          netSize == Small ? evalFile.defaultName : options[evalFile.optionName];
+        std::string user_eval_file = options[evalFile.optionName];
+
         if (user_eval_file.empty())
             user_eval_file = evalFile.defaultName;
 
@@ -193,6 +186,9 @@ int Eval::simple_eval(const Position& pos, Color c) {
 }
 
 
+int SMALLNET = 1087;
+TUNE(SMALLNET);
+
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
 // of the position from the point of view of the side to move.
 Value Eval::evaluate(const Position& pos, int optimism) {
@@ -200,7 +196,7 @@ Value Eval::evaluate(const Position& pos, int optimism) {
     assert(!pos.checkers());
 
     int  simpleEval = simple_eval(pos, pos.side_to_move());
-    bool smallNet   = std::abs(simpleEval) > 1050;
+    bool smallNet   = std::abs(simpleEval) > SMALLNET;
 
     int nnueComplexity;
 
@@ -219,7 +215,7 @@ Value Eval::evaluate(const Position& pos, int optimism) {
     v             = v * (200 - shuffling) / 214;
 
     // Guarantee evaluation does not hit the tablebase range
-    v = std::clamp(int(v), VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
+    v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
 
     return v;
 }
