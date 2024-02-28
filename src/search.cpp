@@ -532,7 +532,7 @@ Value Search::Worker::search(
     Key      posKey;
     Move     ttMove, move, excludedMove, bestMove;
     Depth    extension, newDepth;
-    Value    bestValue, value, ttValue, eval, maxValue, probCutBeta;
+    Value    bestValue, value, ttValue, eval, nnueComplexity, maxValue, probCutBeta;
     bool     givesCheck, improving, priorCapture;
     bool     capture, moveCountPruning, ttCapture;
     Piece    movedPiece;
@@ -560,7 +560,7 @@ Value Search::Worker::search(
         // Step 2. Check for aborted search and immediate draw
         if (threads.stop.load(std::memory_order_relaxed) || pos.is_draw(ss->ply)
             || ss->ply >= MAX_PLY)
-            return (ss->ply >= MAX_PLY && !ss->inCheck) ? evaluate(pos, thisThread->optimism[us])
+            return (ss->ply >= MAX_PLY && !ss->inCheck) ? evaluate(pos, thisThread->optimism[us]).value
                                                         : value_draw(thisThread->nodes);
 
         // Step 3. Mate distance pruning. Even if we mate at the next move our score
@@ -689,7 +689,7 @@ Value Search::Worker::search(
     if (ss->inCheck)
     {
         // Skip early pruning when in check
-        ss->staticEval = eval = VALUE_NONE;
+        ss->staticEval = eval = nnueComplexity = VALUE_NONE;
         improving             = false;
         goto moves_loop;
     }
@@ -704,8 +704,11 @@ Value Search::Worker::search(
     {
         // Never assume anything about values stored in TT
         unadjustedStaticEval = tte->eval();
-        if (unadjustedStaticEval == VALUE_NONE)
-            unadjustedStaticEval = evaluate(pos, thisThread->optimism[us]);
+        if (unadjustedStaticEval == VALUE_NONE) {
+            Eval::Evaluation ev = evaluate(pos, thisThread->optimism[us]);
+            unadjustedStaticEval = ev.value;
+            nnueComplexity = ev.complexity;
+        }
         else if (PvNode)
             Eval::NNUE::hint_common_parent_position(pos);
 
@@ -717,7 +720,9 @@ Value Search::Worker::search(
     }
     else
     {
-        unadjustedStaticEval = evaluate(pos, thisThread->optimism[us]);
+        Eval::Evaluation ev = evaluate(pos, thisThread->optimism[us]);
+        unadjustedStaticEval = ev.value;
+        nnueComplexity = ev.complexity;
         ss->staticEval = eval = to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
 
         // Static evaluation is saved as it was before adjustment by correction history
@@ -1408,7 +1413,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
 
     // Step 2. Check for an immediate draw or maximum ply reached
     if (pos.is_draw(ss->ply) || ss->ply >= MAX_PLY)
-        return (ss->ply >= MAX_PLY && !ss->inCheck) ? evaluate(pos, thisThread->optimism[us])
+        return (ss->ply >= MAX_PLY && !ss->inCheck) ? evaluate(pos, thisThread->optimism[us]).value
                                                     : VALUE_DRAW;
 
     assert(0 <= ss->ply && ss->ply < MAX_PLY);
@@ -1439,8 +1444,10 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
         {
             // Never assume anything about values stored in TT
             unadjustedStaticEval = tte->eval();
-            if (unadjustedStaticEval == VALUE_NONE)
-                unadjustedStaticEval = evaluate(pos, thisThread->optimism[us]);
+            if (unadjustedStaticEval == VALUE_NONE) {
+                Eval::Evaluation ev = evaluate(pos, thisThread->optimism[us]);
+                unadjustedStaticEval = ev.value;
+            }
             ss->staticEval = bestValue =
               to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
 
@@ -1453,7 +1460,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
         {
             // In case of null move search, use previous static eval with a different sign
             unadjustedStaticEval = (ss - 1)->currentMove != Move::null()
-                                   ? evaluate(pos, thisThread->optimism[us])
+                                   ? evaluate(pos, thisThread->optimism[us]).value
                                    : -(ss - 1)->staticEval;
             ss->staticEval       = bestValue =
               to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
