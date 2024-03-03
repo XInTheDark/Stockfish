@@ -536,7 +536,7 @@ Value Search::Worker::search(
     bool     givesCheck, improving, priorCapture;
     bool     capture, moveCountPruning, ttCapture;
     Piece    movedPiece;
-    int      moveCount, captureCount, quietCount;
+    int      moveCount, captureCount, quietCount, improvement;
 
     // Step 1. Initialize node
     Worker* thisThread = this;
@@ -690,6 +690,7 @@ Value Search::Worker::search(
     {
         // Skip early pruning when in check
         ss->staticEval = eval = VALUE_NONE;
+        improvement           = 0;
         improving             = false;
         goto moves_loop;
     }
@@ -736,14 +737,17 @@ Value Search::Worker::search(
               << bonus / 4;
     }
 
-    // Set up the improving flag, which is true if current static evaluation is
-    // bigger than the previous static evaluation at our turn (if we were in
-    // check at our previous move we look at static evaluation at move prior to it
-    // and if we were in check at move prior to it flag is set to true) and is
-    // false otherwise. The improving flag is used in various pruning heuristics.
-    improving = (ss - 2)->staticEval != VALUE_NONE
-                ? ss->staticEval > (ss - 2)->staticEval
-                : (ss - 4)->staticEval != VALUE_NONE && ss->staticEval > (ss - 4)->staticEval;
+    // Calculate the improvement value, which is the difference between
+    // current static evaluation and the previous static evaluation at our turn
+    // (if we were in check at our previous move we look at static evaluation at move prior to it
+    // and if we were in check at move prior to it improvement is set to a default value).
+    // The improving flag is then set up, and it is used in various pruning heuristics.
+    improvement = (ss - 2)->staticEval != VALUE_NONE
+                ? ss->staticEval - (ss - 2)->staticEval
+                : (ss - 4)->staticEval != VALUE_NONE
+                ? ss->staticEval - (ss - 4)->staticEval
+                : 0;
+    improving   = improvement > 0;
 
     // Step 7. Razoring (~1 Elo)
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
@@ -944,7 +948,7 @@ moves_loop:  // When in check, search starts here
 
         int delta = beta - alpha;
 
-        Depth r = reduction(improving, depth, moveCount, delta);
+        Depth r = reduction(improvement, depth, moveCount, delta);
 
         // Step 14. Pruning at shallow depth (~120 Elo).
         // Depth conditions are important for mate finding.
@@ -1618,9 +1622,10 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
     return bestValue;
 }
 
-Depth Search::Worker::reduction(bool i, Depth d, int mn, int delta) {
+Depth Search::Worker::reduction(int i, Depth d, int mn, int delta) {
     int reductionScale = reductions[d] * reductions[mn];
-    return (reductionScale + 1118 - delta * 793 / rootDelta) / 1024 + (!i && reductionScale > 863);
+    return (reductionScale + 1118 - delta * 793 / rootDelta) / 1024 - std::clamp(i / 300, -3, 3)
+         + (i <= 0 && reductionScale > 863);
 }
 
 namespace {
