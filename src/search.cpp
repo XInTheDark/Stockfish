@@ -206,6 +206,12 @@ void Search::Worker::start_searching() {
     std::cout << sync_endl;
 }
 
+int e1=1070, e2=227, e3=97, e4=510, e5=1510,
+    f1=1560, f2=690, f3=140, f4=217, f5=179,
+    g1=10, g2=95, g3=750, g4=500;
+
+TUNE(e1, e2, e3, e4, e5, f1, f2, f3, f4, f5, g1, g2, g3, g4);
+
 // Main iterative deepening loop. It calls search()
 // repeatedly with increasing depth until the allocated thinking time has been
 // consumed, the user stops the search, or the maximum search depth is reached.
@@ -423,15 +429,15 @@ void Search::Worker::iterative_deepening() {
             int  nodesEffort = effort[bestmove.from_sq()][bestmove.to_sq()] * 100
                             / std::max(size_t(1), size_t(nodes));
 
-            double fallingEval = (66 + 14 * (mainThread->bestPreviousAverageScore - bestValue)
-                                  + 6 * (mainThread->iterValue[iterIdx] - bestValue))
-                               / 616.6;
-            fallingEval = std::clamp(fallingEval, 0.51, 1.51);
+            double fallingEval = (e1 + e2 * (mainThread->bestPreviousAverageScore - bestValue)
+                                  + e3 * (mainThread->iterValue[iterIdx] - bestValue))
+                               / 10000.0;
+            fallingEval = std::clamp(fallingEval, e4 / 1000.0, e5 / 1000.0);
 
             // If the bestMove is stable over several iterations, reduce time accordingly
-            timeReduction    = lastBestMoveDepth + 8 < completedDepth ? 1.56 : 0.69;
-            double reduction = (1.4 + mainThread->previousTimeReduction) / (2.17 * timeReduction);
-            double bestMoveInstability = 1 + 1.79 * totBestMoveChanges / threads.size();
+            timeReduction    = lastBestMoveDepth + 8 < completedDepth ? f1 / 1000.0 : f2 / 1000.0;
+            double reduction = (f3 / 100.0 + mainThread->previousTimeReduction) / (f4 / 100.0 * timeReduction);
+            double bestMoveInstability = 1 + f5 / 100.0 * totBestMoveChanges / threads.size();
 
             double totalTime =
               mainThread->tm.optimum() * fallingEval * reduction * bestMoveInstability;
@@ -440,8 +446,8 @@ void Search::Worker::iterative_deepening() {
             if (rootMoves.size() == 1)
                 totalTime = std::min(500.0, totalTime);
 
-            if (completedDepth >= 10 && nodesEffort >= 95
-                && mainThread->tm.elapsed(threads.nodes_searched()) > totalTime * 3 / 4
+            if (completedDepth >= g1 && nodesEffort >= g2
+                && mainThread->tm.elapsed(threads.nodes_searched()) > totalTime * g3 / 1000.0
                 && !mainThread->ponder)
             {
                 threads.stop = true;
@@ -458,7 +464,7 @@ void Search::Worker::iterative_deepening() {
                     threads.stop = true;
             }
             else if (!mainThread->ponder
-                     && mainThread->tm.elapsed(threads.nodes_searched()) > totalTime * 0.50)
+                     && mainThread->tm.elapsed(threads.nodes_searched()) > totalTime * g4 / 1000.0)
                 threads.increaseDepth = false;
             else
                 threads.increaseDepth = true;
