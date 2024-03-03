@@ -210,7 +210,8 @@ int e1=1070, e2=227, e3=97, e4=510, e5=1510,
     f1=1560, f2=690, f3=140, f4=217, f5=179,
     g1=10, g2=95, g3=750, g4=500;
 
-TUNE(e1, e2, e3, e4, e5, f1, f2, f3, f4, f5, g1, g2, g3, g4);
+TUNE(e1, e2, e3, e4, e5, f1, f2, f3, f5, g1, g2, g3, g4);
+TUNE(SetRange(1, 2 * f4), f4);
 
 // Main iterative deepening loop. It calls search()
 // repeatedly with increasing depth until the allocated thinking time has been

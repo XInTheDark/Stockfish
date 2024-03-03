@@ -48,7 +48,8 @@ int a1=110, a2=334, a3=300, a4=490,
     c1=120, c2=310, c3=440, c4=210, c5=690, c6=1220,
     d1=840;
 
-TUNE(a1, a2, a3, a4, b1, b2, b3, c1, c2, c3, c4, c5, c6, d1);
+TUNE(a1, a2, a3, a4, b1, b2, b3, c1, c2, c3, c4, c5, c6);
+TUNE(SetRange(600, 980), d1);
 
 // Called at the beginning of the search and calculates
 // the bounds of time allowed for the current game ply. We currently support:
