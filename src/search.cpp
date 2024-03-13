@@ -47,12 +47,12 @@
 namespace Stockfish {
 
 int a1=122, a2=46, a3=57, a4=331, a5=45, a6=11450, a7=249, a8=327, a9=1192, a10=516, a11=299, a12=1254,
-    b1=9, b2=12800, b3=130, b4=90, b5=71, b6=1980,
+    b1=900, b2=12800, b3=130, b4=90, b5=71, b6=1980,
     c1=14, c2=1621, c3=1238, c4=462, c5=296, c6=145, c7=12, c8=287, c9=16211, c10=20, c11=314, c12=151,
-    d1=8, d2=168, d3=64, d4=410, d5=7, d6=298, d7=288, d8=202,
-    e1=6, e2=4125, e3=5686, e4=15, e5=55, e6=153, e7=58, e8=118, e9=26,
+    d1=800, d2=168, d3=64, d4=410, d5=700, d6=298, d7=288, d8=202,
+    e1=600, e2=4125, e3=5686, e4=15, e5=55, e6=153, e7=58, e8=118, e9=26,
     f1=29, f2=58, f3=55, f4=22, f5=14, f6=40, f7=4315, f8=4587, f9=14956,
-    g1=48, g2=12, g3=13665, g4=12276, g5=5, g6=14446, g7=10,
+    g1=48, g2=12, g3=13665, g4=12276, g5=500, g6=14446, g7=10,
     h1=221, h2=79, h3=1091, h4=759, h5=950, h6=167;
 
 TUNE(a1, a2, a3, a4, a5, a7, a8, a9, a10, a11, a12,
@@ -329,7 +329,7 @@ void Search::Worker::iterative_deepening() {
 
             // Reset aspiration window starting size
             Value avg = rootMoves[pvIdx].averageScore;
-            delta     = b1 + avg * avg / b2;
+            delta     = b1 / 100 + avg * avg / b2;
             alpha     = std::max(avg - delta, -VALUE_INFINITE);
             beta      = std::min(avg + delta, VALUE_INFINITE);
 
@@ -850,7 +850,7 @@ Value Search::Worker::search(
         return qsearch<PV>(pos, ss, alpha, beta);
 
     // For cutNodes without a ttMove, we decrease depth by 2 if depth is high enough.
-    if (cutNode && depth >= d1 && !ttMove)
+    if (cutNode && depth >= d1 / 100 && !ttMove)
         depth -= 2;
 
     // Step 11. ProbCut (~10 Elo)
@@ -991,7 +991,7 @@ moves_loop:  // When in check, search starts here
             if (capture || givesCheck)
             {
                 // Futility pruning for captures (~2 Elo)
-                if (!givesCheck && lmrDepth < d5 && !ss->inCheck)
+                if (!givesCheck && lmrDepth < d5 / 100 && !ss->inCheck)
                 {
                     Piece capturedPiece = pos.piece_on(move.to_sq());
                     int   futilityEval =
@@ -1015,7 +1015,7 @@ moves_loop:  // When in check, search starts here
                   + thisThread->pawnHistory[pawn_structure_index(pos)][movedPiece][move.to_sq()];
 
                 // Continuation history based pruning (~2 Elo)
-                if (lmrDepth < e1 && history < -e2 * depth)
+                if (lmrDepth < e1 / 100 && history < -e2 * depth)
                     continue;
 
                 history += 2 * thisThread->mainHistory[us][move.from_to()];
@@ -1348,7 +1348,7 @@ moves_loop:  // When in check, search starts here
     // Bonus for prior countermove that caused the fail low
     else if (!priorCapture && prevSq != SQ_NONE)
     {
-        int bonus = (depth > g5) + (PvNode || cutNode) + ((ss - 1)->statScore < -g6)
+        int bonus = (depth > g5 / 100) + (PvNode || cutNode) + ((ss - 1)->statScore < -g6)
                   + ((ss - 1)->moveCount > g7);
         update_continuation_histories(ss - 1, pos.piece_on(prevSq), prevSq,
                                       stat_bonus(depth) * bonus);
