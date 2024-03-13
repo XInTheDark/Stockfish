@@ -25,11 +25,14 @@
 
 namespace Stockfish {
 
+inline int SMALLNET = 1136, PSQTONLY = 2656;
+TUNE(SMALLNET, PSQTONLY);
+
 class Position;
 
 namespace Eval {
 
-constexpr inline int SmallNetThreshold = 1136, PsqtOnlyThreshold = 2656;
+inline int SmallNetThreshold = SMALLNET, PsqtOnlyThreshold = PSQTONLY;
 
 // The default net name MUST follow the format nn-[SHA256 first 12 digits].nnue
 // for the build process (profile-build and fishtest) to work. Do not change the
