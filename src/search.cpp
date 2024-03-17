@@ -433,13 +433,18 @@ void Search::Worker::iterative_deepening() {
                                / 10000.0;
             fallingEval = std::clamp(fallingEval, 0.580, 1.667);
 
+            // In unbalanced openings and middlegames spend extra time.
+            double unbalanced = 6.0 * std::abs(bestValue) / (std::abs(bestValue) + 180.0)
+                                * std::log10(0.10 * rootPos.count<ALL_PIECES>());
+            unbalanced = std::max(unbalanced, 1.0);
+
             // If the bestMove is stable over several iterations, reduce time accordingly
             timeReduction    = lastBestMoveDepth + 8 < completedDepth ? 1.495 : 0.687;
             double reduction = (1.48 + mainThread->previousTimeReduction) / (2.17 * timeReduction);
             double bestMoveInstability = 1 + 1.88 * totBestMoveChanges / threads.size();
 
             double totalTime =
-              mainThread->tm.optimum() * fallingEval * reduction * bestMoveInstability;
+              mainThread->tm.optimum() * fallingEval * unbalanced * reduction * bestMoveInstability;
 
             // Cap used time in case of a single legal move for a better viewer experience
             if (rootMoves.size() == 1)
