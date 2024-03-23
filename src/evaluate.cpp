@@ -73,6 +73,12 @@ Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, 
         // Damp down the evaluation linearly when shuffling
         int shuffling = pos.rule50_count();
         v             = v * (shufflingConstant - shuffling) / shufflingDiv;
+
+        // Rescale evaluation such that positive values are increased
+        // until the turning point 1000, and negative values are decreased
+        // until the turning point -1000.
+        if (std::abs(v) < 3600)
+            v = v * 4000 / (std::abs(v) + 3000);
     };
 
     if (!smallNet)
