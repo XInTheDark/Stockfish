@@ -43,6 +43,10 @@ int Eval::simple_eval(const Position& pos, Color c) {
 }
 
 
+int a = 1000, b = 1000, c = 1000;
+TUNE(SetRange(1, 2000), a, b);
+TUNE(SetRange(300, 10000), c);
+
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
 // of the position from the point of view of the side to move.
 Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, int optimism) {
@@ -75,10 +79,10 @@ Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, 
         v             = v * (shufflingConstant - shuffling) / shufflingDiv;
 
         // Rescale evaluation such that positive values are increased
-        // until the turning point 1000, and negative values are decreased
-        // until the turning point -1000.
-        if (std::abs(v) < 3600)
-            v = v * 4000 / (std::abs(v) + 3000);
+        // until the turning point, and negative values are decreased
+        // until the turning point.
+        if (std::abs(v) < c)
+            v = v * a / (std::abs(v) + b);
     };
 
     if (!smallNet)
