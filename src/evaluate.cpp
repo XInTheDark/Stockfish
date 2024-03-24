@@ -75,10 +75,10 @@ Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, 
         v             = v * (shufflingConstant - shuffling) / shufflingDiv;
 
         // Rescale evaluation such that positive values are increased
-        // until the turning point 300, and negative values are decreased
-        // until the turning point 300.
-        if (std::abs(v) < 300)
-            v = v * 1200 / (std::abs(v) + 900);
+        // until the turning point, and negative values are decreased
+        // until the turning point.
+        if (std::abs(v) < 370)
+            v = v * 1250 / (std::abs(v) + 880);
     };
 
     if (!smallNet)
