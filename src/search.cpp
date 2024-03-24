@@ -55,7 +55,7 @@ int a1=118, a2=44, a3=53, a4=309, a5=47, a6=11175, a7=245, a8=320, a9=1296, a10=
 
     e1=600, e2=4040, e3=5637, e4=15, e5=59, e6=141, e7=58, e8=125, e9=27,
 
-    f1=58, f2=58, f3=14, f4=37, f5=4026, f6=4723, f7=13659,
+    f0=30, f1=58, f2=58, f3=14, f4=37, f5=4026, f6=4723, f7=13659,
 
     g1=47, g2=12, g3=14206, g4=12077, g5=14963, g6=11, g7=150,
 
@@ -66,7 +66,7 @@ TUNE(a1, a2, a3, a4, a5, a7, a8, a9, a10, a11, a12,
      c1, c2, c3, c4, c5, c6, c7, c9, c10, c11,
      d1, d2, d3, d4, d5, d6, d7,
      e1, e2, e4, e5, e6, e7, e8, e9,
-     f1, f2, f3, f4, f5, f6,
+     f0, f1, f2, f3, f4, f5, f6,
      g1, g2, g3, g4, g5, g6, g7,
      h1, h2, h3, h4, h5, h6);
 
@@ -1052,7 +1052,7 @@ moves_loop:  // When in check, search starts here
             // so changing them requires tests at these types of time controls.
             // Recursive singular search is avoided.
             if (!rootNode && move == ttMove && !excludedMove
-                && depth >= 3 + ss->ttPv
+                && depth >= 4 - (thisThread->completedDepth > f0) + ss->ttPv
                 && std::abs(ttValue) < VALUE_TB_WIN_IN_MAX_PLY && (tte->bound() & BOUND_LOWER)
                 && tte->depth() >= depth - 3)
             {
