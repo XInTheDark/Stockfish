@@ -1118,7 +1118,7 @@ moves_loop:  // When in check, search starts here
             r--;
 
         // Decrease reduction if bestValue is not clearly winning/losing
-        if (ss->ply <= 5 && ss->moveCount < 10 && std::abs(bestValue) < 400)
+        if (ss->ply <= 6 && ss->moveCount <= 10 && std::abs(bestValue) < 450)
             r--;
 
         // Increase reduction if next ply has a lot of fail high (~5 Elo)
