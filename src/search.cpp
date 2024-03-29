@@ -59,7 +59,9 @@ int a1=118, a2=44, a3=53, a4=309, a5=47, a6=11175, a7=245, a8=320, a9=1296, a10=
 
     g1=47, g2=12, g3=14206, g4=12077, g5=14963, g6=11, g7=150,
 
-    h1=226, h2=78, h3=1107, h4=725, h5=956, h6=168;
+    h1=226, h2=78, h3=1107, h4=725, h5=956, h6=168,
+
+    fTripleExt=0;
 
 TUNE(a1, a2, a3, a4, a5, a7, a8, a9, a10, a11, a12,
      b1, b3, b4, b5, b6,
@@ -69,6 +71,8 @@ TUNE(a1, a2, a3, a4, a5, a7, a8, a9, a10, a11, a12,
      f0, f1, f2, f3, f4, f5, f6,
      g1, g2, g3, g4, g5, g6, g7,
      h1, h2, h3, h4, h5, h6);
+
+TUNE(SetRange(0, 30), fTripleExt);
 
 TUNE(SetRange(1, 2*a6), a6);
 TUNE(SetRange(1, 2*b2), b2);
@@ -1071,7 +1075,7 @@ moves_loop:  // When in check, search starts here
                     // We make sure to limit the extensions in some way to avoid a search explosion
                     if (!PvNode && ss->multipleExtensions <= 16)
                     {
-                        extension = 2 + !ttCapture;
+                        extension = 2 + (value < singularBeta - fTripleExt && !ttCapture);
                         depth += depth < f3;
                     }
                     if (PvNode && !ttCapture && ss->multipleExtensions <= 5
