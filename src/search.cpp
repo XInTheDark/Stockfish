@@ -500,8 +500,10 @@ void Search::Worker::clear() {
                 for (auto& h : to)
                     h->fill(-67);
 
+    double reductionConstant = std::pow(19.80 + std::log(size_t(options["Threads"])) / 2, 2.0);
     for (size_t i = 1; i < reductions.size(); ++i)
-        reductions[i] = int((19.80 + std::log(size_t(options["Threads"])) / 2) * std::log(i));
+        for (size_t j = 1; j < reductions[0].size(); ++j)
+            reductions[i][j] = int(reductionConstant * std::log(i) * std::log(j));
 }
 
 
@@ -1628,7 +1630,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
 }
 
 Depth Search::Worker::reduction(bool i, Depth d, int mn, int delta) {
-    int reductionScale = reductions[d] * reductions[mn];
+    int reductionScale = reductions[d][mn];
     return (reductionScale + 1107 - delta * 725 / rootDelta) / 1024 + (!i && reductionScale > 956);
 }
 
