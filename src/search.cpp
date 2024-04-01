@@ -1629,7 +1629,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
 
 Depth Search::Worker::reduction(bool i, Depth d, int mn, int delta) {
     int reductionScale = reductions[d] * reductions[mn];
-    return (reductionScale + 1107 - delta * 725 / rootDelta) / 1024 + (!i && reductionScale > 956);
+    return (reductionScale + 1000 - delta * 750 / rootDelta) / 1024 + (!i && reductionScale > 1000);
 }
 
 namespace {
