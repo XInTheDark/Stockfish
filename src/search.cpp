@@ -1051,7 +1051,7 @@ moves_loop:  // When in check, search starts here
                     {
                         extension = 2;
                         if (!ttCapture)
-                            extension += (value < singularBeta - 40) + (value < singularBeta - 80);
+                            extension += (value < singularBeta - 50) + (value < singularBeta - 120);
                         depth += depth < 14;
                     }
                     if (PvNode && !ttCapture && ss->multipleExtensions <= 5
