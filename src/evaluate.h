@@ -38,7 +38,7 @@ inline int SmallNetThreshold = SMALLNET, PsqtOnlyThreshold = PSQTONLY;
 // for the build process (profile-build and fishtest) to work. Do not change the
 // name of the macro or the location where this macro is defined, as it is used
 // in the Makefile/Fishtest.
-#define EvalFileDefaultNameBig "nn-1ceb1ade0001.nnue"
+#define EvalFileDefaultNameBig "nn-ae6a388e4a1a.nnue"
 #define EvalFileDefaultNameSmall "nn-baff1ede1f90.nnue"
 
 namespace NNUE {
