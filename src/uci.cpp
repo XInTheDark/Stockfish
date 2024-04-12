@@ -393,7 +393,6 @@ std::string UCIEngine::wdl(Value v, const Position& pos) {
     int wdl_w = win_rate_model(v, pos);
     int wdl_l = win_rate_model(-v, pos);
     int wdl_d = 1000 - wdl_w - wdl_l;
-    ss << " wdl " << wdl_w << " " << wdl_d << " " << wdl_l;
 
     return ss.str();
 }
