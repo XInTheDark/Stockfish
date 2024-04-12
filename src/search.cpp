@@ -266,6 +266,10 @@ void Search::Worker::iterative_deepening() {
 
     multiPV = std::min(multiPV, rootMoves.size());
 
+    // Before the iterative deepening loop, evaluate the root position
+    // This is used for complexity calculation later.
+    Value rootStaticEval = evaluate(networks, rootPos, 0);
+
     int searchAgainCounter = 0;
 
     // Iterative deepening loop until requested to stop or the target depth is reached
@@ -363,6 +367,10 @@ void Search::Worker::iterative_deepening() {
                     break;
 
                 delta += delta / 3;
+
+                // Adjust complexity based on the difference between static eval and search score
+                int evalDiff = std::abs(bestValue - rootStaticEval);
+                complexity = 100 * evalDiff / (evalDiff + 200);
 
                 assert(alpha >= -VALUE_INFINITE && beta <= VALUE_INFINITE);
             }
