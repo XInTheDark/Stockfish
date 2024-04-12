@@ -549,7 +549,7 @@ Value Search::Worker::search(
     priorCapture       = pos.captured_piece();
     Color us           = pos.side_to_move();
     forceBigNet        = (ss - 2)->staticEval == VALUE_NONE
-               || (abs((ss - 2)->staticEval) > 300 && abs((ss - 2)->staticEval) < 800);
+               || (PvNode && abs((ss - 2)->staticEval) > 300 && abs((ss - 2)->staticEval) < 800);
     moveCount = captureCount = quietCount = ss->moveCount = 0;
     bestValue                                             = -VALUE_INFINITE;
     maxValue                                              = VALUE_INFINITE;
