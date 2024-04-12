@@ -341,6 +341,10 @@ void Search::Worker::iterative_deepening() {
                 if (threads.stop)
                     break;
 
+                // Adjust complexity based on the difference between static eval and search score
+                int evalDiff = std::abs(bestValue - rootStaticEval);
+                complexity = 100 * evalDiff / (evalDiff + 200);
+
                 // When failing high/low give some update (without cluttering
                 // the UI) before a re-search.
                 if (mainThread && multiPV == 1 && (bestValue <= alpha || bestValue >= beta)
@@ -367,10 +371,6 @@ void Search::Worker::iterative_deepening() {
                     break;
 
                 delta += delta / 3;
-
-                // Adjust complexity based on the difference between static eval and search score
-                int evalDiff = std::abs(bestValue - rootStaticEval);
-                complexity = 100 * evalDiff / (evalDiff + 200);
 
                 assert(alpha >= -VALUE_INFINITE && beta <= VALUE_INFINITE);
             }
@@ -574,7 +574,7 @@ Value Search::Worker::search(
         if (threads.stop.load(std::memory_order_relaxed) || pos.is_draw(ss->ply)
             || ss->ply >= MAX_PLY)
             return (ss->ply >= MAX_PLY && !ss->inCheck)
-                   ? evaluate(networks, pos, thisThread->optimism[us])
+                   ? evaluate(networks, pos, thisThread->optimism[us], thisThread->complexity)
                    : value_draw(thisThread->nodes);
 
         // Step 3. Mate distance pruning. Even if we mate at the next move our score
@@ -716,7 +716,7 @@ Value Search::Worker::search(
         // Never assume anything about values stored in TT
         unadjustedStaticEval = tte->eval();
         if (unadjustedStaticEval == VALUE_NONE)
-            unadjustedStaticEval = evaluate(networks, pos, thisThread->optimism[us]);
+            unadjustedStaticEval = evaluate(networks, pos, thisThread->optimism[us], thisThread->complexity);
         else if (PvNode)
             Eval::NNUE::hint_common_parent_position(pos, networks);
 
@@ -728,7 +728,7 @@ Value Search::Worker::search(
     }
     else
     {
-        unadjustedStaticEval = evaluate(networks, pos, thisThread->optimism[us]);
+        unadjustedStaticEval = evaluate(networks, pos, thisThread->optimism[us], thisThread->complexity);
         ss->staticEval = eval = to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
 
         // Static evaluation is saved as it was before adjustment by correction history
@@ -1424,7 +1424,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
     // Step 2. Check for an immediate draw or maximum ply reached
     if (pos.is_draw(ss->ply) || ss->ply >= MAX_PLY)
         return (ss->ply >= MAX_PLY && !ss->inCheck)
-               ? evaluate(networks, pos, thisThread->optimism[us])
+               ? evaluate(networks, pos, thisThread->optimism[us], thisThread->complexity)
                : VALUE_DRAW;
 
     assert(0 <= ss->ply && ss->ply < MAX_PLY);
@@ -1456,7 +1456,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
             // Never assume anything about values stored in TT
             unadjustedStaticEval = tte->eval();
             if (unadjustedStaticEval == VALUE_NONE)
-                unadjustedStaticEval = evaluate(networks, pos, thisThread->optimism[us]);
+                unadjustedStaticEval = evaluate(networks, pos, thisThread->optimism[us], thisThread->complexity);
             ss->staticEval = bestValue =
               to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
 
@@ -1469,7 +1469,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
         {
             // In case of null move search, use previous static eval with a different sign
             unadjustedStaticEval = (ss - 1)->currentMove != Move::null()
-                                   ? evaluate(networks, pos, thisThread->optimism[us])
+                                   ? evaluate(networks, pos, thisThread->optimism[us], thisThread->complexity)
                                    : -(ss - 1)->staticEval;
             ss->staticEval       = bestValue =
               to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
