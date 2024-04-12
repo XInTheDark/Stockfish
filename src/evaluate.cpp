@@ -45,7 +45,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
 // of the position from the point of view of the side to move.
-Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, int optimism) {
+Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, int optimism, int* complexity) {
 
     assert(!pos.checkers());
 
@@ -73,6 +73,10 @@ Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, 
         // Damp down the evaluation linearly when shuffling
         int shuffling = pos.rule50_count();
         v             = v * (shufflingConstant - shuffling) / shufflingDiv;
+
+        // If a complexity pointer is passed, update it
+        if (complexity)
+            *complexity = nnueComplexity;
     };
 
     if (!smallNet)
