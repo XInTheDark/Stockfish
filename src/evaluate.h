@@ -45,7 +45,10 @@ struct Networks;
 std::string trace(Position& pos, const Eval::NNUE::Networks& networks);
 
 int   simple_eval(const Position& pos, Color c);
-Value evaluate(const NNUE::Networks& networks, const Position& pos, int optimism);
+Value evaluate(const NNUE::Networks& networks,
+               const Position&       pos,
+               int                   optimism,
+               bool                  forceBigNet = false);
 
 
 }  // namespace Eval
