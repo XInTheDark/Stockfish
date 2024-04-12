@@ -45,7 +45,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
 // of the position from the point of view of the side to move.
-Value Eval::evaluate(const Eval::NNUE::Networks& networks,
+Eval::Evaluation Eval::evaluate(const Eval::NNUE::Networks& networks,
                      const Position&             pos,
                      int                         optimism,
                      bool                        forceBigNet) {
@@ -88,7 +88,8 @@ Value Eval::evaluate(const Eval::NNUE::Networks& networks,
     // Guarantee evaluation does not hit the tablebase range
     v = std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
 
-    return v;
+    // Return value and NNUE complexity
+    return { v, nnueComplexity };
 }
 
 // Like evaluate(), but instead of returning a value, it returns
@@ -110,7 +111,7 @@ std::string Eval::trace(Position& pos, const Eval::NNUE::Networks& networks) {
     v       = pos.side_to_move() == WHITE ? v : -v;
     ss << "NNUE evaluation        " << 0.01 * UCIEngine::to_cp(v, pos) << " (white side)\n";
 
-    v = evaluate(networks, pos, VALUE_ZERO);
+    v = evaluate(networks, pos, VALUE_ZERO).value;
     v = pos.side_to_move() == WHITE ? v : -v;
     ss << "Final evaluation       " << 0.01 * UCIEngine::to_cp(v, pos) << " (white side)";
     ss << " [with scaled NNUE, ...]";

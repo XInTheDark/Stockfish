@@ -42,10 +42,15 @@ namespace NNUE {
 struct Networks;
 }
 
+struct Evaluation {
+    Value value;
+    int   complexity;
+};
+
 std::string trace(Position& pos, const Eval::NNUE::Networks& networks);
 
 int   simple_eval(const Position& pos, Color c);
-Value evaluate(const NNUE::Networks& networks,
+Evaluation evaluate(const NNUE::Networks& networks,
                const Position&       pos,
                int                   optimism,
                bool                  forceBigNet = false);
