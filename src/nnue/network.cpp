@@ -187,14 +187,13 @@ bool Network<Arch, Transformer>::save(const std::optional<std::string>& filename
 
 template<typename Arch, typename Transformer>
 Value Network<Arch, Transformer>::evaluate(const Position& pos,
-                                           bool            adjusted,
+                                           int             delta,
                                            int*            complexity,
                                            bool            psqtOnly) const {
     // We manually align the arrays on the stack because with gcc < 9.3
     // overaligning stack variables with alignas() doesn't work correctly.
 
     constexpr uint64_t alignment = CacheLineSize;
-    constexpr int      delta     = 24;
 
 #if defined(ALIGNAS_ON_STACK_VARIABLES_BROKEN)
     TransformedFeatureType transformedFeaturesUnaligned
@@ -216,12 +215,9 @@ Value Network<Arch, Transformer>::evaluate(const Position& pos,
     if (complexity)
         *complexity = !psqtOnly ? std::abs(psqt - positional) / OutputScale : 0;
 
-    // Give more value to positional evaluation when adjusted flag is set
-    if (adjusted)
-        return static_cast<Value>(((1024 - delta) * psqt + (1024 + delta) * positional)
-                                  / (1024 * OutputScale));
-    else
-        return static_cast<Value>((psqt + positional) / OutputScale);
+    // Give more value to positional evaluation based on delta parameter
+    return static_cast<Value>(((1024 - delta) * psqt + (1024 + delta) * positional)
+                              / (1024 * OutputScale));
 }
 
 

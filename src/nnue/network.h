@@ -53,7 +53,7 @@ class Network {
 
 
     Value evaluate(const Position& pos,
-                   bool            adjusted   = false,
+                   int             delta      = 0,
                    int*            complexity = nullptr,
                    bool            psqtOnly   = false) const;
 
