@@ -343,7 +343,7 @@ void Search::Worker::iterative_deepening() {
 
                 // Adjust complexity based on the difference between static eval and search score
                 int evalDiff = std::abs(bestValue - rootStaticEval);
-                complexity = 100 * evalDiff / (evalDiff + 200);
+                complexity = 60 * evalDiff / (evalDiff + 180);
 
                 // When failing high/low give some update (without cluttering
                 // the UI) before a re-search.
