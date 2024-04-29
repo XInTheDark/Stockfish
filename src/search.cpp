@@ -1045,11 +1045,11 @@ moves_loop:  // When in check, search starts here
                   search<NonPV>(pos, ss, singularBeta - 1, singularBeta, singularDepth, cutNode);
                 ss->excludedMove = Move::none();
 
-                if (value < singularBeta)
+                if (value < singularBeta) 
                 {
-                        int doubleMargin =        451 *  PvNode - 441 * !ttCapture - 355 * !ss->ttPv;
-                        int tripleMargin = 993  - 484 * !PvNode - 498 * !ttCapture - 454 * !ss->ttPv;
-                        int quadMargin   = 1997 - 654 * !PvNode - 601 * !ttCapture - 646 * !ss->ttPv;
+                        int doubleMargin =        351 *  PvNode - 341 * !ttCapture - 255 * !ss->ttPv;
+                        int tripleMargin = 993  - 484 * !PvNode - 498 * !ttCapture - 434 * !ss->ttPv;
+                        int quadMargin   = 1997 - 654 * !PvNode - 571 * !ttCapture - 646 * !ss->ttPv;
 
                         extension    = 1 + (value < singularBeta - doubleMargin) 
                                          + (value < singularBeta - tripleMargin)
