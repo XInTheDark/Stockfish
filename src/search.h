@@ -108,8 +108,7 @@ struct RootMove {
 using RootMoves = std::vector<RootMove>;
 
 
-// LimitsType struct stores information sent by GUI about available time to
-// search the current move, maximum depth/time, or if we are in analysis mode.
+// LimitsType struct stores information sent by the caller about the analysis required.
 struct LimitsType {
 
     // Init explicitly due to broken value-initialization of non POD in MSVC
@@ -127,6 +126,7 @@ struct LimitsType {
     int                      movestogo, depth, mate, perft, infinite;
     uint64_t                 nodes;
     bool                     ponderMode;
+    Square                   capSq;
 };
 
 
@@ -301,14 +301,13 @@ class Worker {
 
     Tablebases::Config tbConfig;
 
-    // Used by NNUE
-
-    Eval::NNUE::AccumulatorCaches refreshTable;
-
     const OptionsMap&           options;
     ThreadPool&                 threads;
     TranspositionTable&         tt;
     const Eval::NNUE::Networks& networks;
+
+    // Used by NNUE
+    Eval::NNUE::AccumulatorCaches refreshTable;
 
     friend class Stockfish::ThreadPool;
     friend class SearchManager;
