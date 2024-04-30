@@ -448,8 +448,15 @@ void Search::Worker::iterative_deepening() {
             int    el                  = std::clamp((bestValue + 750) / 150, 0, 9);
             double recapture           = limits.capSq == rootMoves[0].pv[0].to_sq() ? 0.955 : 1.005;
 
+            // Use more time if we have at least 2 move scores that are close to each other, and vice versa.
+            double closeMoveScores =
+              rootMoves.size() >= 2
+                ? 1 - std::log((rootMoves[0].score - rootMoves[1].score + 1) / 150.0)
+                : 0.975;
+            closeMoveScores = std::clamp(closeMoveScores, 0.700, 2.000);
+
             double totalTime = mainThread->tm.optimum() * fallingEval * reduction
-                             * bestMoveInstability * EvalLevel[el] * recapture;
+                             * bestMoveInstability * EvalLevel[el] * recapture * closeMoveScores;
 
             // Cap used time in case of a single legal move for a better viewer experience
             if (rootMoves.size() == 1)
