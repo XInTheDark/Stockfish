@@ -1647,7 +1647,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
 
 Depth Search::Worker::reduction(bool i, Depth d, int mn, int delta, int complexity) {
     int reductionScale = reductions[d] * reductions[mn];
-    return (reductionScale + 1150 - complexity * 3 - delta * 832 / rootDelta) / 1024 + (!i && reductionScale > 1025);
+    return (reductionScale + 1150 - complexity * 3 / 2 - delta * 832 / rootDelta) / 1024 + (!i && reductionScale > 1025);
 }
 
 TimePoint Search::Worker::elapsed() const {
