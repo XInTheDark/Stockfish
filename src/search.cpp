@@ -452,7 +452,7 @@ void Search::Worker::iterative_deepening() {
             double closeMoveScores =
               rootMoves.size() >= 2
                 ? 1 - std::log((rootMoves[0].score - rootMoves[1].score + 1) / 150.0)
-                : 0.975;
+                : 1.0;
             closeMoveScores = std::clamp(closeMoveScores, 0.700, 2.000);
 
             double totalTime = mainThread->tm.optimum() * fallingEval * reduction
