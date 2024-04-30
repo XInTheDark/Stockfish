@@ -451,7 +451,7 @@ void Search::Worker::iterative_deepening() {
             // Use more time if we have at least 2 move scores that are close to each other, and vice versa.
             double closeMoveScores =
               rootMoves.size() >= 2
-                ? 1 - std::log((rootMoves[0].score - rootMoves[1].score + 1) / 150.0)
+                ? 1 - std::log10((rootMoves[0].score - rootMoves[1].score + 1) / 150.0)
                 : 1.0;
             closeMoveScores = std::clamp(closeMoveScores, 0.700, 2.000);
 
