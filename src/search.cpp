@@ -477,6 +477,11 @@ void Search::Worker::iterative_deepening() {
 
         mainThread->iterValue[iterIdx] = bestValue;
         iterIdx                        = (iterIdx + 1) & 3;
+
+        // Calculate root position complexity by taking into account the score of the top 2 moves.
+        complexity = 0;
+        if (rootMoves.size() >= 2 && std::abs(rootMoves[0].score) < VALUE_TB_WIN_IN_MAX_PLY)
+            complexity = std::max(240 - (rootMoves[0].score - rootMoves[1].score), -400);
     }
 
     if (!mainThread)
@@ -952,7 +957,7 @@ moves_loop:  // When in check, search starts here
 
         int delta = beta - alpha;
 
-        Depth r = reduction(improving, depth, moveCount, delta);
+        Depth r = reduction(improving, depth, moveCount, delta, thisThread->complexity);
 
         // Step 14. Pruning at shallow depth (~120 Elo).
         // Depth conditions are important for mate finding.
@@ -1640,9 +1645,9 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
     return bestValue;
 }
 
-Depth Search::Worker::reduction(bool i, Depth d, int mn, int delta) {
+Depth Search::Worker::reduction(bool i, Depth d, int mn, int delta, int complexity) {
     int reductionScale = reductions[d] * reductions[mn];
-    return (reductionScale + 1150 - delta * 832 / rootDelta) / 1024 + (!i && reductionScale > 1025);
+    return (reductionScale + 1150 - complexity * 3 - delta * 832 / rootDelta) / 1024 + (!i && reductionScale > 1025);
 }
 
 TimePoint Search::Worker::elapsed() const {

@@ -267,7 +267,7 @@ class Worker {
     template<NodeType nodeType>
     Value qsearch(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth = 0);
 
-    Depth reduction(bool i, Depth d, int mn, int delta);
+    Depth reduction(bool i, Depth d, int mn, int delta, int complexity);
 
     // Get a pointer to the search manager, only allowed to be called by the
     // main thread.
@@ -285,6 +285,7 @@ class Worker {
     int                   selDepth, nmpMinPly;
 
     Value optimism[COLOR_NB];
+    Value complexity;
 
     Position  rootPos;
     StateInfo rootState;
