@@ -53,7 +53,7 @@ b1=10, b2=10891, b3=128, b4=96, b5=67, b6=1877,
 
 c1=14, c2=1667, c3=1446, c4=463, c5=264, c6=153, c7=11, c8=288, c9=18213, c10=20, c11=321, c12=143,
 
-d1=165, d2=65, d3=429, d4=278, d5=264, d6=199, d7=198,
+d1=165, d2=65, d3=429, d4=278, d5=264, d6=199, d7=199, d8=198,
 
 e1=4199, e2=64, e3=5060, e4=54, e5=129, e6=62, e7=140, e8=14, e9=28,
 
@@ -66,7 +66,7 @@ h1=268, h2=74, h3=1225, h4=786, h5=1020, h6=182;
 TUNE(a1, a2, a3, a4, a5, a7, a8, a9, a10, a11, a12, a13,
     b1, b3, b4, b5, b6,
     c1, c2, c3, c4, c5, c6, c7, c9, c10, c11,
-    d1, d2, d3, d4, d5, d6, d7,
+    d1, d2, d3, d4, d5, d6, d7, d8,
     e1, e2, e4, e5, e6, e7, e8, e9,
     f1, f2, f3, f4,
     g1, g3, g4, g5, g6, g7, g8, g9,
@@ -178,9 +178,6 @@ Search::Worker::Worker(SharedState&                    sharedState,
 }
 
 void Search::Worker::start_searching() {
-
-    // Initialize accumulator refresh entries
-    refreshTable.clear(networks);
 
     // Non-main threads go directly to iterative_deepening()
     if (!is_mainthread())
@@ -538,6 +535,8 @@ void Search::Worker::clear() {
 
     for (size_t i = 1; i < reductions.size(); ++i)
         reductions[i] = int((b6 / 100.0 + std::log(size_t(options["Threads"])) / 2) * std::log(i));
+
+    refreshTable.clear(networks);
 }
 
 
@@ -999,20 +998,21 @@ moves_loop:  // When in check, search starts here
             if (capture || givesCheck)
             {
                 Piece capturedPiece = pos.piece_on(move.to_sq());
-                int captHist = thisThread->captureHistory[movedPiece][move.to_sq()][type_of(capturedPiece)];
+                int   captHist =
+                  thisThread->captureHistory[movedPiece][move.to_sq()][type_of(capturedPiece)];
 
                 // Futility pruning for captures (~2 Elo)
                 if (!givesCheck && lmrDepth < 7 && !ss->inCheck)
                 {
-                    Value futilityValue =
-                      ss->staticEval + d4 + d5 * lmrDepth + PieceValue[capturedPiece] + captHist / 7;
+                    Value futilityValue = ss->staticEval + d4 + d5 * lmrDepth
+                                        + PieceValue[capturedPiece] + captHist / 7;
                     if (futilityValue <= alpha)
                         continue;
                 }
 
                 // SEE based pruning for captures and checks (~11 Elo)
-                int seeHist = std::clamp(captHist / 32, -d6 * depth, d6 * depth);
-                if (!pos.see_ge(move, -d7 * depth - seeHist))
+                int seeHist = std::clamp(captHist / 32, -d6 * depth, d7 * depth);
+                if (!pos.see_ge(move, -d8 * depth - seeHist))
                     continue;
             }
             else
