@@ -57,7 +57,7 @@ d1=165, d2=65, d3=429, d4=278, d5=264, d6=199, d7=198,
 
 e1=4199, e2=64, e3=5060, e4=54, e5=129, e6=62, e7=140, e8=14, e9=28,
 
-f1=32, f2=42, f3=39, f4=11, f5=14, f6=37, f7=3788,
+f1=32, f2=65, f3=59, f4=3788,
 
 g1=4664, g2=13615, g3=42, g4=12, g5=14082, g6=13651, g7=13602, g8=10, g9=140,
 
@@ -68,7 +68,7 @@ TUNE(a1, a2, a3, a4, a5, a7, a8, a9, a10, a11, a12, a13,
     c1, c2, c3, c4, c5, c6, c7, c9, c10, c11,
     d1, d2, d3, d4, d5, d6, d7,
     e1, e2, e4, e5, e6, e7, e8, e9,
-    f1, f2, f3, f5, f6, f7,
+    f1, f2, f3, f4,
     g1, g3, g4, g5, g6, g7, g8, g9,
     h1, h2, h3, h4, h5, h6);
 
@@ -78,9 +78,6 @@ TUNE(SetRange(1, 2*c8), c8);
 TUNE(SetRange(1, 2*c12), c12);
 TUNE(SetRange(1, 2*e3), e3);
 TUNE(SetRange(1, 2*g2), g2);
-
-// triple extension (c value increased manually)
-TUNE(SetRange(0, 15), f4);
 
 namespace TB = Tablebases;
 
@@ -629,7 +626,6 @@ Value Search::Worker::search(
     bestMove             = Move::none();
     (ss + 2)->killers[0] = (ss + 2)->killers[1] = Move::none();
     (ss + 2)->cutoffCnt                         = 0;
-    ss->multipleExtensions                      = (ss - 1)->multipleExtensions;
     Square prevSq = ((ss - 1)->currentMove).is_ok() ? ((ss - 1)->currentMove).to_sq() : SQ_NONE;
     ss->statScore = 0;
 
@@ -1084,17 +1080,15 @@ moves_loop:  // When in check, search starts here
 
                 if (value < singularBeta)
                 {
-                    extension = 1;
+                    int doubleMargin =        251 *  PvNode - 241 * !ttCapture;
+                    int tripleMargin = 493  - 234 * !PvNode - 248 * !ttCapture - 124 * (!ss->ttPv && ttCapture);
+                    int quadMargin   = 1007 - 354 * !PvNode - 300 * !ttCapture - 206 * !ss->ttPv;
 
-                    // We make sure to limit the extensions in some way to avoid a search explosion
-                    if (!PvNode && ss->multipleExtensions <= 16)
-                    {
-                        extension = 2 + (value < singularBeta - f4 && !ttCapture);
-                        depth += depth < f5;
-                    }
-                    if (PvNode && !ttCapture && ss->multipleExtensions <= 5
-                        && value < singularBeta - f6)
-                        extension = 2;
+                    extension    = 1 + (value < singularBeta - doubleMargin)
+                                     + (value < singularBeta - tripleMargin)
+                                     + (value < singularBeta - quadMargin);
+
+                    depth += ((!PvNode) && (depth < 14));
                 }
 
                 // Multi-cut pruning
@@ -1133,13 +1127,12 @@ moves_loop:  // When in check, search starts here
             else if (PvNode && move == ttMove && move.to_sq() == prevSq
                      && thisThread->captureHistory[movedPiece][move.to_sq()]
                                                   [type_of(pos.piece_on(move.to_sq()))]
-                          > f7)
+                          > f4)
                 extension = 1;
         }
 
         // Add extension to new depth
         newDepth += extension;
-        ss->multipleExtensions = (ss - 1)->multipleExtensions + (extension >= 2);
 
         // Speculative prefetch as early as possible
         prefetch(tt.first_entry(pos.key_after(move)));
