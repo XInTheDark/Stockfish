@@ -502,7 +502,7 @@ void Search::Worker::clear() {
                     h->fill(-60);
 
     for (size_t i = 1; i < reductions.size(); ++i)
-        reductions[i] = int((18.93 + std::log(size_t(options["Threads"])) / 2) * std::log(i));
+        reductions[i] = int((19.00 + 0.2 * std::log(size_t(options["Threads"]))) * std::log(i));
 
     refreshTable.clear(networks);
 }
