@@ -291,6 +291,7 @@ class Worker {
     RootMoves rootMoves;
     Depth     rootDepth, completedDepth;
     Value     rootDelta;
+    bool      useEndgameSearch;
 
     size_t thread_idx;
 
