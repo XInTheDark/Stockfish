@@ -295,7 +295,7 @@ void Search::Worker::iterative_deepening() {
             searchAgainCounter++;
 
         // Choose whether to use endgame search
-        useEndgameSearch = (rootPos.count<ALL_PIECES>() - rootPos.count<PAWN>() <= 6)
+        useEndgameSearch = (rootPos.count<ALL_PIECES>() - rootPos.count<PAWN>() <= 8)
                         && (std::abs(rootMoves[0].averageScore) < VALUE_TB_WIN_IN_MAX_PLY);
 
         // MultiPV loop. We perform a full root search for each PV line
