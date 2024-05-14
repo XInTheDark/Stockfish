@@ -839,10 +839,10 @@ Value Search::Worker::search(
       !PvNode && depth > 3
       && std::abs(beta) < VALUE_TB_WIN_IN_MAX_PLY
       // If value from transposition table is lower than probCutBeta, don't attempt probCut
-      // there and in further interactions with transposition table cutoff depth is set to depth - 3
-      // because probCut search has depth set to depth - 4 but we also do a move before it
-      // So effective depth is equal to depth - 3
-      && !(tte->depth() >= depth - 3 && ttValue != VALUE_NONE && ttValue < probCutBeta))
+      // there and in further interactions with transposition table cutoff depth is set to depth - 2
+      // because probCut search has depth set to depth - 3 but we also do a move before it
+      // So effective depth is equal to depth - 2
+      && !(tte->depth() >= depth - 2 && ttValue != VALUE_NONE && ttValue < probCutBeta))
     {
         assert(probCutBeta < VALUE_INFINITE && probCutBeta > beta);
 
@@ -869,7 +869,7 @@ Value Search::Worker::search(
 
                 // If the qsearch held, perform the regular search
                 if (value >= probCutBeta)
-                    value = -search<NonPV>(pos, ss + 1, -probCutBeta, -probCutBeta + 1, depth - 4,
+                    value = -search<NonPV>(pos, ss + 1, -probCutBeta, -probCutBeta + 1, depth - 3,
                                            !cutNode);
 
                 pos.undo_move(move);
@@ -892,7 +892,7 @@ moves_loop:  // When in check, search starts here
     // Step 12. A small Probcut idea, when we are in check (~4 Elo)
     probCutBeta = beta + 428;
     if (ss->inCheck && !PvNode && ttCapture && (tte->bound() & BOUND_LOWER)
-        && tte->depth() >= depth - 4 && ttValue >= probCutBeta
+        && tte->depth() >= depth - 2 && ttValue >= probCutBeta
         && std::abs(ttValue) < VALUE_TB_WIN_IN_MAX_PLY && std::abs(beta) < VALUE_TB_WIN_IN_MAX_PLY)
         return probCutBeta;
 
