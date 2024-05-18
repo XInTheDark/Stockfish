@@ -47,16 +47,16 @@
 
 namespace Stockfish {
 
-int a1=126, a2=46, a3=58, a4=323, a5=52, a6=7350, a7=208, a8=297, a9=16, a10=1406, a11=520, a12=312, a13=1479,
-    b1=10, b2=9530, b3=119, b4=88, b5=60, b6=1893,
-    c1=13, c2=1796, c3=1526, c4=433, c5=302, c6=141, c7=11, c8=254, c9=16993, c10=19, c11=326, c12=134,
-    d1=159, d2=66, d3=420, d4=295, d5=280,  d6=197, d7=196, d8=186,
-    e1=4081, e2=4768, e3=52, e4=134, e5=54, e6=142, e7=13, e8=28,
-    f1=32, f2=65, f3=52, f4=251, f5=241, f6=135, f7=234, f8=248, f9=124, f10=447, f11=354, f12=300, f13=206, f14=14,
-    g1=4016, g2=5078, g3=17662, g4=16, g5=105, g6=40, g7=13, g8=14455, g9=10, g10=130, g11=77,
-    h1=270, h2=4000, h3=69, h4=1318, h5=760, h6=1066, h7=165;
+int a1=131, a2=48, a3=64, a4=330, a6=7179, a7=200, a8=280, a9=16, a10=1495, a11=586, a12=284, a13=1639,
+    b1=10, b2=9474, b3=117, b4=88, b5=62, b6=2119,
+    c1=12, c2=1749, c3=1584, c4=473, c5=308, c6=138, c7=11, c8=258, c9=16079, c10=21, c11=324, c12=144,
+    d1=177, d2=65, d3=428, d4=305, d5=272,  d6=185, d7=182, d8=176,
+    e1=4360, e2=4507, e3=54, e4=142, e5=55, e6=132, e7=11, e8=27,
+    f1=33, f2=59, f3=49, f4=285, f5=228, f6=121, f7=238, f8=259, f9=117, f10=471, f11=343, f12=281, f13=217, f14=14,
+    g1=4041, g2=5313, g3=16145, g4=15, g5=102, g6=41, g7=13, g8=14323, g9=10, g10=120, g11=76,
+    h1=259, h2=4057, h3=68, h4=1284, h5=755, h6=1133, h7=165;
 
-TUNE(a1, a2, a3, a4, a5, a7, a8, a9, a10, a11, a12, a13,
+TUNE(a1, a2, a3, a4, a7, a8, a9, a10, a11, a12, a13,
      b1, b3, b4, b5, b6,
      c1, c2, c3, c4, c5, c6, c7, c9, c10, c11,
      d1, d2, d3, d4, d5, d6, d7, d8,
@@ -87,7 +87,7 @@ static constexpr double EvalLevel[10] = {0.981, 0.956, 0.895, 0.949, 0.913,
 Value futility_margin(Depth d, bool noTtCutNode, bool improving, bool oppWorsening) {
     Value futilityMult       = a1 - a2 * noTtCutNode;
     Value improvingDeduction = a3 * improving * futilityMult / 32;
-    Value worseningDeduction = (a4 + a5 * improving) * oppWorsening * futilityMult / 1024;
+    Value worseningDeduction = a4 * oppWorsening * futilityMult / 1024;
 
     return futilityMult * d - improvingDeduction - worseningDeduction;
 }
@@ -183,7 +183,8 @@ void Search::Worker::start_searching() {
         return;
     }
 
-    main_manager()->tm.init(limits, rootPos.side_to_move(), rootPos.game_ply(), options);
+    main_manager()->tm.init(limits, rootPos.side_to_move(), rootPos.game_ply(), options,
+                            main_manager()->originalPly);
     tt.new_search();
 
     if (rootMoves.empty())
@@ -521,7 +522,7 @@ void Search::Worker::clear() {
     counterMoves.fill(Move::none());
     mainHistory.fill(0);
     captureHistory.fill(0);
-    pawnHistory.fill(0);
+    pawnHistory.fill(-900);
     correctionHistory.fill(0);
 
     for (bool inCheck : {false, true})
@@ -1353,13 +1354,18 @@ moves_loop:  // When in check, search starts here
     // Bonus for prior countermove that caused the fail low
     else if (!priorCapture && prevSq != SQ_NONE)
     {
-        int bonus = (depth > 5) + (PvNode || cutNode) + ((ss - 1)->statScore < -g8)
+        int bonus = (depth > 4) + (depth > 5) + (PvNode || cutNode) + ((ss - 1)->statScore < -g8)
                   + ((ss - 1)->moveCount > g9) + (!ss->inCheck && bestValue <= ss->staticEval - g10)
                   + (!(ss - 1)->inCheck && bestValue <= -(ss - 1)->staticEval - g11);
         update_continuation_histories(ss - 1, pos.piece_on(prevSq), prevSq,
                                       stat_bonus(depth) * bonus);
         thisThread->mainHistory[~us][((ss - 1)->currentMove).from_to()]
           << stat_bonus(depth) * bonus / 2;
+
+
+        if (type_of(pos.piece_on(prevSq)) != PAWN && ((ss - 1)->currentMove).type_of() != PROMOTION)
+            thisThread->pawnHistory[pawn_structure_index(pos)][pos.piece_on(prevSq)][prevSq]
+              << stat_bonus(depth) * bonus * 2;
     }
 
     if (PvNode)
@@ -1504,6 +1510,8 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
         // Stand pat. Return immediately if static value is at least beta
         if (bestValue >= beta)
         {
+            if (std::abs(bestValue) < VALUE_TB_WIN_IN_MAX_PLY && !PvNode)
+                bestValue = (3 * bestValue + beta) / 4;
             if (!ss->ttHit)
                 tte->save(posKey, value_to_tt(bestValue, ss->ply), false, BOUND_LOWER, DEPTH_NONE,
                           Move::none(), unadjustedStaticEval, tt.generation());
@@ -1527,8 +1535,6 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
     Square     prevSq = ((ss - 1)->currentMove).is_ok() ? ((ss - 1)->currentMove).to_sq() : SQ_NONE;
     MovePicker mp(pos, ttMove, depth, &thisThread->mainHistory, &thisThread->captureHistory,
                   contHist, &thisThread->pawnHistory);
-
-    int quietCheckEvasions = 0;
 
     // Step 5. Loop through all pseudo-legal moves until no moves remain
     // or a beta cutoff occurs.
@@ -1582,12 +1588,6 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
                 }
             }
 
-            // We prune after the second quiet check evasion move, where being 'in check' is
-            // implicitly checked through the counter, and being a 'quiet move' apart from
-            // being a tt move is assumed after an increment because captures are pushed ahead.
-            if (quietCheckEvasions > 1)
-                break;
-
             // Continuation history based pruning (~3 Elo)
             if (!capture
                 && (*contHist[0])[pos.moved_piece(move)][move.to_sq()]
@@ -1610,8 +1610,6 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
         ss->continuationHistory =
           &thisThread
              ->continuationHistory[ss->inCheck][capture][pos.moved_piece(move)][move.to_sq()];
-
-        quietCheckEvasions += !capture && ss->inCheck;
 
         // Step 7. Make and search the move
         thisThread->nodes.fetch_add(1, std::memory_order_relaxed);
