@@ -52,7 +52,7 @@ int a1=131, a2=48, a3=64, a4=330, a6=7179, a7=200, a8=280, a9=16, a10=1495, a11=
     c1=12, c2=1749, c3=1584, c4=473, c5=308, c6=138, c7=11, c8=258, c9=16079, c10=21, c11=324, c12=144,
     d1=177, d2=65, d3=428, d4=305, d5=272,  d6=185, d7=182, d8=176,
     e1=4360, e2=4507, e3=54, e4=142, e5=55, e6=132, e7=11, e8=27,
-    f1=33, f2=59, f3=49, f4=285, f5=228, f6=121, f7=238, f8=259, f9=117, f10=471, f11=343, f12=281, f13=217, f14=14,
+    f1=33, f2=59, f3=49, f4=285, f5=228, f6=121, f7=238, f8=259, f9=117, f14=14,
     g1=4041, g2=5313, g3=16145, g4=15, g5=102, g6=41, g7=13, g8=14323, g9=10, g10=120, g11=76,
     h1=259, h2=4057, h3=68, h4=1284, h5=755, h6=1133, h7=165;
 
@@ -61,7 +61,7 @@ TUNE(a1, a2, a3, a4, a7, a8, a9, a10, a11, a12, a13,
      c1, c2, c3, c4, c5, c6, c7, c9, c10, c11,
      d1, d2, d3, d4, d5, d6, d7, d8,
      e1, e3, e4, e5, e6, e7, e8,
-     f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14,
+     f1, f2, f3, f4, f5, f6, f7, f8, f9, f14,
      g1, g2, g4, g5, g6, g7, g8, g9, g10, g11,
      h1, h2, h3, h4, h5, h6, h7);
 
@@ -1079,11 +1079,9 @@ moves_loop:  // When in check, search starts here
                     int doubleMargin = f4 * PvNode - f5 * !ttCapture;
                     int tripleMargin =
                       f6 + f7 * PvNode - f8 * !ttCapture + f9 * (ss->ttPv || !ttCapture);
-                    int quadMargin = f10 + f11 * PvNode - f12 * !ttCapture + f13 * ss->ttPv;
 
                     extension = 1 + (value < singularBeta - doubleMargin)
-                              + (value < singularBeta - tripleMargin)
-                              + (value < singularBeta - quadMargin);
+                              + (value < singularBeta - tripleMargin);
 
                     depth += ((!PvNode) && (depth < f14));
                 }
