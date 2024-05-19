@@ -47,21 +47,21 @@
 
 namespace Stockfish {
 
-int a1=131, a2=48, a3=64, a4=330, a6=7179, a7=200, a8=280, a9=16, a10=1495, a11=586, a12=284, a13=1639,
-    b1=10, b2=9474, b3=117, b4=88, b5=62, b6=2119,
-    c1=12, c2=1749, c3=1584, c4=473, c5=308, c6=138, c7=11, c8=258, c9=16079, c10=21, c11=324, c12=144,
-    d1=177, d2=65, d3=428, d4=305, d5=272,  d6=185, d7=182, d8=176,
-    e1=4360, e2=4507, e3=54, e4=142, e5=55, e6=132, e7=11, e8=27,
-    f1=33, f2=59, f3=49, f4=285, f5=228, f6=121, f7=238, f8=259, f9=117, f14=14,
-    g1=4041, g2=5313, g3=16145, g4=15, g5=102, g6=41, g7=13, g8=14323, g9=10, g10=120, g11=76,
-    h1=259, h2=4057, h3=68, h4=1284, h5=755, h6=1133, h7=165;
+int a1=127, a2=48, a3=65, a4=334, a6=6047, a7=187, a8=288, a9=17, a10=1548, a11=630, a12=281, a13=1741,
+    b1=10, b2=9828, b3=116, b4=84, b5=60, b6=2169,
+    c1=11, c2=1729, c3=1517, c4=474, c5=326, c6=139, c7=11, c8=252, c9=15246, c10=21, c11=366, c12=152,
+    d1=176, d2=65, d3=440, d4=276, d5=256, dub=64, d6=177, d7=175, d8=183,
+    e1=4076, e2=4401, e3=53, e4=151, e5=57, e6=140, e7=10, e8=26,
+    f1=35, f2=57, f3=50, f4=298, f5=209, f6=117, f7=252, f8=270, f9=111, f10=471, f11=343, f12=281, f13=217, f14=15,
+    g1=3748, g2=5266, g3=14519, g4=15, g5=103, g6=40, g7=13, g8=13241, g9=10, g10=127, g11=74,
+    h1=264, h2=4348, h3=63, h4=1147, h5=755, h6=1125, h7=165;
 
 TUNE(a1, a2, a3, a4, a7, a8, a9, a10, a11, a12, a13,
      b1, b3, b4, b5, b6,
      c1, c2, c3, c4, c5, c6, c7, c9, c10, c11,
-     d1, d2, d3, d4, d5, d6, d7, d8,
+     d1, d2, d3, d4, d5, dub, d6, d7, d8,
      e1, e3, e4, e5, e6, e7, e8,
-     f1, f2, f3, f4, f5, f6, f7, f8, f9, f14,
+     f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14,
      g1, g2, g4, g5, g6, g7, g8, g9, g10, g11,
      h1, h2, h3, h4, h5, h6, h7);
 
@@ -1008,7 +1008,7 @@ moves_loop:  // When in check, search starts here
                 }
 
                 // SEE based pruning for captures and checks (~11 Elo)
-                int seeHist = std::clamp(captHist / 32, -d6 * depth, d7 * depth);
+                int seeHist = std::clamp(captHist * dub / 2048, -d6 * depth, d7 * depth);
                 if (!pos.see_ge(move, -d8 * depth - seeHist))
                     continue;
             }
@@ -1079,9 +1079,11 @@ moves_loop:  // When in check, search starts here
                     int doubleMargin = f4 * PvNode - f5 * !ttCapture;
                     int tripleMargin =
                       f6 + f7 * PvNode - f8 * !ttCapture + f9 * (ss->ttPv || !ttCapture);
+                    int quadMargin = f10 + f11 * PvNode - f12 * !ttCapture + f13 * ss->ttPv;
 
                     extension = 1 + (value < singularBeta - doubleMargin)
-                              + (value < singularBeta - tripleMargin);
+                              + (value < singularBeta - tripleMargin)
+                              + (value < singularBeta - quadMargin);
 
                     depth += ((!PvNode) && (depth < f14));
                 }
