@@ -1136,8 +1136,8 @@ moves_loop:  // When in check, search starts here
             r--;
 
         // Decrease reduction at high depth if only pawns are left
-        if (depth > 10 && !stmNonPawnMaterial)
-            r -= 1 + (type_of(movedPiece) == PAWN);
+        if (depth > 8 && !stmNonPawnMaterial)
+            r -= 1 + (depth > 16);
 
         // Increase reduction if next ply has a lot of fail high (~5 Elo)
         if ((ss + 1)->cutoffCnt > 3)
