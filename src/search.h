@@ -248,13 +248,15 @@ class Worker {
 
     bool is_mainthread() const { return thread_idx == 0; }
 
-    // Public because they need to be updatable by the stats
+    // Public because they need to be used to update stats
     CounterMoveHistory    counterMoves;
     ButterflyHistory      mainHistory;
     CapturePieceToHistory captureHistory;
     ContinuationHistory   continuationHistory[2][2];
     PawnHistory           pawnHistory;
     CorrectionHistory     correctionHistory;
+
+    Depth rootDepth, completedDepth;
 
    private:
     void iterative_deepening();
@@ -290,7 +292,6 @@ class Worker {
     Position  rootPos;
     StateInfo rootState;
     RootMoves rootMoves;
-    Depth     rootDepth, completedDepth;
     Value     rootDelta;
 
     size_t thread_idx;

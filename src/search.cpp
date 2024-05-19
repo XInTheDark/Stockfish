@@ -72,8 +72,9 @@ constexpr int futility_move_count(bool improving, Depth depth) {
 
 // Add correctionHistory value to raw staticEval and guarantee evaluation does not hit the tablebase range
 Value to_corrected_static_eval(Value v, const Worker& w, const Position& pos) {
-    auto cv = w.correctionHistory[pos.side_to_move()][pawn_structure_index<Correction>(pos)];
-    v += cv * std::abs(cv) / 6047;
+    auto cv      = w.correctionHistory[pos.side_to_move()][pawn_structure_index<Correction>(pos)];
+    int  divisor = std::max(6000 - 50 * w.completedDepth, 3000);
+    v += cv * std::abs(cv) / divisor;
     return std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
 }
 
