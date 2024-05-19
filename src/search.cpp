@@ -54,7 +54,8 @@ int a1=127, a2=48, a3=65, a4=334, a6=6047, a7=187, a8=288, a9=17, a10=1548, a11=
     e1=4076, e2=4401, e3=53, e4=151, e5=57, e6=140, e7=10, e8=26,
     f1=35, f2=57, f3=50, f4=298, f5=209, f6=117, f7=252, f8=270, f9=111, f10=471, f11=343, f12=281, f13=217, f14=15,
     g1=3748, g2=5266, g3=14519, g4=15, g5=103, g6=40, g7=13, g8=13241, g9=10, g10=127, g11=74,
-    h1=264, h2=4348, h3=63, h4=1147, h5=755, h6=1125, h7=165;
+    h1=264, h2=4348, h3=63, h4=1147, h5=755, h6=1125, h7=165,
+    u1=112, u2=136, u3=159, u4=124;
 
 TUNE(a1, a2, a3, a4, a7, a8, a9, a10, a11, a12, a13,
      b1, b3, b4, b5, b6,
@@ -63,13 +64,15 @@ TUNE(a1, a2, a3, a4, a7, a8, a9, a10, a11, a12, a13,
      e1, e3, e4, e5, e6, e7, e8,
      f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14,
      g1, g2, g4, g5, g6, g7, g8, g9, g10, g11,
-     h1, h2, h3, h4, h5, h6, h7);
+     h1, h2, h3, h4, h5, h6, h7,
+    u1, u2, u3);
 
 TUNE(SetRange(1, 2*a6), a6);
 TUNE(SetRange(1, 2*b2), b2);
 TUNE(SetRange(1, 2*c8), c8);
 TUNE(SetRange(1, 2*c12), c12);
 TUNE(SetRange(1, 2*e2), e2);
+TUNE(SetRange(1, 2*u4), u4);
 
 TUNE(SetRange(6800, 35324), g3);
 
@@ -1804,6 +1807,8 @@ void update_all_stats(const Position& pos,
 // Updates histories of the move pairs formed
 // by moves at ply -1, -2, -3, -4, and -6 with current move.
 void update_continuation_histories(Stack* ss, Piece pc, Square to, int bonus) {
+
+    bonus = bonus * (u1 * ss->ply + u2) / (u3 * ss->ply + u4);
 
     for (int i : {1, 2, 3, 4, 6})
     {
