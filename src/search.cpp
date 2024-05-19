@@ -548,7 +548,7 @@ Value Search::Worker::search(
     Depth    extension, newDepth;
     Value    bestValue, value, ttValue, eval, maxValue, probCutBeta;
     bool     givesCheck, improving, priorCapture, opponentWorsening;
-    bool     capture, moveCountPruning, ttCapture;
+    bool     capture, moveCountPruning, ttCapture, stmNonPawnMaterial;
     Piece    movedPiece;
     int      moveCount, captureCount, quietCount;
 
@@ -599,6 +599,7 @@ Value Search::Worker::search(
     (ss + 2)->cutoffCnt                         = 0;
     Square prevSq = ((ss - 1)->currentMove).is_ok() ? ((ss - 1)->currentMove).to_sq() : SQ_NONE;
     ss->statScore = 0;
+    stmNonPawnMaterial = (bool)pos.non_pawn_material(us);
 
     // Step 4. Transposition table lookup.
     excludedMove = ss->excludedMove;
@@ -781,7 +782,7 @@ Value Search::Worker::search(
     // Step 9. Null move search with verification search (~35 Elo)
     if (!PvNode && (ss - 1)->currentMove != Move::null() && (ss - 1)->statScore < 15246
         && eval >= beta && ss->staticEval >= beta - 21 * depth + 366 && !excludedMove
-        && pos.non_pawn_material(us) && ss->ply >= thisThread->nmpMinPly
+        && stmNonPawnMaterial && ss->ply >= thisThread->nmpMinPly
         && beta > VALUE_TB_LOSS_IN_MAX_PLY)
     {
         assert(eval - beta >= 0);
@@ -958,7 +959,7 @@ moves_loop:  // When in check, search starts here
 
         // Step 14. Pruning at shallow depth (~120 Elo).
         // Depth conditions are important for mate finding.
-        if (!rootNode && pos.non_pawn_material(us) && bestValue > VALUE_TB_LOSS_IN_MAX_PLY)
+        if (!rootNode && stmNonPawnMaterial && bestValue > VALUE_TB_LOSS_IN_MAX_PLY)
         {
             // Skip quiet moves if movecount exceeds our FutilityMoveCount threshold (~8 Elo)
             moveCountPruning = moveCount >= futility_move_count(improving, depth);
