@@ -1139,9 +1139,6 @@ moves_loop:  // When in check, search starts here
         if (PvNode)
             r--;
 
-        // Increase/decrease reduction based on correction history value
-        r -= correctionHistoryValue / 64;
-
         // Increase reduction if next ply has a lot of fail high (~5 Elo)
         if ((ss + 1)->cutoffCnt > 3)
             r++;
@@ -1157,6 +1154,7 @@ moves_loop:  // When in check, search starts here
 
         // Decrease/increase reduction for moves with a good/bad history (~8 Elo)
         r -= ss->statScore / (14519 - std::min(depth, 15) * 103);
+        r -= correctionHistoryValue / 64;
 
         // Step 17. Late moves reduction / extension (LMR, ~117 Elo)
         if (depth >= 2 && moveCount > 1 + rootNode)
