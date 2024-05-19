@@ -70,10 +70,15 @@ constexpr int futility_move_count(bool improving, Depth depth) {
     return improving ? (3 + depth * depth) : (3 + depth * depth) / 2;
 }
 
+// Calculate correctionHistory value for the given position
+Value correction_history_value(const Worker& w, const Position& pos) {
+    int cv = w.correctionHistory[pos.side_to_move()][pawn_structure_index<Correction>(pos)];
+    return cv * std::abs(cv) / 6047;
+}
+
 // Add correctionHistory value to raw staticEval and guarantee evaluation does not hit the tablebase range
-Value to_corrected_static_eval(Value v, const Worker& w, const Position& pos) {
-    auto cv = w.correctionHistory[pos.side_to_move()][pawn_structure_index<Correction>(pos)];
-    v += cv * std::abs(cv) / 6047;
+Value to_corrected_static_eval(Value v, Value cv) {
+    v += cv;
     return std::clamp(v, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
 }
 
@@ -697,6 +702,8 @@ Value Search::Worker::search(
 
     // Step 6. Static evaluation of the position
     Value unadjustedStaticEval = VALUE_NONE;
+    Value correctionHistoryValue = correction_history_value(*thisThread, pos);
+
     if (ss->inCheck)
     {
         // Skip early pruning when in check
@@ -720,7 +727,7 @@ Value Search::Worker::search(
         else if (PvNode)
             Eval::NNUE::hint_common_parent_position(pos, networks, refreshTable);
 
-        ss->staticEval = eval = to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
+        ss->staticEval = eval = to_corrected_static_eval(unadjustedStaticEval, correctionHistoryValue);
 
         // ttValue can be used as a better position evaluation (~7 Elo)
         if (ttValue != VALUE_NONE && (tte->bound() & (ttValue > eval ? BOUND_LOWER : BOUND_UPPER)))
@@ -729,7 +736,7 @@ Value Search::Worker::search(
     else
     {
         unadjustedStaticEval = evaluate(networks, pos, refreshTable, thisThread->optimism[us]);
-        ss->staticEval = eval = to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
+        ss->staticEval = eval = to_corrected_static_eval(unadjustedStaticEval, correctionHistoryValue);
 
         // Static evaluation is saved as it was before adjustment by correction history
         tte->save(posKey, VALUE_NONE, ss->ttPv, BOUND_NONE, DEPTH_NONE, Move::none(),
@@ -1132,6 +1139,9 @@ moves_loop:  // When in check, search starts here
         if (PvNode)
             r--;
 
+        // Increase/decrease reduction based on correction history value
+        r -= correctionHistoryValue / 64;
+
         // Increase reduction if next ply has a lot of fail high (~5 Elo)
         if ((ss + 1)->cutoffCnt > 3)
             r++;
@@ -1450,6 +1460,8 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
 
     // Step 4. Static evaluation of the position
     Value unadjustedStaticEval = VALUE_NONE;
+    Value correctionHistoryValue = correction_history_value(*thisThread, pos);
+
     if (ss->inCheck)
         bestValue = futilityBase = -VALUE_INFINITE;
     else
@@ -1462,7 +1474,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
                 unadjustedStaticEval =
                   evaluate(networks, pos, refreshTable, thisThread->optimism[us]);
             ss->staticEval = bestValue =
-              to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
+              to_corrected_static_eval(unadjustedStaticEval, correctionHistoryValue);
 
             // ttValue can be used as a better position evaluation (~13 Elo)
             if (ttValue != VALUE_NONE
@@ -1476,7 +1488,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta,
                                    ? evaluate(networks, pos, refreshTable, thisThread->optimism[us])
                                    : -(ss - 1)->staticEval;
             ss->staticEval       = bestValue =
-              to_corrected_static_eval(unadjustedStaticEval, *thisThread, pos);
+              to_corrected_static_eval(unadjustedStaticEval, correctionHistoryValue);
         }
 
         // Stand pat. Return immediately if static value is at least beta
