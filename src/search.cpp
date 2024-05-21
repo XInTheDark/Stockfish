@@ -49,7 +49,7 @@ namespace Stockfish {
 
 int a1=119, a2=45, a3=59, a4=313, a6=5543, a7=198, a8=289, a9=18, a10=1536, a11=684, a12=285, a13=1873,
     b1=9, b2=9289, b3=120, b4=94, b5=57, b6=2075,
-    c1=10, c2=1763, c3=1456, c4=476, c5=310, c6=128, c7=12, c8=249, c9=14517, c10=20, c11=381, c12=155,
+    c1=10, c2=1763, c3=1456, c4=476, c5=310, c7=12, c8=249, c9=14517, c10=20, c11=381, c12=155,
     d1=174, d2=64, d3=418, d4=282, d5=229, dub=63, d6=173, d7=163, d8=167,
     e1=4400, e2=4060, e3=54, e4=145, e5=53, e6=138, e7=11, e8=27,
     f1=35, f2=54, f3=57, f4=304, f5=202, f6=117, f7=251, f8=282, f9=98, f10=455, f11=349, f12=275, f13=216, f14=16,
@@ -59,7 +59,7 @@ int a1=119, a2=45, a3=59, a4=313, a6=5543, a7=198, a8=289, a9=18, a10=1536, a11=
 
 TUNE(a1, a2, a3, a4, a7, a8, a9, a10, a11, a12, a13,
      b1, b3, b4, b5, b6,
-     c1, c2, c3, c4, c5, c6, c7, c9, c10, c11,
+     c1, c2, c3, c4, c5, c7, c9, c10, c11,
      d1, d2, d3, d4, d5, dub, d6, d7, d8,
      e1, e3, e4, e5, e6, e7, e8,
      f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14,
@@ -790,7 +790,7 @@ Value Search::Worker::search(
     // If eval is really low check with qsearch if it can exceed alpha, if it can't,
     // return a fail low.
     // Adjust razor margin according to cutoffCnt. (~1 Elo)
-    if (eval < alpha - c4 - (c5 - c6 * ((ss + 1)->cutoffCnt > 3)) * depth * depth)
+    if (eval < alpha - c4 - c5 * depth * depth)
     {
         value = qsearch<NonPV>(pos, ss, alpha - 1, alpha);
         if (value < alpha)
@@ -854,18 +854,9 @@ Value Search::Worker::search(
         }
     }
 
-    // Step 10. Internal iterative reductions (~9 Elo)
-    // For PV nodes without a ttMove, we decrease depth by 3.
-    if (PvNode && !ttMove)
-        depth -= 3;
-
-    // Use qsearch if depth <= 0.
-    if (depth <= 0)
-        return qsearch<PV>(pos, ss, alpha, beta);
-
     // For cutNodes without a ttMove, we decrease depth by 2 if depth is high enough.
-    if (cutNode && depth >= 8 && (!ttMove || tte->bound() == BOUND_UPPER))
-        depth -= 1 + !ttMove;
+    if ((cutNode || PvNode) && depth >= 8)
+        depth -= (!ttMove || (tte->bound() == BOUND_UPPER && cutNode)) + !ttMove;
 
     // Step 11. ProbCut (~10 Elo)
     // If we have a good enough capture (or queen promotion) and a reduced search returns a value
