@@ -48,15 +48,15 @@
 
 namespace Stockfish {
 
-int a1=119, a2=45, a3=59, a4=313, a6=5543, a7=198, a8=289, a9=18, a10=1536, a11=684, a12=285, a13=1873,
-    b1=9, b2=9289, b3=120, b4=94, b5=57, b6=2075,
-    c1=10, c2=1763, c3=1456, c4=476, c5=310, c7=12, c8=249, c9=14517, c10=20, c11=381, c12=155,
-    d1=174, d2=64, d3=418, d4=282, d5=229, dub=63, d6=173, d7=163, d8=167,
-    e1=4400, e2=4060, e3=54, e4=145, e5=53, e6=138, e7=11, e8=27,
-    f1=35, f2=54, f3=57, f4=304, f5=202, f6=117, f7=251, f8=282, f9=98, f10=455, f11=349, f12=275, f13=216, f14=16,
-    g1=3829, g2=5124, g3=12709, g4=14, g5=114, g6=40, g7=13, g8=14282, g9=9, g10=128, g11=79,
-    h1=271, h2=4317, h3=64, h4=1159, h5=804, h6=1235, h7=170,
-    u1=45;
+int a1=129, a2=43, a3=56, a4=336, a6=5435, a7=205, a8=283, a9=18, a10=1544, a11=767, a12=275, a13=1911,
+    b1=9, b2=10502, b3=122, b4=92, b5=60, b6=1990,
+    c1=11, c2=1592, c3=1390, c4=501, c5=305, c7=12, c8=248, c9=13999, c10=21, c11=390, c12=177,
+    d1=185, d2=60, d3=361, d4=283, d5=235, dub=64, d6=183, d7=162, d8=166,
+    e1=4427, e2=3670, e3=51, e4=149, e5=55, e6=141, e7=11, e8=26,
+    f1=38, f2=58, f3=64, f4=304, f5=203, f6=117, f7=259, f8=296, f9=97, f10=486, f11=343, f12=273, f13=232, f14=16,
+    g1=3988, g2=5169, g3=12219, g4=13, g5=120, g6=36, g7=13, g8=14144, g9=9, g10=115, g11=81,
+    h1=279, h2=4181, h3=67, h4=1222, h5=733, h6=1231, h7=176,
+    u1=47;
 
 TUNE(a1, a2, a3, a4, a7, a8, a9, a10, a11, a12, a13,
      b1, b3, b4, b5, b6,
@@ -1092,9 +1092,9 @@ moves_loop:  // When in check, search starts here
 
                 if (value < singularBeta)
                 {
-                    int doubleMargin = 304 * PvNode - 203 * !ttCapture;
-                    int tripleMargin = 117 + 259 * PvNode - 296 * !ttCapture + 97 * ss->ttPv;
-                    int quadMargin   = 486 + 343 * PvNode - 273 * !ttCapture + 232 * ss->ttPv;
+                    int doubleMargin = f4 * PvNode - f5 * !ttCapture;
+                    int tripleMargin = f6 + f7 * PvNode - f8 * !ttCapture + f9 * ss->ttPv;
+                    int quadMargin   = f10 + f11 * PvNode - f12 * !ttCapture + f13 * ss->ttPv;
 
                     extension = 1 + (value < singularBeta - doubleMargin)
                               + (value < singularBeta - tripleMargin)
