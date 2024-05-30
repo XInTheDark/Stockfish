@@ -161,7 +161,7 @@ void Search::Worker::start_searching() {
     }
 
     main_manager()->tm.init(limits, rootPos.side_to_move(), rootPos.game_ply(), options,
-                            main_manager()->originalPly);
+                            main_manager()->originalPly, main_manager()->originalTimeAdjust);
     tt.new_search();
 
     if (rootMoves.empty())
@@ -1064,9 +1064,9 @@ moves_loop:  // When in check, search starts here
 
                 if (value < singularBeta)
                 {
-                    int doubleMargin = 293 * PvNode - 209 * !ttCapture;
-                    int tripleMargin = 114 + 252 * PvNode - 291 * !ttCapture + 99 * ss->ttPv;
-                    int quadMargin   = 545 + 359 * PvNode - 286 * !ttCapture + 221 * ss->ttPv - 164 * !(ss-1)->ttPv;
+                    int doubleMargin = 304 * PvNode - 203 * !ttCapture;
+                    int tripleMargin = 117 + 259 * PvNode - 296 * !ttCapture + 97 * ss->ttPv;
+                    int quadMargin   = 486 + 343 * PvNode - 273 * !ttCapture + 232 * ss->ttPv;
 
                     extension = 1 + (value < singularBeta - doubleMargin)
                               + (value < singularBeta - tripleMargin)
@@ -1341,18 +1341,19 @@ moves_loop:  // When in check, search starts here
     // Bonus for prior countermove that caused the fail low
     else if (!priorCapture && prevSq != SQ_NONE)
     {
-        int bonus = (depth > 4) + (depth > 5) + (PvNode || cutNode) + ((ss - 1)->statScore < -13701)
-                  + ((ss - 1)->moveCount > 9) + (!ss->inCheck && bestValue <= ss->staticEval - 113)
-                  + (!(ss - 1)->inCheck && bestValue <= -(ss - 1)->staticEval - 83);
+        int bonus = (116 * (depth > 5) + 115 * (PvNode || cutNode)
+                     + 186 * ((ss - 1)->statScore < -13701) + 121 * ((ss - 1)->moveCount > 9)
+                     + 64 * (!ss->inCheck && bestValue <= ss->staticEval - 113)
+                     + 137 * (!(ss - 1)->inCheck && bestValue <= -(ss - 1)->staticEval - 83));
         update_continuation_histories(ss - 1, pos.piece_on(prevSq), prevSq,
-                                      stat_bonus(depth) * bonus);
+                                      stat_bonus(depth) * bonus / 100);
         thisThread->mainHistory[~us][((ss - 1)->currentMove).from_to()]
-          << stat_bonus(depth) * bonus / 2;
+          << stat_bonus(depth) * bonus / 200;
 
 
         if (type_of(pos.piece_on(prevSq)) != PAWN && ((ss - 1)->currentMove).type_of() != PROMOTION)
             thisThread->pawnHistory[pawn_structure_index(pos)][pos.piece_on(prevSq)][prevSq]
-              << stat_bonus(depth) * bonus * 4;
+              << stat_bonus(depth) * bonus / 25;
     }
 
     if (PvNode)
