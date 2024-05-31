@@ -1054,7 +1054,7 @@ moves_loop:  // When in check, search starts here
                 && std::abs(ttValue) < VALUE_TB_WIN_IN_MAX_PLY && (tte->bound() & BOUND_LOWER)
                 && tte->depth() >= depth - 3)
             {
-                Value singularBeta  = ttValue - (58 + 69 * (ss->ttPv && !PvNode)) * depth / 64;
+                Value singularBeta  = ttValue - (58 + 64 * (ss->ttPv && !PvNode)) * depth / 64;
                 Depth singularDepth = newDepth / 2;
 
                 ss->excludedMove = move;
@@ -1064,15 +1064,13 @@ moves_loop:  // When in check, search starts here
 
                 if (value < singularBeta)
                 {
-                    int doubleMargin = 300 * PvNode - 204 * !ttCapture;
-                    int tripleMargin = 116 + 281 * PvNode - 309 * !ttCapture + 104 * ss->ttPv;
-                    int quadMargin = 457 + 343 * PvNode - 297 * !ttCapture + 200 * ss->ttPv;
+                    int doubleMargin = 304 * PvNode - 203 * !ttCapture;
+                    int tripleMargin = 117 + 259 * PvNode - 296 * !ttCapture + 97 * ss->ttPv;
 
                     extension = 1 + (value < singularBeta - doubleMargin)
-                              + (value < singularBeta - tripleMargin)
-                              + (value < singularBeta - quadMargin);
+                              + (value < singularBeta - tripleMargin);
 
-                    depth += ((!PvNode) && (depth < 17));
+                    depth += ((!PvNode) && (depth < 16));
                 }
 
                 // Multi-cut pruning
