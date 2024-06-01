@@ -48,15 +48,15 @@
 
 namespace Stockfish {
 
-int a1=122, a2=40, a3=59, a4=324, a6=5587, a7=207, a8=272, a9=18, a10=1630, a11=806, a12=272, a13=2027,
-    b1=9, b2=10351, b3=131, b4=98, b5=64, b6=2149, b7=1300,
-    c1=12, c2=1544, c3=1400, c4=470, c5=328, c7=12, c8=257, c9=13565, c10=21, c11=372, c12=170,
-    d1=169, d2=58, d3=321, d4=268, d5=239, dub=64, d6=178, d7=154, d8=169,
-    e1=4283, e2=3633, e3=47, e4=156, e5=57, e6=124, e7=12, e8=26,
-    f1=36, f2=54, f3=61, f4=304, f5=203, f6=117, f7=259, f8=296, f9=97, f10=486, f11=343, f12=273, f13=232, f15=16,
-    g1=3830, g2=5603, g3=12565, g4=12, g5=110, g6=37, g7=13, g8=13701, g9=9, g10=113, g11=83,
-    g12=116, g13=115, g14=186, g15=121, g16=64, g17=137,
-    h1=266, h2=4361, h3=67, h4=1256, h5=707, h6=1334, h7=165,
+int a1=130, a2=42, a3=54, a4=350, a6=5734, a7=195, a8=268, a9=17, a10=1787, a11=826, a12=271, a13=1924,
+    b1=9, b2=10328, b3=138, b4=96, b5=64, b6=2004, b7=1388,
+    c1=12, c2=1595, c3=1354, c4=443, c5=314, c7=13, c8=248, c9=15317, c10=21, c11=386, c12=184,
+    d1=177, d2=55, d3=320, d4=265, d5=237, dub=75, d6=175, d7=148, d8=180,
+    e1=4231, e2=3766, e3=48, e4=165, e5=54, e6=128, e7=13, e8=25,
+    f1=39, f2=58, f3=69, f4=290, f5=211, f6=115, f7=291, f8=299, f9=106, f15=17,
+    g1=3663, g2=5272, g3=12639, g4=12, g5=114, g6=39, g7=13, g8=12331, g9=10, g10=119, g11=80,
+    g12=127, g13=108, g14=196, g15=127, g16=59, g17=143,
+    h1=261, h2=4636, h3=67, h4=1325, h5=672, h6=1180, h7=159,
     u1=49;
 
 TUNE(a1, a2, a3, a4, a7, a8, a9, a10, a11, a12, a13,
@@ -64,7 +64,7 @@ TUNE(a1, a2, a3, a4, a7, a8, a9, a10, a11, a12, a13,
      c1, c2, c3, c4, c5, c7, c9, c10, c11,
      d1, d2, d3, d4, d5, dub, d6, d7, d8,
      e1, e3, e4, e5, e6, e7, e8,
-     f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f15,
+     f1, f2, f3, f4, f5, f6, f7, f8, f9, f15,
      g1, g2, g4, g5, g6, g7, g8, g9, g10, g11,
      g12, g13, g14, g15, g16, g17,
      h1, h2, h3, h4, h5, h6, h7,
@@ -1097,11 +1097,9 @@ moves_loop:  // When in check, search starts here
                 {
                     int doubleMargin = f4 * PvNode - f5 * !ttCapture;
                     int tripleMargin = f6 + f7 * PvNode - f8 * !ttCapture + f9 * ss->ttPv;
-                    int quadMargin   = f10 + f11 * PvNode - f12 * !ttCapture + f13 * ss->ttPv;
 
                     extension = 1 + (value < singularBeta - doubleMargin)
-                              + (value < singularBeta - tripleMargin)
-                              + (value < singularBeta - quadMargin);
+                              + (value < singularBeta - tripleMargin);
 
                     depth += ((!PvNode) && (depth < f15));
                 }
@@ -1182,10 +1180,10 @@ moves_loop:  // When in check, search starts here
         if ((ss + 1)->cutoffCnt > 3)
             r++;
 
-        // Set reduction to 0 for first picked move (ttMove) (~2 Elo)
-        // Nullifies all previous reduction adjustments to ttMove and leaves only history to do them
+        // Set reduction to 0 for first picked move (ttMove) if it's less than 2
+        // Otherwise, reduce by 2 (~3 Elo)
         else if (move == ttMove)
-            r = 0;
+            (r < 2) ? r = 0: r -= 2;
 
         ss->statScore = 2 * thisThread->mainHistory[us][move.from_to()]
                       + (*contHist[0])[movedPiece][move.to_sq()]
