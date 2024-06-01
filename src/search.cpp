@@ -550,7 +550,7 @@ Value Search::Worker::search(
     Key      posKey;
     Move     ttMove, move, excludedMove, bestMove;
     Depth    extension, newDepth;
-    Value    bestValue, value, ttValue, eval, maxValue, probCutBeta;
+    Value    bestValue, value, ttValue, eval, maxValue, probCutBeta, stmNonPawnMaterial;
     bool     givesCheck, improving, priorCapture, opponentWorsening;
     bool     capture, moveCountPruning, ttCapture;
     Piece    movedPiece;
@@ -561,6 +561,7 @@ Value Search::Worker::search(
     ss->inCheck        = pos.checkers();
     priorCapture       = pos.captured_piece();
     Color us           = pos.side_to_move();
+    stmNonPawnMaterial = pos.non_pawn_material(us);
     moveCount = captureCount = quietCount = ss->moveCount = 0;
     bestValue                                             = -VALUE_INFINITE;
     maxValue                                              = VALUE_INFINITE;
@@ -782,7 +783,7 @@ Value Search::Worker::search(
     // Step 9. Null move search with verification search (~35 Elo)
     if (!PvNode && (ss - 1)->currentMove != Move::null() && (ss - 1)->statScore < 13999
         && eval >= beta && ss->staticEval >= beta - 21 * depth + 390 && !excludedMove
-        && pos.non_pawn_material(us) && ss->ply >= thisThread->nmpMinPly
+        && stmNonPawnMaterial && ss->ply >= thisThread->nmpMinPly
         && beta > VALUE_TB_LOSS_IN_MAX_PLY)
     {
         assert(eval - beta >= 0);
@@ -969,7 +970,7 @@ moves_loop:  // When in check, search starts here
 
         // Step 14. Pruning at shallow depth (~120 Elo).
         // Depth conditions are important for mate finding.
-        if (!rootNode && pos.non_pawn_material(us) && bestValue > VALUE_TB_LOSS_IN_MAX_PLY)
+        if (!rootNode && stmNonPawnMaterial && bestValue > VALUE_TB_LOSS_IN_MAX_PLY)
         {
             // Skip quiet moves if movecount exceeds our FutilityMoveCount threshold (~8 Elo)
             moveCountPruning = moveCount >= futility_move_count(improving, depth);
@@ -1131,8 +1132,9 @@ moves_loop:  // When in check, search starts here
             r -= 1 + (ttValue > alpha) + (tte->depth() >= depth);
 
         // Decrease reduction for PvNodes (~0 Elo on STC, ~2 Elo on LTC)
+        // and decrease more if the move is a capture and there are few pieces left (~2 Elo)
         if (PvNode)
-            r--;
+            r -= 1 + (capture && stmNonPawnMaterial < 3400);
 
         // These reduction adjustments have no proven non-linear scaling.
 
