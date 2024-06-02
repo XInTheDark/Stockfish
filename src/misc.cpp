@@ -34,25 +34,22 @@
 // the calls at compile time), try to load them at runtime. To do this we need
 // first to define the corresponding function pointers.
 extern "C" {
-using fun1_t = bool (*)(LOGICAL_PROCESSOR_RELATIONSHIP,
-                        PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX,
-                        PDWORD);
-using fun2_t = bool (*)(USHORT, PGROUP_AFFINITY);
-using fun3_t = bool (*)(HANDLE, CONST GROUP_AFFINITY*, PGROUP_AFFINITY);
-using fun4_t = bool (*)(USHORT, PGROUP_AFFINITY, USHORT, PUSHORT);
-using fun5_t = WORD (*)();
-using fun6_t = bool (*)(HANDLE, DWORD, PHANDLE);
-using fun7_t = bool (*)(LPCSTR, LPCSTR, PLUID);
-using fun8_t = bool (*)(HANDLE, BOOL, PTOKEN_PRIVILEGES, DWORD, PTOKEN_PRIVILEGES, PDWORD);
+using OpenProcessToken_t      = bool (*)(HANDLE, DWORD, PHANDLE);
+using LookupPrivilegeValueA_t = bool (*)(LPCSTR, LPCSTR, PLUID);
+using AdjustTokenPrivileges_t =
+  bool (*)(HANDLE, BOOL, PTOKEN_PRIVILEGES, DWORD, PTOKEN_PRIVILEGES, PDWORD);
 }
 #endif
 
 #include <atomic>
+#include <cctype>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <limits>
+#include <iterator>
 #include <mutex>
 #include <sstream>
 #include <string_view>
@@ -415,14 +412,14 @@ void start_logger(const std::string& fname) { Logger::start(fname); }
 
 #ifdef NO_PREFETCH
 
-void prefetch(void*) {}
+void prefetch(const void*) {}
 
 #else
 
-void prefetch(void* addr) {
+void prefetch(const void* addr) {
 
     #if defined(_MSC_VER)
-    _mm_prefetch((char*) addr, _MM_HINT_T0);
+    _mm_prefetch((char const*) addr, _MM_HINT_T0);
     #else
     __builtin_prefetch(addr);
     #endif
@@ -486,23 +483,25 @@ static void* aligned_large_pages_alloc_windows([[maybe_unused]] size_t allocSize
     if (!hAdvapi32)
         hAdvapi32 = LoadLibrary(TEXT("advapi32.dll"));
 
-    auto fun6 = fun6_t((void (*)()) GetProcAddress(hAdvapi32, "OpenProcessToken"));
-    if (!fun6)
+    auto OpenProcessToken_f =
+      OpenProcessToken_t((void (*)()) GetProcAddress(hAdvapi32, "OpenProcessToken"));
+    if (!OpenProcessToken_f)
         return nullptr;
-    auto fun7 = fun7_t((void (*)()) GetProcAddress(hAdvapi32, "LookupPrivilegeValueA"));
-    if (!fun7)
+    auto LookupPrivilegeValueA_f =
+      LookupPrivilegeValueA_t((void (*)()) GetProcAddress(hAdvapi32, "LookupPrivilegeValueA"));
+    if (!LookupPrivilegeValueA_f)
         return nullptr;
-    auto fun8 = fun8_t((void (*)()) GetProcAddress(hAdvapi32, "AdjustTokenPrivileges"));
-    if (!fun8)
+    auto AdjustTokenPrivileges_f =
+      AdjustTokenPrivileges_t((void (*)()) GetProcAddress(hAdvapi32, "AdjustTokenPrivileges"));
+    if (!AdjustTokenPrivileges_f)
         return nullptr;
 
     // We need SeLockMemoryPrivilege, so try to enable it for the process
-    if (!fun6(  // OpenProcessToken()
+    if (!OpenProcessToken_f(  // OpenProcessToken()
           GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hProcessToken))
         return nullptr;
 
-    if (fun7(  // LookupPrivilegeValue(nullptr, SE_LOCK_MEMORY_NAME, &luid)
-          nullptr, "SeLockMemoryPrivilege", &luid))
+    if (LookupPrivilegeValueA_f(nullptr, "SeLockMemoryPrivilege", &luid))
     {
         TOKEN_PRIVILEGES tp{};
         TOKEN_PRIVILEGES prevTp{};
@@ -514,8 +513,8 @@ static void* aligned_large_pages_alloc_windows([[maybe_unused]] size_t allocSize
 
         // Try to enable SeLockMemoryPrivilege. Note that even if AdjustTokenPrivileges() succeeds,
         // we still need to query GetLastError() to ensure that the privileges were actually obtained.
-        if (fun8(  // AdjustTokenPrivileges()
-              hProcessToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), &prevTp, &prevTpLen)
+        if (AdjustTokenPrivileges_f(hProcessToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), &prevTp,
+                                    &prevTpLen)
             && GetLastError() == ERROR_SUCCESS)
         {
             // Round up size to full pages and allocate
@@ -524,8 +523,7 @@ static void* aligned_large_pages_alloc_windows([[maybe_unused]] size_t allocSize
                                      PAGE_READWRITE);
 
             // Privilege no longer needed, restore previous state
-            fun8(  // AdjustTokenPrivileges ()
-              hProcessToken, FALSE, &prevTp, 0, nullptr, nullptr);
+            AdjustTokenPrivileges_f(hProcessToken, FALSE, &prevTp, 0, nullptr, nullptr);
         }
     }
 
@@ -592,129 +590,6 @@ void aligned_large_pages_free(void* mem) { std_aligned_free(mem); }
 #endif
 
 
-namespace WinProcGroup {
-
-#ifndef _WIN32
-
-void bind_this_thread(size_t) {}
-
-#else
-
-namespace {
-// Retrieves logical processor information using Windows-specific
-// API and returns the best node id for the thread with index idx. Original
-// code from Texel by Peter Österlund.
-int best_node(size_t idx) {
-
-    int   threads      = 0;
-    int   nodes        = 0;
-    int   cores        = 0;
-    DWORD returnLength = 0;
-    DWORD byteOffset   = 0;
-
-    // Early exit if the needed API is not available at runtime
-    HMODULE k32  = GetModuleHandle(TEXT("Kernel32.dll"));
-    auto    fun1 = (fun1_t) (void (*)()) GetProcAddress(k32, "GetLogicalProcessorInformationEx");
-    if (!fun1)
-        return -1;
-
-    // First call to GetLogicalProcessorInformationEx() to get returnLength.
-    // We expect the call to fail due to null buffer.
-    if (fun1(RelationAll, nullptr, &returnLength))
-        return -1;
-
-    // Once we know returnLength, allocate the buffer
-    SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX *buffer, *ptr;
-    ptr = buffer = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*) malloc(returnLength);
-
-    // Second call to GetLogicalProcessorInformationEx(), now we expect to succeed
-    if (!fun1(RelationAll, buffer, &returnLength))
-    {
-        free(buffer);
-        return -1;
-    }
-
-    while (byteOffset < returnLength)
-    {
-        if (ptr->Relationship == RelationNumaNode)
-            nodes++;
-
-        else if (ptr->Relationship == RelationProcessorCore)
-        {
-            cores++;
-            threads += (ptr->Processor.Flags == LTP_PC_SMT) ? 2 : 1;
-        }
-
-        assert(ptr->Size);
-        byteOffset += ptr->Size;
-        ptr = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*) (((char*) ptr) + ptr->Size);
-    }
-
-    free(buffer);
-
-    std::vector<int> groups;
-
-    // Run as many threads as possible on the same node until the core limit is
-    // reached, then move on to filling the next node.
-    for (int n = 0; n < nodes; n++)
-        for (int i = 0; i < cores / nodes; i++)
-            groups.push_back(n);
-
-    // In case a core has more than one logical processor (we assume 2) and we
-    // still have threads to allocate, spread them evenly across available nodes.
-    for (int t = 0; t < threads - cores; t++)
-        groups.push_back(t % nodes);
-
-    // If we still have more threads than the total number of logical processors
-    // then return -1 and let the OS to decide what to do.
-    return idx < groups.size() ? groups[idx] : -1;
-}
-}
-
-
-// Sets the group affinity of the current thread
-void bind_this_thread(size_t idx) {
-
-    // Use only local variables to be thread-safe
-    int node = best_node(idx);
-
-    if (node == -1)
-        return;
-
-    // Early exit if the needed API are not available at runtime
-    HMODULE k32  = GetModuleHandle(TEXT("Kernel32.dll"));
-    auto    fun2 = fun2_t((void (*)()) GetProcAddress(k32, "GetNumaNodeProcessorMaskEx"));
-    auto    fun3 = fun3_t((void (*)()) GetProcAddress(k32, "SetThreadGroupAffinity"));
-    auto    fun4 = fun4_t((void (*)()) GetProcAddress(k32, "GetNumaNodeProcessorMask2"));
-    auto    fun5 = fun5_t((void (*)()) GetProcAddress(k32, "GetMaximumProcessorGroupCount"));
-
-    if (!fun2 || !fun3)
-        return;
-
-    if (!fun4 || !fun5)
-    {
-        GROUP_AFFINITY affinity;
-        if (fun2(node, &affinity))                         // GetNumaNodeProcessorMaskEx
-            fun3(GetCurrentThread(), &affinity, nullptr);  // SetThreadGroupAffinity
-    }
-    else
-    {
-        // If a numa node has more than one processor group, we assume they are
-        // sized equal and we spread threads evenly across the groups.
-        USHORT elements, returnedElements;
-        elements                 = fun5();  // GetMaximumProcessorGroupCount
-        GROUP_AFFINITY* affinity = (GROUP_AFFINITY*) malloc(elements * sizeof(GROUP_AFFINITY));
-        if (fun4(node, affinity, elements, &returnedElements))  // GetNumaNodeProcessorMask2
-            fun3(GetCurrentThread(), &affinity[idx % returnedElements],
-                 nullptr);  // SetThreadGroupAffinity
-        free(affinity);
-    }
-}
-
-#endif
-
-}  // namespace WinProcGroup
-
 #ifdef _WIN32
     #include <direct.h>
     #define GETCWD _getcwd
@@ -723,6 +598,23 @@ void bind_this_thread(size_t idx) {
     #define GETCWD getcwd
 #endif
 
+size_t str_to_size_t(const std::string& s) {
+    unsigned long long value = std::stoull(s);
+    if (value > std::numeric_limits<size_t>::max())
+        std::exit(EXIT_FAILURE);
+    return static_cast<size_t>(value);
+}
+
+std::optional<std::string> read_file_to_string(const std::string& path) {
+    std::ifstream f(path, std::ios_base::binary);
+    if (!f)
+        return std::nullopt;
+    return std::string(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
+}
+
+void remove_whitespace(std::string& s) {
+    s.erase(std::remove_if(s.begin(), s.end(), [](char c) { return std::isspace(c); }), s.end());
+}
 
 std::string CommandLine::get_binary_directory(std::string argv0) {
     std::string pathSeparator;
