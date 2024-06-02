@@ -49,21 +49,21 @@
 namespace Stockfish {
 
 int a1=129, a2=43, a3=56, a4=336, a6=5435, a7=205, a8=283, a9=18, a10=1544, a11=767, a12=275, a13=1911,
-    b1=9, b2=10502, b3=122, b4=92, b5=60, b6=1990,
+    b1=9, b2=10502, b3=122, b4=92, b5=60, b6=1990, b7=1300,
     c1=11, c2=1592, c3=1390, c4=501, c5=305, c7=12, c8=248, c9=13999, c10=21, c11=390, c12=177,
     d1=185, d2=60, d3=361, d4=283, d5=235, dub=64, d6=183, d7=162, d8=166,
     e1=4427, e2=3670, e3=51, e4=149, e5=55, e6=141, e7=11, e8=26,
-    f1=38, f2=58, f3=64, f4=304, f5=203, f6=117, f7=259, f8=296, f9=97, f10=486, f11=343, f12=273, f13=232, f14=170, f15=16,
+    f1=38, f2=58, f3=64, f4=304, f5=203, f6=117, f7=259, f8=296, f9=97, f15=16,
     g1=3988, g2=5169, g3=12219, g4=13, g5=120, g6=36, g7=13, g8=14144, g9=9, g10=115, g11=81,
     h1=279, h2=4181, h3=67, h4=1222, h5=733, h6=1231, h7=176,
     u1=47;
 
 TUNE(a1, a2, a3, a4, a7, a8, a9, a10, a11, a12, a13,
-     b1, b3, b4, b5, b6,
+     b1, b3, b4, b5, b6, b7,
      c1, c2, c3, c4, c5, c7, c9, c10, c11,
      d1, d2, d3, d4, d5, dub, d6, d7, d8,
      e1, e3, e4, e5, e6, e7, e8,
-     f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15,
+     f1, f2, f3, f4, f5, f6, f7, f8, f9, f15,
      g1, g2, g4, g5, g6, g7, g8, g9, g10, g11,
      h1, h2, h3, h4, h5, h6, h7,
     u1);
@@ -525,7 +525,7 @@ void Search::Worker::clear() {
     counterMoves.fill(Move::none());
     mainHistory.fill(0);
     captureHistory.fill(0);
-    pawnHistory.fill(-1300);
+    pawnHistory.fill(-b7);
     correctionHistory.fill(0);
 
     for (bool inCheck : {false, true})
@@ -1094,11 +1094,9 @@ moves_loop:  // When in check, search starts here
                 {
                     int doubleMargin = f4 * PvNode - f5 * !ttCapture;
                     int tripleMargin = f6 + f7 * PvNode - f8 * !ttCapture + f9 * ss->ttPv;
-                    int quadMargin   = f10 + f11 * PvNode - f12 * !ttCapture + f13 * ss->ttPv - f14 * !(ss-1)->ttPv;
 
                     extension = 1 + (value < singularBeta - doubleMargin)
-                              + (value < singularBeta - tripleMargin)
-                              + (value < singularBeta - quadMargin);
+                              + (value < singularBeta - tripleMargin);
 
                     depth += ((!PvNode) && (depth < f15));
                 }
