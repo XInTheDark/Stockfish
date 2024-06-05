@@ -66,7 +66,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks&    networks,
     auto [psqt, positional] = smallNet ? networks.small.evaluate(pos, &caches.small)
                                        : networks.big.evaluate(pos, &caches.big);
 
-    constexpr int delta          = 3;
+    constexpr int delta          = 8;
     Value         nnue           = ((128 - delta) * psqt + (128 + delta) * positional) / 128;
     int           nnueComplexity = std::abs(psqt - positional);
 
