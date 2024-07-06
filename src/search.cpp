@@ -1239,8 +1239,8 @@ moves_loop:  // When in check, search starts here
         // Step 18. Full-depth search when LMR is skipped
         else if (!PvNode || moveCount > 1)
         {
-            // Increase reduction if ttMove is not present (~6 Elo)
-            if (!ttData.move)
+            // Increase reduction for cut nodes without ttMove (~6 Elo)
+            if (!ttData.move && cutNode)
                 r += 2;
 
             // Note that if expected reduction is high, we reduce search depth by 1 here (~9 Elo)
