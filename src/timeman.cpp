@@ -40,6 +40,15 @@ void TimeManagement::advance_nodes_time(std::int64_t nodes) {
     availableNodes = std::max(int64_t(0), availableNodes - nodes);
 }
 
+int a1=50, a2=3285, a3=4830,
+    b1=308, b2=319, b3=506, b4=339, b5=301, b6=293,
+    c1=122, c2=295, c3=462, c4=213, c5=664, c6=120, c7=825;
+
+TUNE(a1, a2, a3,
+     b1, b2, b3, b4, b5, b6,
+     c1, c2, c3, c4, c5, c6);
+TUNE(SetRange(600, 980), c7);
+
 // Called at the beginning of the search and calculates
 // the bounds of time allowed for the current game ply. We currently support:
 //      1) x basetime (+ z increment)
@@ -88,7 +97,7 @@ void TimeManagement::init(Search::LimitsType& limits,
     const TimePoint scaledInc   = limits.inc[us] / scaleFactor;
 
     // Maximum move horizon of 50 moves
-    int mtg = limits.movestogo ? std::min(limits.movestogo, 50) : 50;
+    int mtg = limits.movestogo ? std::min(limits.movestogo, a1) : a1;
 
     // If less than one second, gradually reduce mtg
     if (scaledTime < 1000 && double(mtg) / scaledInc > 0.05)
@@ -107,18 +116,18 @@ void TimeManagement::init(Search::LimitsType& limits,
     {
         // Extra time according to timeLeft
         if (originalTimeAdjust < 0)
-            originalTimeAdjust = 0.3285 * std::log10(timeLeft) - 0.4830;
+            originalTimeAdjust = (a2 / 10000.0) * std::log10(timeLeft) - (a3 / 10000.0);
 
         // Calculate time constants based on current time left.
         double logTimeInSec = std::log10(scaledTime / 1000.0);
-        double optConstant  = std::min(0.00308 + 0.000319 * logTimeInSec, 0.00506);
-        double maxConstant  = std::max(3.39 + 3.01 * logTimeInSec, 2.93);
+        double optConstant  = std::min(b1 / 100000.0 + b2 / 1000000.0 * logTimeInSec, b3 / 100000.0);
+        double maxConstant  = std::max(b4 / 100.0 + b5 / 100.0 * logTimeInSec, b6 / 100.0);
 
-        optScale = std::min(0.0122 + std::pow(ply + 2.95, 0.462) * optConstant,
-                            0.213 * limits.time[us] / timeLeft)
+        optScale = std::min(c1 / 10000.0 + std::pow(ply + c2 / 100.0, c3 / 1000.0) * optConstant,
+                            c4 / 1000.0 * limits.time[us] / timeLeft)
                  * originalTimeAdjust;
 
-        maxScale = std::min(6.64, maxConstant + ply / 12.0);
+        maxScale = std::min(c5 / 100.0, maxConstant + ply / (c6 / 10.0));
     }
 
     // x moves in y seconds (+ z increment)
@@ -131,7 +140,7 @@ void TimeManagement::init(Search::LimitsType& limits,
     // Limit the maximum possible time for this move
     optimumTime = TimePoint(optScale * timeLeft);
     maximumTime =
-      TimePoint(std::min(0.825 * limits.time[us] - moveOverhead, maxScale * optimumTime)) - 10;
+      TimePoint(std::min(c7 / 1000.0 * limits.time[us] - moveOverhead, maxScale * optimumTime)) - 10;
 
     if (options["Ponder"])
         optimumTime += optimumTime / 4;
