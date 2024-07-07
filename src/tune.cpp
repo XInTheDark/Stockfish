@@ -58,12 +58,15 @@ void Tune::make_option(OptionsMap* opts, const string& n, int v, const SetRange&
     (*opts)[n] << Option(v, r(v).first, r(v).second, on_tune);
     LastOption = &((*opts)[n]);
 
+    const int range = r(v).second - r(v).first;
+    double c_value = range < 100 ? range / 20.0 : range / 40.0;
+
     // Print formatted parameters, ready to be copy-pasted in Fishtest
     std::cout << n << ","                                  //
               << v << ","                                  //
               << r(v).first << ","                         //
               << r(v).second << ","                        //
-              << (r(v).second - r(v).first) / 20.0 << ","  //
+              << c_value << ","                              //
               << "0.0020" << std::endl;
 }
 
