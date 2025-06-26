@@ -62,36 +62,45 @@ void syzygy_extend_pv(const OptionsMap&            options,
 using namespace Search;
 
 // vars
-int a1 = 7696, a2 = 7689, a3 = 9708, a4 = 6978, a5 = 131072, a6 = 172, a7 = 111,
-    a8 = 151, a9 = 141, a10 = 86, a11 = 107, a12 = 5, a13 = 11134, a14 = 137,
+int a1 = 7696, a2 = 7689, a3 = 9708, a4 = 6978,
+//    a5 = 131072,
+    a6 = 172, a7 = 111, a8 = 151, a9 = 141, a10 = 86, a11 = 107, a12 = 5, a13 = 11134, a14 = 137,
     a15 = 91, a16 = 67, a17 = 688, a18 = 1287, a19 = 5, a20 = 8, a21 = 473,
     a22 = 2796, a23 = 125, a24 = 77, a25 = 1157, a26 = 2301, a27 = 90, a28 = 10,
     a29 = 1858, a30 = 1492, a31 = 661, a32 = 1057, a33 = 1266, a34 = 3, a35 = 1,
     a36 = 2, a37 = 175, a38 = 486, a39 = 325, a40 = 93, a41 = 20, a42 = 376,
     a43 = 168639, a44 = 14, a45 = 19, a46 = 389, a47 = 213, a48 = 6, a49 = 16,
-    a50 = 3, a51 = 4, a52 = 94, a53 = 6, a54 = 201, a55 = 58, a56 = 5, a57 = 400,
-    a58 = 3, a59 = 2, a60 = 1024, a61 = 7, a62 = 232, a63 = 224, a64 = 131,
-    a65 = 31, a66 = 137, a67 = 125, a68 = 158, a69 = 4229, a70 = 68, a71 = 32,
+    a50 = 3, a51 = 4, a52 = 94, a53 = 6, a54 = 201, a55 = 58, a56 = 5, a57 = 400, a58 = 3, a59 = 2,
+//    a60 = 1024,
+    a61 = 7, a62 = 232, a63 = 224, a64 = 131,
+    a65 = 31, a66 = 137, a67 = 125, a68 = 158, a69 = 4229, a70 = 68,
+//    a71 = 32,
     a72 = 3388, a73 = 46, a74 = 138, a75 = 300, a76 = 117, a77 = 102, a78 = 12,
     a79 = 27, a80 = 6, a81 = 27, a82 = 58, a83 = 76, a84 = 57, a85 = 248400,
     a86 = 3, a87 = 2, a88 = 968, a89 = 2437, a90 = 926, a91 = 901, a92 = 316,
     a93 = 66, a94 = 28047, a95 = 2864, a96 = 966, a97 = 1210, a98 = 8, a99 = 963,
     a100 = 2, a101 = 1036, a102 = 848, a103 = 2, a104 = 50, a105 = 2006, a106 = 826,
-    a107 = 128, a108 = 5030, a109 = 3206, a110 = 826, a111 = 8192, a112 = 42,
-    a113 = 2, a114 = 9, a115 = 1508, a116 = 1128, a117 = 8, a118 = 3564, a119 = 4969,
+//    a107 = 128,
+    a108 = 5030, a109 = 3206, a110 = 826,
+//    a111 = 8192,
+    a112 = 42, a113 = 2, a114 = 9, a115 = 1508, a116 = 1128, a117 = 8, a118 = 3564, a119 = 4969,
     a120 = 8, a121 = 15, a122 = 2, a123 = 16, a124 = 32, a125 = 800, a126 = 879,
     a127 = 220, a128 = 159, a129 = 94, a130 = 1501, a131 = 1080, a132 = 376, a133 = 2,
-    a134 = 6218, a135 = 74, a136 = 794, a137 = 205, a138 = 512, a139 = 1086, a140 = 143,
-    a141 = 89, a142 = 1496, a143 = 302, a144 = 737, a145 = 179, a146 = 3141,
+    a134 = 6218, a135 = 74, a136 = 794, a137 = 205,
+//    a138 = 512,
+    a139 = 1086, a140 = 143, a141 = 89, a142 = 1496, a143 = 302, a144 = 737, a145 = 179, a146 = 3141,
     a147 = 30, a148 = 1059, a149 = 1310, a150 = 1213, a151 = 580, a152 = 1388,
     a153 = 1092, a154 = 631, a155 = 294, a156 = 517, a157 = 126, a158 = 445,
     a159 = 792, a160 = 1082, a161 = 784, a162 = 705, a163 = 450,
-    a164 = -4, a165 = 244, a166 = 206, a167 = 997, a168 = 131072, a169 = 47,
-    a170 = 84, a171 = 269, a172 = 253, a173 = 91, a174 = 54,
+    a164 = -4, a165 = 244, a166 = 206, a167 = 997,
+//    a168 = 131072,
+    a169 = 47, a170 = 84, a171 = 269, a172 = 253, a173 = 91, a174 = 54,
     a175 = 103, a176 = 323, a177 = 73, a178 = 531, a179 = 174, a180 = 8,
-    a181 = 144, a182 = 104, a183 = 128, a184 = 82;
+    a181 = 144, a182 = 104, a183 = 128, a184 = 82, a185 = 412, a186 = 203, a187 = 1040;
 
-TUNE(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20,a21,a22,a23,a24,a25,a26,a27,a28,a29,a30,a31,a32,a33,a34,a35,a36,a37,a38,a39,a40,a41,a42,a43,a44,a45,a46,a47,a48,a49,a50,a51,a52,a53,a54,a55,a56,a57,a58,a59,a60,a61,a62,a63,a64,a65,a66,a67,a68,a69,a70,a71,a72,a73,a74,a75,a76,a77,a78,a79,a80,a81,a82,a83,a84,a85,a86,a87,a88,a89,a90,a91,a92,a93,a94,a95,a96,a97,a98,a99,a100,a101,a102,a103,a104,a105,a106,a107,a108,a109,a110,a111,a112,a113,a114,a115,a116,a117,a118,a119,a120,a121,a122,a123,a124,a125,a126,a127,a128,a129,a130,a131,a132,a133,a134,a135,a136,a137,a138,a139,a140,a141,a142,a143,a144,a145,a146,a147,a148,a149,a150,a151,a152,a153,a154,a155,a156,a157,a158,a159,a160,a161,a162,a163,a164,a165,a166,a167,a168,a169,a170,a171,a172,a173,a174,a175,a176,a177,a178,a179,a180,a181,a182,a183,a184);
+TUNE(a1,a2,a3,a4,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20,a21,a22,a23,a24,a25,a26,a27,a28,a29,a30,a31,a32,a33,a34,a35,a36,a37,a38,a39,a40,a41,a42,a43,a44,a45,a46,a47,a48,a49,a50,a51,a52,a53,a54,a55,a56,a57,a58,a59,a61,a62,a63,a64,a65,a66,a67,a68,a69,a70,a72,a73,a74,a75,a76,a77,a78,a79,a80,a81,a82,a83,a84,a85,a86,a87,a88,a89,a90,a91,a92,a93,a94,a95,a96,a97,a98,a99,a100,a101,a102,a103,a104,a105,a106,a108,a109,a110,a112,a113,a114,a115,a116,a117,a118,a119,a120,a121,a122,a123,a124,a125,a126,a127,a128,a129,a130,a131,a132,a133,a134,a135,a136,a137,a139,a140,a141,a142,a143,a144,a145,a146,a147,a148,a149,a150,a151,a152,a153,a154,a155,a156,a157,a158,a159,a160,a161,a162,a163);
+TUNE(SetRange(-256, 512), a164,a165,a166,a167,a169,a170,a171,a172,a173,a174); // ext margins
+TUNE(a175,a176,a177,a178,a179,a180,a181,a182,a183,a184,a185,a186,a187);
 
 namespace {
 
@@ -118,7 +127,7 @@ int correction_value(const Worker& w, const Position& pos, const Stack* const ss
 // Add correctionHistory value to raw staticEval and guarantee evaluation
 // does not hit the tablebase range.
 Value to_corrected_static_eval(const Value v, const int cv) {
-    return std::clamp(v + cv / a5, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
+    return std::clamp(v + cv / 131072, VALUE_TB_LOSS_IN_MAX_PLY + 1, VALUE_TB_WIN_IN_MAX_PLY - 1);
 }
 
 void update_correction_history(const Position& pos,
@@ -1067,7 +1076,7 @@ moves_loop:  // When in check, search starts here
                 mp.skip_quiet_moves();
 
             // Reduced depth of the next LMR search
-            int lmrDepth = newDepth - r / a60;
+            int lmrDepth = newDepth - r / 1024;
 
             if (capture || givesCheck)
             {
@@ -1111,7 +1120,7 @@ moves_loop:  // When in check, search starts here
                 if (history < -a69 * depth)
                     continue;
 
-                history += a70 * thisThread->mainHistory[us][move.from_to()] / a71;
+                history += a70 * thisThread->mainHistory[us][move.from_to()] / 32;
 
                 lmrDepth += history / a72;
 
@@ -1165,7 +1174,7 @@ moves_loop:  // When in check, search starts here
             {
                 int corrValAdj   = std::abs(correctionValue) / a85;
                 int doubleMargin = a164 + a165 * PvNode - a166 * !ttCapture - corrValAdj
-                                 - a167 * ttMoveHistory / a168
+                                 - a167 * ttMoveHistory / 131072
                                  - (ss->ply > thisThread->rootDepth) * a169;
                 int tripleMargin = a170 + a171 * PvNode - a172 * !ttCapture + a173 * ss->ttPv - corrValAdj
                                  - (ss->ply * 2 > thisThread->rootDepth * 3) * a174;
@@ -1248,7 +1257,7 @@ moves_loop:  // When in check, search starts here
 
         if (capture)
             ss->statScore =
-              a106 * int(PieceValue[pos.captured_piece()]) / a107
+              a106 * int(PieceValue[pos.captured_piece()]) / 128
               + thisThread->captureHistory[movedPiece][move.to_sq()][type_of(pos.captured_piece())]
               - a108;
         else
@@ -1257,7 +1266,7 @@ moves_loop:  // When in check, search starts here
                           + (*contHist[1])[movedPiece][move.to_sq()] - a109;
 
         // Decrease/increase reduction for moves with a good/bad history
-        r -= ss->statScore * a110 / a111;
+        r -= ss->statScore * a110 / 8192;
 
         // Step 17. Late moves reduction / extension (LMR)
         if (depth >= 2 && moveCount > 1)
@@ -1472,14 +1481,14 @@ moves_loop:  // When in check, search starts here
         const int scaledBonus = std::min(a128 * depth - a129, a130) * bonusScale;
 
         update_continuation_histories(ss - 1, pos.piece_on(prevSq), prevSq,
-                                      scaledBonus * 412 / 32768);
+                                      scaledBonus * a185 / 32768);
 
         thisThread->mainHistory[~us][((ss - 1)->currentMove).from_to()]
-          << scaledBonus * 203 / 32768;
+          << scaledBonus * a186 / 32768;
 
         if (type_of(pos.piece_on(prevSq)) != PAWN && ((ss - 1)->currentMove).type_of() != PROMOTION)
             thisThread->pawnHistory[pawn_structure_index(pos)][pos.piece_on(prevSq)][prevSq]
-              << scaledBonus * 1040 / 32768;
+              << scaledBonus * a187 / 32768;
     }
 
     // Bonus for prior capture countermove that caused the fail low
@@ -1786,7 +1795,7 @@ Value Search::Worker::qsearch(Position& pos, Stack* ss, Value alpha, Value beta)
 
 Depth Search::Worker::reduction(bool i, Depth d, int mn, int delta) const {
     int reductionScale = reductions[d] * reductions[mn];
-    return reductionScale - delta * a136 / rootDelta + !i * reductionScale * a137 / a138 + a139;
+    return reductionScale - delta * a136 / rootDelta + !i * reductionScale * a137 / 512 + a139;
 }
 
 // elapsed() returns the time elapsed since the search started. If the

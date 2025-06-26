@@ -63,7 +63,7 @@ void Tune::make_option(OptionsMap* opts, const string& n, int v, const SetRange&
               << v << ","                                  //
               << r(v).first << ","                         //
               << r(v).second << ","                        //
-              << (r(v).second - r(v).first) / 20.0 << ","  //
+              << std::max(0.50 , (r(v).second - r(v).first) / 20.0) << ","  //
               << "0.0020" << std::endl;
 }
 
