@@ -99,7 +99,7 @@ void update_correction_history(const Position& pos,
     const Move  m  = (ss - 1)->currentMove;
     const Color us = pos.side_to_move();
 
-    int nonPawnWeight = 173;
+    static constexpr int nonPawnWeight = 173;
 
     workerThread.pawnCorrectionHistory[pawn_structure_index<Correction>(pos)][us]
       << bonus * 119 / 128;
