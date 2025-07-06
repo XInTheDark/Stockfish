@@ -695,7 +695,7 @@ Value Search::Worker::search(
 
         // Partial workaround for the graph history interaction problem
         // For high rule50 counts don't produce transposition table cutoffs.
-        if (pos.rule50_count() < 97)
+        if (pos.rule50_count() < 90)
         {
             if (depth >= 8 && ttData.move && pos.pseudo_legal(ttData.move) && pos.legal(ttData.move)
                 && !is_decisive(ttData.value))
@@ -1887,7 +1887,7 @@ void update_all_stats(const Position& pos,
 // Updates histories of the move pairs formed by moves
 // at ply -1, -2, -3, -4, and -6 with current move.
 void update_continuation_histories(Stack* ss, Piece pc, Square to, int bonus) {
-    std::array<ConthistBonus, 6> conthist_bonuses = {
+    static constexpr std::array<ConthistBonus, 6> conthist_bonuses = {
       {{1, 1046}, {2, 645}, {3, 272}, {4, 539}, {5, 128}, {6, 454}}};
 
     for (const auto [i, weight] : conthist_bonuses)
