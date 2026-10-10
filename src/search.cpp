@@ -302,7 +302,10 @@ bool Search::Worker::iterative_deepening() {
     }
 
     for (int i = 0; i <= MAX_PLY + 2; ++i)
-        (ss + i)->ply = i;
+    {
+        (ss + i)->ply             = i;
+        (ss + i)->precomputedEval = VALUE_NONE;
+    }
 
     ss->pv = &pv;
 
@@ -853,7 +856,8 @@ Value Search::Worker::search(
         // Never assume anything about values stored in TT
         unadjustedStaticEval = ttData.eval;
         if (!is_valid(unadjustedStaticEval))
-            unadjustedStaticEval = evaluate(pos);
+            unadjustedStaticEval =
+              is_valid(ss->precomputedEval) ? ss->precomputedEval : evaluate(pos);
 
         ss->staticEval = eval = to_corrected_static_eval(unadjustedStaticEval, correctionValue);
 
@@ -864,7 +868,7 @@ Value Search::Worker::search(
     }
     else
     {
-        unadjustedStaticEval = evaluate(pos);
+        unadjustedStaticEval = is_valid(ss->precomputedEval) ? ss->precomputedEval : evaluate(pos);
         ss->staticEval = eval = to_corrected_static_eval(unadjustedStaticEval, correctionValue);
 
         // Static evaluation is saved as it was before adjustment by correction history
@@ -1379,7 +1383,21 @@ moves_loop:  // When in check, search starts here
         // Decrease/increase reduction for moves with a good/bad history
         r -= ss->statScore * 439 / 4096;
 
-        if (!capture && !is_decisive(alpha))
+        // Decrease/increase reduction based on eval of position after the move relative to alpha
+        // Also give the eval to the child to avoid computing it again.
+        if (depth >= 2 && moveCount > 1 && !givesCheck && !is_decisive(alpha))
+        {
+            auto [childTtHit, childTtData, childTtWriter] = tt.probe(pos.key());
+            Value childRawEval = childTtHit ? childTtData.eval : VALUE_NONE;
+            if (!is_valid(childRawEval))
+                childRawEval = (ss + 1)->precomputedEval = evaluate(pos);
+
+            Value childEval =
+              -to_corrected_static_eval(childRawEval, correction_value(*this, pos, ss + 1));
+
+            r += 4 * std::clamp(alpha - childEval, -100, 300);
+        }
+        else if (!capture && !is_decisive(alpha))
             r += 3 * std::clamp(alpha - eval, -64, 96);
 
         // Scale up reductions for expected ALL nodes
@@ -1452,6 +1470,7 @@ moves_loop:  // When in check, search starts here
 
         // Step 21. Undo move
         undo_move(pos, move);
+        (ss + 1)->precomputedEval = VALUE_NONE;
 
         assert(value > -VALUE_INFINITE && value < VALUE_INFINITE);
 
