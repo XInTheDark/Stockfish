@@ -908,6 +908,11 @@ Value Search::Worker::search(
                     update_continuation_histories(ss - 1, pos.piece_on(prevSq), prevSq, -2210);
             }
 
+            // Extra bonus for late quiet moves of the previous ply that refute
+            else if (ttData.value < beta && prevSq != SQ_NONE && (ss - 1)->moveCount > 9
+                     && !priorCapture)
+                update_continuation_histories(ss - 1, pos.piece_on(prevSq), prevSq, 2210);
+
             // Partial workaround for the graph history interaction problem.
             // For high rule50 counts don't produce transposition table cutoffs.
             if (pos.rule50_count() < 96)
