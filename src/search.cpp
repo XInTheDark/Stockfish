@@ -1379,6 +1379,9 @@ moves_loop:  // When in check, search starts here
         // Decrease/increase reduction for moves with a good/bad history
         r -= ss->statScore * 439 / 4096;
 
+        if (givesCheck && depth >= 2 && moveCount > 1)
+            r -= 256 * std::max(8 - int(MoveList<LEGAL>(pos).size()), 0);
+
         if (!capture && !is_decisive(alpha))
             r += 3 * std::clamp(alpha - eval, -64, 96);
 
